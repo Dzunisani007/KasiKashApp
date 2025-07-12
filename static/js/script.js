@@ -31,8 +31,9 @@ var layout = {
 
 var config = {responsive: true}
 
-Plotly.newPlot('myDiv', data, layout, config );
-
+document.addEventListener('DOMContentLoaded', function() {
+    Plotly.newPlot('myDiv', data, layout, config );
+});
 
 
 $(document).ready(function(){

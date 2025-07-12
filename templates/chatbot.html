@@ -2,7 +2,9 @@
     <div id="chatbot-main">
         <div id="chatbot-header">
             <div class="assistant-info">
-                <div class="avatar">💬</div>
+                <div class="avatar">
+                  <img src="{{ url_for('static', filename='ChatbotImage.png') }}" alt="Chatbot Avatar" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: #fff;" />
+                </div>
                 <div>
                     <h3>KasiKash Assistant</h3>
                     <div class="status">Online • Financial Expert</div>
@@ -51,5 +53,7 @@
             <div class="tip" data-question="Explain stokvel payout rules">Payout rules</div>
         </div>
     </div>
-    <div id="chatbot-fab" title="Open Chat">💬</div>
+    <div id="chatbot-fab" title="Open Chat">
+      <img src="{{ url_for('static', filename='ChatbotImage.png') }}" alt="Chatbot Avatar" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.15);" />
+    </div>
 </div> 
