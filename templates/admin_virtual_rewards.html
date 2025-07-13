@@ -2,6 +2,9 @@
 {% block title %}Virtual Rewards Management{% endblock %}
 {% block admin_content %}
 <style>
+  body, .admin-main, .stats-grid, .stat-card, .reward-form, .user-table, .transaction-table, .export-section, .form-label, .form-input, .table-header, .table-row, .page-header, .page-description {
+    font-family: 'Inter', 'Montserrat', Arial, Helvetica, sans-serif !important;
+  }
   .stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -9,85 +12,77 @@
     margin-bottom: 2rem;
   }
   .stat-card {
-    background: linear-gradient(135deg, #101c2c 0%, #1e3357 100%);
+    background: var(--card-bg) !important;
     border-radius: 15px;
     padding: 1.5rem;
-    color: #60efff;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-    border: 1px solid #22304a;
+    color: var(--text) !important;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+    border: 1px solid var(--border);
+  }
+  body.light-mode .stat-card {
+    background: linear-gradient(135deg, #4facfe 0%, #38f9d7 100%) !important;
+    color: #fff !important;
   }
   .stat-value {
     font-size: 2rem;
     font-weight: bold;
     margin-bottom: 0.5rem;
-    color: #fff;
+    color: var(--text) !important;
   }
   .stat-label {
     font-size: 0.9rem;
     opacity: 0.9;
-    color: #60efff;
+    color: var(--subtext) !important;
   }
   .reward-form {
-    background: #16213a;
+    background: var(--card-bg) !important;
     border-radius: 15px;
     padding: 2rem;
     margin-bottom: 2rem;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-    border: 1px solid #22304a;
-    color: #fff;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+    border: 1px solid var(--border);
+    color: var(--text) !important;
   }
-  .user-table {
-    background: #16213a;
+  .user-table, .transaction-table, .export-section {
+    background: var(--card-bg) !important;
     border-radius: 15px;
     overflow: hidden;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-    border: 1px solid #22304a;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+    border: 1px solid var(--border);
+    color: var(--text) !important;
   }
-  .transaction-table {
-    background: #16213a;
-    border-radius: 15px;
-    overflow: hidden;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-    border: 1px solid #22304a;
-  }
-  .balance-positive { color: #60efff; }
+  .balance-positive { color: var(--accent) !important; }
   .balance-zero { color: #8b9bb4; }
-  .amount-positive { color: #60efff; }
-  .amount-negative { color: #ff6b6b; }
+  .amount-positive { color: var(--accent) !important; }
+  .amount-negative { color: var(--danger) !important; }
   .page-header {
-    color: #60efff;
+    color: var(--accent) !important;
   }
   .page-description {
-    color: #8b9bb4;
+    color: var(--subtext) !important;
   }
   .form-label {
-    color: #60efff;
+    color: var(--accent) !important;
   }
   .form-input {
-    background: #22304a;
-    border: 1px solid #2d3250;
-    color: #fff;
+    background: #fff;
+    border: 1px solid var(--border);
+    color: var(--text) !important;
   }
   .form-input:focus {
-    border-color: #60efff;
-    box-shadow: 0 0 0 2px rgba(96, 239, 255, 0.2);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(96, 239, 255, 0.08);
   }
   .table-header {
-    background: #22304a;
-    color: #60efff;
+    background: var(--sidebar-bg) !important;
+    color: var(--accent) !important;
   }
   .table-row {
-    background: #16213a;
-    color: #fff;
+    background: var(--card-bg) !important;
+    color: var(--text) !important;
   }
   .table-row:hover {
-    background: #1e3357;
-  }
-  .export-section {
-    background: #16213a;
-    border: 1px solid #22304a;
-    border-radius: 15px;
-    padding: 1.5rem;
+    background: #eaf6fb !important;
   }
 </style>
 

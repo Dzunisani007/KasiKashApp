@@ -167,6 +167,10 @@ Session(app)  # Initialize Flask-Session
 # Register the admin blueprint
 app.register_blueprint(admin_bp, url_prefix='/admin')
 
+# Register the admin API blueprint
+from admin.api import api_bp
+app.register_blueprint(api_bp, url_prefix='/admin')
+
 # Initialize OpenRouter client at application level
 try:
     # Use requests method for OpenRouter since openai client has compatibility

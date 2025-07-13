@@ -4,13 +4,13 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
 <style>
     .admin-settings-title {
-        color: #00e0ff !important; /* Neon blue */
+        color: var(--accent) !important;
         font-weight: 700;
         letter-spacing: 0.5px;
         text-shadow: 0 2px 8px rgba(0,224,255,0.10);
     }
     .admin-settings-subtitle {
-        color: #00e0ff !important;
+        color: var(--accent) !important;
         font-size: 1.08rem;
         font-weight: 500;
         text-shadow: 0 1px 6px rgba(0,224,255,0.10);
@@ -19,14 +19,14 @@
         max-width: 1200px;
         margin: 30px auto;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        color: #eaf6fb !important;
-        background: #181c2f;
+        color: var(--text) !important;
+        background: var(--card-bg) !important;
         border-radius: 12px;
         box-shadow: 0 2px 16px rgba(0,224,255,0.04);
     }
     .settings-tabs {
-        border-bottom: 1px solid #222b3a;
-        background: #181c2f;
+        border-bottom: 1px solid var(--border);
+        background: var(--card-bg) !important;
     }
     .settings-tab {
         padding: 12px 20px;
@@ -34,27 +34,27 @@
         border-bottom: 3px solid transparent;
         transition: all 0.3s;
         font-weight: 500;
-        color: #00e0ff !important;
+        color: var(--accent) !important;
         background: transparent;
         border-radius: 8px 8px 0 0;
         margin-right: 6px;
     }
     .settings-tab.active {
-        color: #181c2f !important;
-        background: #00e0ff !important;
-        border-bottom-color: #00e0ff;
+        color: var(--card-bg) !important;
+        background: var(--accent) !important;
+        border-bottom-color: var(--accent);
         box-shadow: 0 2px 8px rgba(0,224,255,0.10);
     }
     .settings-tab:hover {
-        color: #181c2f !important;
-        background: #00e0ff !important;
-        border-bottom-color: #00e0ff;
+        color: var(--card-bg) !important;
+        background: var(--accent) !important;
+        border-bottom-color: var(--accent);
     }
     .settings-section, .settings-card {
-        color: #eaf6fb !important; /* Ensure card text is light */
+        color: var(--text) !important;
     }
     .settings-section {
-        background: #222b3a;
+        background: var(--card-bg) !important;
         padding: 25px;
         border-radius: 8px;
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
@@ -63,25 +63,25 @@
     .setting-item {
         margin-bottom: 25px;
         padding-bottom: 15px;
-        border-bottom: 1px dashed #333;
+        border-bottom: 1px dashed var(--border);
     }
     .setting-label {
         font-weight: 500;
         margin-bottom: 10px;
-        color: #eaf6fb !important;
+        color: var(--text) !important;
     }
     .setting-controls {
         display: flex;
         flex-wrap: wrap;
         gap: 15px;
         align-items: center;
-        color: #eaf6fb !important;
+        color: var(--text) !important;
     }
     .control-group {
         display: flex;
         align-items: center;
         gap: 8px;
-        color: #eaf6fb !important;
+        color: var(--text) !important;
     }
     .form-range {
         width: 200px;
@@ -93,17 +93,17 @@
     }
     .audit-log-table th {
         font-weight: 500;
-        background-color: #2c2f3f;
-        color: #eaf6fb !important;
+        background-color: var(--sidebar-bg) !important;
+        color: var(--text) !important;
     }
     .settings-card {
-        border: 1px solid #2c2f3f;
+        border: 1px solid var(--border);
         border-radius: 8px;
         margin-bottom: 24px;
         box-shadow: 0 1px 4px rgba(0,0,0,0.03);
         padding: 18px 22px 10px 22px;
-        background: #222b3a;
-        color: #eaf6fb !important;
+        background: var(--card-bg) !important;
+        color: var(--text) !important;
     }
     .settings-card h4 {
         font-size: 1.15rem;
@@ -111,24 +111,24 @@
         display: flex;
         align-items: center;
         gap: 8px;
-        color: #00e0ff !important;
+        color: var(--accent) !important;
     }
     .settings-card .help-text {
         font-size: 0.97rem;
-        color: #b0c4de !important;
+        color: var(--subtext) !important;
         margin-bottom: 12px;
     }
     .form-select, .form-control, .input-group-text {
-        color: #222 !important;
+        color: var(--text) !important;
         background: #fff;
     }
     .form-check-label {
-        color: #eaf6fb !important;
+        color: var(--text) !important;
     }
     .switch-user-label {
-        background: #181c2f;
-        color: #00e0ff !important;
-        border: 2px solid #00e0ff;
+        background: var(--card-bg) !important;
+        color: var(--accent) !important;
+        border: 2px solid var(--accent);
         border-radius: 20px;
         padding: 6px 18px 6px 12px;
         font-weight: 600;
@@ -140,12 +140,12 @@
         transition: background 0.2s, color 0.2s, border 0.2s;
     }
     #switchToUserView:checked + .switch-user-label {
-        background: #00e0ff;
-        color: #181c2f !important;
-        border-color: #00e0ff;
+        background: var(--accent) !important;
+        color: var(--card-bg) !important;
+        border-color: var(--accent);
     }
     #switchToUserView {
-        accent-color: #00e0ff;
+        accent-color: var(--accent);
         width: 2.2em;
         height: 1.2em;
     }
@@ -242,7 +242,15 @@
                 </div>
             </div>
             <div class="settings-card">
-                <h4><i class="bi bi-journal-text"></i> {{ t('audit_logs', user_language) }}</h4>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h4><i class="bi bi-journal-text"></i> {{ t('audit_logs', user_language) }}</h4>
+                    <div class="theme-toggle-settings" style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="font-size: 0.9rem; color: #6b7280;">Theme:</span>
+                        <button class="btn btn-outline-primary btn-sm" id="settingsThemeToggle" title="Toggle Light/Dark Mode">
+                            <i class="fas fa-moon" id="settingsThemeIcon"></i>
+                        </button>
+                    </div>
+                </div>
                 <div class="help-text">{{ t('view_audit_logs_help', user_language) }}</div>
                 <div class="table-responsive">
                     <table class="table audit-log-table">
@@ -511,5 +519,49 @@
             });
         });
     });
+        // Settings page theme toggle functionality
+        const settingsThemeToggle = document.getElementById('settingsThemeToggle');
+        const settingsThemeIcon = document.getElementById('settingsThemeIcon');
+        
+        // Sync with global theme
+        function updateSettingsThemeIcon() {
+            const isLightMode = document.body.classList.contains('light-mode');
+            settingsThemeIcon.className = isLightMode ? 'fas fa-sun' : 'fas fa-moon';
+        }
+        
+        // Initialize settings theme icon
+        updateSettingsThemeIcon();
+        
+        // Settings theme toggle
+        settingsThemeToggle.addEventListener('click', function() {
+            const body = document.body;
+            const globalThemeToggle = document.getElementById('themeToggle');
+            const globalThemeIcon = document.getElementById('themeIcon');
+            
+            if (body.classList.contains('light-mode')) {
+                // Switch to dark mode
+                body.classList.remove('light-mode');
+                localStorage.setItem('adminTheme', 'dark');
+                if (globalThemeIcon) {
+                    globalThemeIcon.className = 'fas fa-moon';
+                }
+            } else {
+                // Switch to light mode
+                body.classList.add('light-mode');
+                localStorage.setItem('adminTheme', 'light');
+                if (globalThemeIcon) {
+                    globalThemeIcon.className = 'fas fa-sun';
+                }
+            }
+            
+            updateSettingsThemeIcon();
+        });
+        
+        // Listen for global theme changes
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'adminTheme') {
+                updateSettingsThemeIcon();
+            }
+        });
 </script>
 {% endblock %}

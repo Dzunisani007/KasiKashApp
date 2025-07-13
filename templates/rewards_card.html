@@ -39,9 +39,9 @@
         </div>
           </div>
           
-          <!-- Balance and Expiry -->
+        <!-- Balance and Expiry -->
           <div class="flex items-center justify-between mt-4 relative z-10">
-            <div>
+          <div>
               <div class="text-xs text-white/70 font-medium">AVAILABLE BALANCE</div>
               <div class="text-4xl font-black text-white drop-shadow-lg">R{{ '%.2f' % (card.balance or 0) }}</div>
           </div>
@@ -49,16 +49,16 @@
               <div class="text-xs text-white/70 font-medium">VALID THRU</div>
               <div class="text-xl font-mono tracking-widest font-bold text-white">12/28</div>
             </div>
-          </div>
         </div>
       </div>
+    </div>
 
       <!-- Enhanced Stats Grid -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
         <div class="group relative bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl p-6 shadow-xl border border-blue-500/20 hover:scale-105 transition-all duration-300">
           <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
           <div class="relative z-10 flex items-center justify-between">
-            <div>
+        <div>
               <div class="text-sm text-blue-100 font-medium mb-1">Current Balance</div>
               <div class="text-2xl font-bold text-white">R{{ '%.2f' % (card.balance or 0) }}</div>
             </div>
@@ -120,7 +120,7 @@
           <button id="tab-marketplace" class="flex-1 px-8 py-4 rounded-xl bg-white/10 text-gray-300 font-bold focus:outline-none transition-all duration-300 hover:bg-white/20">
             <i class="fas fa-ticket-alt mr-3"></i>Vouchers
           </button>
-        </div>
+    </div>
     </div>
 
     <!-- Tab Content -->

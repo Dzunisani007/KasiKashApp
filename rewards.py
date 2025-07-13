@@ -672,12 +672,12 @@ def buy_marketplace_item(item_id):
             VALUES (%s, %s, %s, %s, %s)
         """, (user_id, item_id, quantity, total_points, 'pending'))
         
-    conn.commit()
-    cur.close()
-    conn.close()
+        conn.commit()
+        cur.close()
+        conn.close()
         
-    flash('Purchase successful! Your order is pending.', 'success')
-    return redirect(url_for('rewards.marketplace'))
+        flash('Purchase successful! Your order is pending.', 'success')
+        return redirect(url_for('rewards.marketplace'))
 
 @rewards_bp.route('/marketplace/orders', methods=['GET'])
 def marketplace_orders():
