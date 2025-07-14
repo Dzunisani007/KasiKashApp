@@ -10,6 +10,8 @@ import pandas as pd
 from io import BytesIO
 from fpdf import FPDF
 from translations import t
+from extensions import csrf
+from flask_babel import _
 
 def get_user_language():
     return session.get('language_preference', 'en')
@@ -19,7 +21,7 @@ def get_user_language():
 def dashboard():
     user_language = get_user_language()
     if session.get('role') != 'admin':
-        flash(t('error', user_language), 'danger')
+        flash(_('Permission denied.'), 'danger')
         return redirect(url_for('home'))
     
     firebase_uid = session.get('user_id')
@@ -73,7 +75,7 @@ def dashboard():
 def manage_users():
     user_language = get_user_language()
     if session.get('role') != 'admin':
-        flash(t('error', user_language), 'danger')
+        flash(_('Permission denied.'), 'danger')
         return redirect(url_for('home'))
 
     search_query = request.args.get('search', '')
@@ -106,7 +108,7 @@ def manage_users():
                 stokvels = cur.fetchall()
     except Exception as e:
         print(f"Error fetching users or stokvels for admin: {e}")
-        flash('Could not load users or stokvels.', 'danger')
+        flash(_('Could not load users or stokvels.'), 'danger')
 
     return render_template('admin_manage_users.html', users=users, search_query=search_query, stokvels=stokvels, t=t, user_language=user_language)
 
@@ -123,7 +125,7 @@ def add_user():
     stokvel_id = request.form.get('stokvel_id')  # Get stokvel_id from form
 
     if not all([username, email]):
-        return jsonify({'success': False, 'message': 'Username and email are required.'}), 400
+        return jsonify({'success': False, 'message': _('Username and email are required.')}), 400
 
     try:
         firebase_uid = None
@@ -151,10 +153,10 @@ def add_user():
                         (user_id, stokvel_id)
                     )
                 conn.commit()
-        flash(f'User {username} created successfully!', 'success')
+        flash(_('User %(username)s created successfully!', username=username), 'success')
         return jsonify({'success': True})
     except auth.EmailAlreadyExistsError:
-        return jsonify({'success': False, 'message': 'An account with this email already exists in Firebase.'}), 409
+        return jsonify({'success': False, 'message': _('An account with this email already exists in Firebase.')}), 409
     except Exception as e:
         print(f"Error adding user from admin: {e}")
         if 'user_record' in locals():
@@ -162,14 +164,14 @@ def add_user():
                 auth.delete_user(user_record.uid)
             except Exception:
                 pass
-        return jsonify({'success': False, 'message': f'An error occurred: {e}'}), 500
+        return jsonify({'success': False, 'message': _('An error occurred: %(error)s', error=e)}), 500
 
 @admin_bp.route('/loan-approvals')
 @login_required
 def loan_approvals():
     user_language = get_user_language()
     if session.get('role') != 'admin':
-        flash(t('error', user_language), 'danger')
+        flash(_('Permission denied.'), 'danger')
         return redirect(url_for('home'))
 
     status = request.args.get('status', 'pending')
@@ -187,7 +189,7 @@ def loan_approvals():
                  loans = cur.fetchall()
     except Exception as e:
         print(f"Error fetching loan approvals: {e}")
-        flash('Could not load loan approvals.', 'danger')
+        flash(_('Could not load loan approvals.'), 'danger')
     return render_template('admin_loan_approvals.html', loans=loans, current_status=status, t=t, user_language=user_language)
 
 @admin_bp.route('/loans/approve', methods=['POST'])
@@ -345,7 +347,7 @@ def events():
                 stokvels = cur.fetchall()
     except Exception as e:
         print(f"Error fetching events or stokvels: {e}")
-        flash('Could not load page data.', 'danger')
+        flash(_('Could not load page data.'), 'danger')
     return render_template('admin_events.html', events=events, stokvels=stokvels, t=t, user_language=user_language)
 
 @admin_bp.route('/memberships', methods=['GET'])
@@ -367,7 +369,7 @@ def memberships():
                 memberships = cur.fetchall()
     except Exception as e:
         print(f"Error fetching membership plans: {e}")
-        flash('Could not load membership plans.', 'danger')
+        flash(_('Could not load membership plans.'), 'danger')
     return render_template('admin_memberships.html', memberships=memberships, search_query=search_query, t=t, user_language=user_language)
 
 @admin_bp.route('/memberships/add', methods=['POST'])
@@ -384,10 +386,10 @@ def add_membership_plan():
             with conn.cursor() as cur:
                 cur.execute("INSERT INTO membership_plans (name, monthly_contribution, target_amount) VALUES (%s, %s, %s)", (name, monthly_contribution, target_amount))
                 conn.commit()
-        flash('Membership plan added successfully!', 'success')
+        flash(_('Membership plan added successfully!'), 'success')
     except Exception as e:
         print(f"Error adding membership plan: {e}")
-        flash('Failed to add membership plan.', 'danger')
+        flash(_('Could not add membership plan.'), 'danger')
     return redirect(url_for('admin.memberships'))
 
 @admin_bp.route('/notifications')
@@ -456,13 +458,13 @@ def send_notification():
                 # Create success message with count
                 recipient_count = len(user_ids)
                 if recipient_count == 1:
-                    flash(f'Notification sent successfully to 1 user!', 'success')
+                    flash(_('Notification sent successfully to 1 user!'), 'success')
                 else:
-                    flash(f'Notification sent successfully to {recipient_count} users!', 'success')
+                    flash(_('Notification sent successfully to %(count)s users!', count=recipient_count), 'success')
                     
     except Exception as e:
         print(f"Error sending notification: {e}")
-        flash('Failed to send notification.', 'danger')
+        flash(_('Could not send notification.'), 'danger')
     return redirect(url_for('admin.notifications'))
 
 @admin_bp.route('/kyc-approvals')
@@ -500,7 +502,7 @@ def kyc_approvals():
         import traceback
         print(f"Error fetching KYC approvals: {e}")
         traceback.print_exc()
-        flash('Could not load KYC approvals.', 'danger')
+        flash(_('Could not load KYC approvals.'), 'danger')
     return render_template('admin_kyc_approvals.html', kyc_users=kyc_users, search_query=search_query, debug_kyc_users=kyc_users, t=t, user_language=user_language)
 
 @admin_bp.route('/kyc-approve/<int:user_id>', methods=['POST'])
@@ -535,10 +537,10 @@ def approve_kyc(user_id):
                     create_notification(firebase_uid, message, link_url=link, notification_type='kyc_approved')
                 
                 conn.commit()
-        flash(f'KYC for {email} approved successfully.', 'success')
+        flash(_('KYC for %(email)s approved successfully.', email=email), 'success')
     except Exception as e:
         print(f"Error approving KYC: {e}")
-        flash('Failed to approve KYC.', 'danger')
+        flash(_('Could not approve KYC.'), 'danger')
     return redirect(url_for('admin.kyc_approvals'))
 
 @admin_bp.route('/kyc-reject/<int:user_id>', methods=['POST'])
@@ -575,10 +577,10 @@ def reject_kyc(user_id):
                     create_notification(firebase_uid, message, link_url=link, notification_type='kyc_rejected')
 
                 conn.commit()
-        flash(f'KYC for {email} rejected successfully.', 'success')
+        flash(_('KYC for %(email)s rejected successfully.', email=email), 'success')
     except Exception as e:
         print(f"Error rejecting KYC: {e}")
-        flash('Failed to reject KYC.', 'danger')
+        flash(_('Could not reject KYC.'), 'danger')
     return redirect(url_for('admin.kyc_approvals'))
 
 @admin_bp.route('/admin/settings', methods=['GET', 'POST'])
@@ -684,7 +686,7 @@ def settings():
                         ))
                 conn.commit()
             session['language_preference'] = language  # Ensure session is updated for immediate effect
-            flash('Settings saved successfully!', 'success')
+            flash(_('Settings updated successfully!'), 'success')
         except Exception as e:
             flash(f'Error saving settings: {e}', 'danger')
         return redirect(url_for('admin.settings'))
@@ -719,6 +721,9 @@ def settings():
                     # Convert comma-separated roles to list if needed
                     if 'loan_approval_roles' in default_settings and default_settings['loan_approval_roles']:
                         default_settings['loan_approval_roles'] = default_settings['loan_approval_roles'].split(',')
+        # Sync session language with admin settings
+        if default_settings.get('language'):
+            session['language_preference'] = default_settings['language']
     except Exception as e:
         flash(f'Error loading settings: {e}', 'danger')
 
@@ -843,12 +848,26 @@ def set_language():
     Redirects back to the referring page or dashboard.
     """
     language = request.form.get('language')
-    valid_codes = ['en', 'zu', 'xh', 'af', 'st', 'ts', 'tn', 'ss', 've', 'nr']
+    valid_codes = ['en', 'zu', 'xh', 'af', 'st', 'ts', 'tn', 'ss', 've', 'nr', 'nso']
     if language not in valid_codes:
         language = 'en'
     session['language_preference'] = language
-    flash(f'Language switched to {language}.', 'success')
+    flash(_('Language updated successfully!'), 'success')
     return redirect(request.referrer or url_for('admin.dashboard'))
+csrf.exempt(set_language)
+
+@admin_bp.route('/set_language')
+def admin_set_language():
+    lang = request.args.get('lang')
+    from flask import current_app, make_response, request, url_for
+    supported = current_app.config.get('BABEL_SUPPORTED_LOCALES', ['en'])
+    resp = make_response(redirect(request.referrer or url_for('dashboard')))
+    if lang and lang in supported:
+        resp.set_cookie('language_preference', lang, max_age=60*60*24*30)  # 30 days
+        flash(_("Admin language changed to %(lang)s", lang=lang), "success")
+    else:
+        flash(_("Invalid language selected."), "error")
+    return resp
 
 @admin_bp.route('/financial-reports')
 @login_required
@@ -949,7 +968,7 @@ def distribute_rewards():
                 success = add_reward(firebase_uid, amount, reward_type, description)
                 
                 if success:
-                    flash(f'Successfully distributed {amount} {reward_type} to {email}', 'success')
+                    flash(_('Rewards distributed successfully!'), 'success')
                 else:
                     flash('Failed to distribute reward. User may not have a reward card.', 'danger')
                     
@@ -957,7 +976,7 @@ def distribute_rewards():
         flash('Amount must be a valid number.', 'danger')
     except Exception as e:
         print(f"Error distributing reward: {e}")
-        flash('An error occurred while distributing the reward.', 'danger')
+        flash(_('Could not distribute rewards.'), 'danger')
     
     return redirect(url_for('admin.virtual_rewards'))
 
@@ -1016,13 +1035,13 @@ def bulk_distribute_rewards():
                         if add_reward(firebase_uid_result[0], amount, reward_type, description):
                             success_count += 1
                 
-                flash(f'Successfully distributed {amount} {reward_type} to {success_count} users', 'success')
+                flash(_('Bulk rewards distributed successfully!'), 'success')
                     
     except ValueError:
         flash('Amount must be a valid number.', 'danger')
     except Exception as e:
         print(f"Error bulk distributing rewards: {e}")
-        flash('An error occurred during bulk distribution.', 'danger')
+        flash(_('Could not bulk distribute rewards.'), 'danger')
     
     return redirect(url_for('admin.virtual_rewards'))
 
@@ -1143,7 +1162,7 @@ def export_reward_data():
             
     except Exception as e:
         print(f"Error exporting reward data: {e}")
-        flash('An error occurred while exporting data.', 'danger')
+        flash(_('Could not export reward data.'), 'danger')
     
     return redirect(url_for('admin.virtual_rewards'))
 
@@ -1190,11 +1209,11 @@ def reward_rules():
                         """, (rule_name, rule_value))
                     
                     conn.commit()
-                    flash('Reward rules updated successfully!', 'success')
+                    flash(_('Reward rules updated successfully!'), 'success')
                     
         except Exception as e:
             print(f"Error updating reward rules: {e}")
-            flash('An error occurred while updating rules.', 'danger')
+            flash(_('Could not update reward rules.'), 'danger')
     
     # Load current rules
     try:

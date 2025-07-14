@@ -230,18 +230,18 @@
         <nav class="sidebar" id="adminSidebar">
             <div class="sidebar-header">
                 <img src="{{ url_for('static', filename='kasikash-logo.svg') }}" alt="Logo">
-                <span style="font-weight: bold; font-size: 1.2rem;">Admin</span>
+                <span style="font-weight: bold; font-size: 1.2rem;">{{ _('Admin') }}</span>
             </div>
             <div class="nav flex-column">
-                <a href="{{ url_for('admin.dashboard') }}" class="{% if request.endpoint == 'admin.dashboard' %}active{% endif %}"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
-                <a href="{{ url_for('admin.manage_users') }}" class="{% if request.endpoint == 'admin.manage_users' %}active{% endif %}"><i class="fas fa-users"></i> Manage Users</a>
-                <a href="{{ url_for('admin.loan_approvals') }}" class="{% if request.endpoint == 'admin.loan_approvals' %}active{% endif %}"><i class="fas fa-hand-holding-usd"></i> Loan Approvals</a>
-                <a href="{{ url_for('admin.events') }}" class="{% if request.endpoint == 'admin.events' %}active{% endif %}"><i class="fas fa-calendar-alt"></i> Events</a>
-                <a href="{{ url_for('admin.memberships') }}" class="{% if request.endpoint == 'admin.memberships' %}active{% endif %}"><i class="fas fa-medal"></i> Membership Plans</a>
-                <a href="{{ url_for('admin.notifications') }}" class="{% if request.endpoint == 'admin.notifications' %}active{% endif %}"><i class="fas fa-bell"></i> Notifications</a>
-                <a href="{{ url_for('admin.kyc_approvals') }}" class="{% if request.endpoint == 'admin.kyc_approvals' %}active{% endif %}"><i class="fas fa-id-card"></i> KYC Approvals</a>
-                <a href="{{ url_for('admin.virtual_rewards') }}" class="{% if request.endpoint == 'admin.virtual_rewards' %}active{% endif %}"><i class="fas fa-gift"></i> Virtual Rewards</a>
-                <a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                <a href="{{ url_for('admin.dashboard') }}" class="{% if request.endpoint == 'admin.dashboard' %}active{% endif %}"><i class="fas fa-tachometer-alt"></i> {{ _('Dashboard') }}</a>
+                <a href="{{ url_for('admin.manage_users') }}" class="{% if request.endpoint == 'admin.manage_users' %}active{% endif %}"><i class="fas fa-users"></i> {{ _('Manage Users') }}</a>
+                <a href="{{ url_for('admin.loan_approvals') }}" class="{% if request.endpoint == 'admin.loan_approvals' %}active{% endif %}"><i class="fas fa-hand-holding-usd"></i> {{ _('Loan Approvals') }}</a>
+                <a href="{{ url_for('admin.events') }}" class="{% if request.endpoint == 'admin.events' %}active{% endif %}"><i class="fas fa-calendar-alt"></i> {{ _('Events') }}</a>
+                <a href="{{ url_for('admin.memberships') }}" class="{% if request.endpoint == 'admin.memberships' %}active{% endif %}"><i class="fas fa-medal"></i> {{ _('Membership Plans') }}</a>
+                <a href="{{ url_for('admin.notifications') }}" class="{% if request.endpoint == 'admin.notifications' %}active{% endif %}"><i class="fas fa-bell"></i> {{ _('Notifications') }}</a>
+                <a href="{{ url_for('admin.kyc_approvals') }}" class="{% if request.endpoint == 'admin.kyc_approvals' %}active{% endif %}"><i class="fas fa-id-card"></i> {{ _('KYC Approvals') }}</a>
+                <a href="{{ url_for('admin.virtual_rewards') }}" class="{% if request.endpoint == 'admin.virtual_rewards' %}active{% endif %}"><i class="fas fa-gift"></i> {{ _('Virtual Rewards') }}</a>
+                <a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> {{ _('Logout') }}</a>
             </div>
         </nav>
         <main class="admin-main" id="adminMain">

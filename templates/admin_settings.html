@@ -173,97 +173,97 @@
 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 <div class="settings-container">
     <div class="d-flex justify-content-between align-items-center mb-2">
-        <h1 class="admin-settings-title"><i class="bi bi-shield-lock"></i> {{ t('admin_settings', user_language) }}</h1>
+        <h1 class="admin-settings-title"><i class="bi bi-shield-lock"></i> {{ _('Admin Settings') }}</h1>
         <div>
             <div class="form-check form-switch" style="display: flex; align-items: center;">
                 <input class="form-check-input" type="checkbox" id="switchToUserView" style="margin-right: 0.5em;">
-                <label class="form-check-label switch-user-label" for="switchToUserView"><i class="bi bi-person-circle"></i> {{ t('switch_to_user_view', user_language) }}</label>
+                <label class="form-check-label switch-user-label" for="switchToUserView"><i class="bi bi-person-circle"></i> {{ _('Switch to User View') }}</label>
             </div>
         </div>
     </div>
-    <p class="admin-settings-subtitle">{{ t('admin_settings_subtitle', user_language) }}</p>
+    <p class="admin-settings-subtitle">{{ _('Configure your admin settings below.') }}</p>
     <div class="d-flex settings-tabs mb-4">
         <div class="settings-tab active" data-tab="user-permissions">
-            <i class="bi bi-people"></i> {{ t('user_permissions', user_language) }}
+            <i class="bi bi-people"></i> {{ _('User Permissions') }}
         </div>
         <div class="settings-tab" data-tab="financial">
-            <i class="bi bi-cash-coin"></i> {{ t('financial_controls', user_language) }}
+            <i class="bi bi-cash-coin"></i> {{ _('Financial Controls') }}
         </div>
         <div class="settings-tab" data-tab="notifications">
-            <i class="bi bi-bell"></i> {{ t('notifications', user_language) }}
+            <i class="bi bi-bell"></i> {{ _('Notifications') }}
         </div>
         <div class="settings-tab" data-tab="meetings">
-            <i class="bi bi-calendar-event"></i> {{ t('meetings_events', user_language) }}
+            <i class="bi bi-calendar-event"></i> {{ _('Meetings & Events') }}
         </div>
         <div class="settings-tab" data-tab="security">
-            <i class="bi bi-lock"></i> {{ t('data_security', user_language) }}
+            <i class="bi bi-lock"></i> {{ _('Data Security') }}
         </div>
     </div>
     <div id="settings-content">
         <!-- User & Permissions Tab -->
         <div class="settings-section" id="user-permissions">
             <div class="settings-card mb-3">
-                <h4><i class="bi bi-translate"></i> {{ t('languages', user_language) }}</h4>
-                <div class="help-text">{{ t('select_admin_language', user_language) }}</div>
+                <h4><i class="bi bi-translate"></i> {{ _('Languages') }}</h4>
+                <div class="help-text">{{ _('Select the admin interface language.') }}</div>
                 <div class="setting-controls">
-                    <select class="form-select" name="language" style="width: 220px;">
-                        <option value="en" {% if default_settings.language == 'en' %}selected{% endif %}>{{ t('english', user_language) }}</option>
-                        <option value="zu" {% if default_settings.language == 'zu' %}selected{% endif %}>{{ t('zulu', user_language) }}</option>
-                        <option value="xh" {% if default_settings.language == 'xh' %}selected{% endif %}>{{ t('xhosa', user_language) }}</option>
-                        <option value="af" {% if default_settings.language == 'af' %}selected{% endif %}>{{ t('afrikaans', user_language) }}</option>
-                        <option value="st" {% if default_settings.language == 'st' %}selected{% endif %}>{{ t('sesotho', user_language) }}</option>
-                        <option value="ts" {% if default_settings.language == 'ts' %}selected{% endif %}>{{ t('xitsonga', user_language) }}</option>
-                        <option value="tn" {% if default_settings.language == 'tn' %}selected{% endif %}>{{ t('setswana', user_language) }}</option>
-                        <option value="ss" {% if default_settings.language == 'ss' %}selected{% endif %}>{{ t('siswati', user_language) }}</option>
-                        <option value="ve" {% if default_settings.language == 've' %}selected{% endif %}>{{ t('tshivenda', user_language) }}</option>
-                        <option value="nr" {% if default_settings.language == 'nr' %}selected{% endif %}>{{ t('ndebele', user_language) }}</option>
-                        <option value="nso" {% if default_settings.language == 'nso' %}selected{% endif %}>{{ t('northern_sotho', user_language) }}</option>
+                    <select class="form-select" id="admin-language-select" name="language" style="width: 220px; color: #000;">
+                        <option value="en" {% if default_settings.language == 'en' %}selected{% endif %}>{{ _('English') }}</option>
+                        <option value="zu" {% if default_settings.language == 'zu' %}selected{% endif %}>{{ _('Zulu') }}</option>
+                        <option value="xh" {% if default_settings.language == 'xh' %}selected{% endif %}>{{ _('Xhosa') }}</option>
+                        <option value="af" {% if default_settings.language == 'af' %}selected{% endif %}>{{ _('Afrikaans') }}</option>
+                        <option value="st" {% if default_settings.language == 'st' %}selected{% endif %}>{{ _('Sesotho') }}</option>
+                        <option value="ts" {% if default_settings.language == 'ts' %}selected{% endif %}>{{ _('Xitsonga') }}</option>
+                        <option value="tn" {% if default_settings.language == 'tn' %}selected{% endif %}>{{ _('Setswana') }}</option>
+                        <option value="ss" {% if default_settings.language == 'ss' %}selected{% endif %}>{{ _('Siswati') }}</option>
+                        <option value="ve" {% if default_settings.language == 've' %}selected{% endif %}>{{ _('Tshivenda') }}</option>
+                        <option value="nr" {% if default_settings.language == 'nr' %}selected{% endif %}>{{ _('Ndebele') }}</option>
+                        <option value="nso" {% if default_settings.language == 'nso' %}selected{% endif %}>{{ _('Northern Sotho') }}</option>
                     </select>
                 </div>
             </div>
             <div class="settings-card">
-                <h4><i class="bi bi-person-badge"></i> {{ t('role_management', user_language) }}</h4>
-                <div class="help-text">{{ t('assign_roles_help', user_language) }}</div>
+                <h4><i class="bi bi-person-badge"></i> {{ _('Role Management') }}</h4>
+                <div class="help-text">{{ _('Assign roles to users to control their access.') }}</div>
                 <div class="setting-controls">
                     <select class="form-select" name="role_management" style="width: 250px;">
-                        <option value="admin" {% if default_settings.role_management == 'admin' %}selected{% endif %}>{{ t('admin_full_access', user_language) }}</option>
-                        <option value="treasurer" {% if default_settings.role_management == 'treasurer' %}selected{% endif %}>{{ t('treasurer_financial_access', user_language) }}</option>
-                        <option value="secretary" {% if default_settings.role_management == 'secretary' %}selected{% endif %}>{{ t('secretary_meeting_management', user_language) }}</option>
-                        <option value="member" {% if default_settings.role_management == 'member' %}selected{% endif %}>{{ t('member_limited_access', user_language) }}</option>
+                        <option value="admin" {% if default_settings.role_management == 'admin' %}selected{% endif %}>{{ _('Admin Full Access') }}</option>
+                        <option value="treasurer" {% if default_settings.role_management == 'treasurer' %}selected{% endif %}>{{ _('Treasurer Financial Access') }}</option>
+                        <option value="secretary" {% if default_settings.role_management == 'secretary' %}selected{% endif %}>{{ _('Secretary Meeting Management') }}</option>
+                        <option value="member" {% if default_settings.role_management == 'member' %}selected{% endif %}>{{ _('Member Limited Access') }}</option>
                     </select>
                 </div>
             </div>
             <div class="settings-card">
-                <h4><i class="bi bi-hand-thumbs-up"></i> {{ t('loan_approval_permissions', user_language) }}</h4>
-                <div class="help-text">{{ t('choose_loan_approval_roles', user_language) }}</div>
+                <h4><i class="bi bi-hand-thumbs-up"></i> {{ _('Loan Approval Permissions') }}</h4>
+                <div class="help-text">{{ _('Choose which roles have permission to approve loans.') }}</div>
                 <div class="setting-controls">
                     <select class="form-select" name="loan_approval_roles" multiple style="width: 100%;">
-                        <option value="admin" {% if 'admin' in default_settings.loan_approval_roles %}selected{% endif %}>{{ t('admins', user_language) }}</option>
-                        <option value="treasurer" {% if 'treasurer' in default_settings.loan_approval_roles %}selected{% endif %}>{{ t('treasurers', user_language) }}</option>
-                        <option value="secretary" {% if 'secretary' in default_settings.loan_approval_roles %}selected{% endif %}>{{ t('secretaries', user_language) }}</option>
+                        <option value="admin" {% if 'admin' in default_settings.loan_approval_roles %}selected{% endif %}>{{ _('Admins') }}</option>
+                        <option value="treasurer" {% if 'treasurer' in default_settings.loan_approval_roles %}selected{% endif %}>{{ _('Treasurers') }}</option>
+                        <option value="secretary" {% if 'secretary' in default_settings.loan_approval_roles %}selected{% endif %}>{{ _('Secretaries') }}</option>
                     </select>
                 </div>
             </div>
             <div class="settings-card">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                    <h4><i class="bi bi-journal-text"></i> {{ t('audit_logs', user_language) }}</h4>
+                    <h4><i class="bi bi-journal-text"></i> {{ _('Audit Logs') }}</h4>
                     <div class="theme-toggle-settings" style="display: flex; align-items: center; gap: 0.5rem;">
-                        <span style="font-size: 0.9rem; color: #6b7280;">{{ t('theme', user_language) }}:</span>
-                        <button class="btn btn-outline-primary btn-sm" id="settingsThemeToggle" title="{{ t('toggle_light_dark_mode', user_language) }}">
+                        <span style="font-size: 0.9rem; color: #6b7280;">{{ _('Theme') }}:</span>
+                        <button class="btn btn-outline-primary btn-sm" id="settingsThemeToggle" title="{{ _('Toggle Light/Dark Mode') }}">
                             <i class="fas fa-moon" id="settingsThemeIcon"></i>
                         </button>
                     </div>
                 </div>
-                <div class="help-text">{{ t('view_audit_logs_help', user_language) }}</div>
+                <div class="help-text">{{ _('View and manage system audit logs.') }}</div>
                 <div class="table-responsive">
                     <table class="table audit-log-table">
                         <thead>
                             <tr>
-                                <th>{{ t('action', user_language) }}</th>
-                                <th>{{ t('performed_by', user_language) }}</th>
-                                <th>{{ t('target', user_language) }}</th>
-                                <th>{{ t('amount', user_language) }}</th>
-                                <th>{{ t('date', user_language) }}</th>
+                                <th>{{ _('Action') }}</th>
+                                <th>{{ _('Performed By') }}</th>
+                                <th>{{ _('Target') }}</th>
+                                <th>{{ _('Amount') }}</th>
+                                <th>{{ _('Date') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -284,56 +284,56 @@
         <!-- Financial Controls Tab (hidden by default) -->
         <div class="settings-section d-none" id="financial">
             <div class="settings-card">
-                <h4><i class="bi bi-cash-stack"></i> {{ t('contribution_rules', user_language) }}</h4>
-                <div class="help-text">{{ t('set_contribution_rules_help', user_language) }}</div>
+                <h4><i class="bi bi-cash-stack"></i> {{ _('Contribution Rules') }}</h4>
+                <div class="help-text">{{ _('Set rules for member contributions.') }}</div>
                 <div class="setting-controls flex-column align-items-start">
                     <div class="control-group">
-                        <label>{{ t('monthly_amount', user_language) }}:</label>
+                        <label>{{ _('Monthly Amount') }}:</label>
                         <div class="input-group" style="width: 150px;">
                             <span class="input-group-text">R</span>
                             <input type="number" class="form-control" name="contribution_amount" value="{{ default_settings.contribution_amount }}">
                         </div>
                     </div>
                     <div class="control-group">
-                        <label>{{ t('late_penalty', user_language) }}:</label>
+                        <label>{{ _('Late Penalty') }}:</label>
                         <input type="range" class="form-range" name="late_penalty" min="0" max="50" value="{{ default_settings.late_penalty }}">
                         <span>{{ default_settings.late_penalty }}%</span>
                     </div>
                     <div class="control-group">
-                        <label>{{ t('grace_period', user_language) }}:</label>
+                        <label>{{ _('Grace Period') }}:</label>
                         <input type="number" class="form-control" name="grace_period" style="width: 80px;" value="{{ default_settings.grace_period }}">
-                        <span>{{ t('days', user_language) }}</span>
+                        <span>{{ _('days') }}</span>
                     </div>
                 </div>
             </div>
             <div class="settings-card">
-                <h4><i class="bi bi-currency-exchange"></i> {{ t('loan_settings', user_language) }}</h4>
-                <div class="help-text">{{ t('configure_loan_settings_help', user_language) }}</div>
+                <h4><i class="bi bi-currency-exchange"></i> {{ _('Loan Settings') }}</h4>
+                <div class="help-text">{{ _('Configure loan interest rates and repayment periods.') }}</div>
                 <div class="setting-controls flex-column align-items-start">
                     <div class="control-group">
-                        <label>{{ t('max_loan_percent', user_language) }}:</label>
+                        <label>{{ _('Max Loan Percent') }}:</label>
                         <input type="range" class="form-range" name="max_loan_percent" min="10" max="100" value="{{ default_settings.max_loan_percent }}">
                         <span>{{ default_settings.max_loan_percent }}%</span>
                     </div>
                     <div class="control-group">
-                        <label>{{ t('interest_rate', user_language) }}:</label>
+                        <label>{{ _('Interest Rate') }}:</label>
                         <input type="range" class="form-range" name="interest_rate" min="0" max="20" value="{{ default_settings.interest_rate }}">
                         <span>{{ default_settings.interest_rate }}%</span>
                     </div>
                     <div class="control-group">
-                        <label>{{ t('repayment_period', user_language) }}:</label>
+                        <label>{{ _('Repayment Period') }}:</label>
                         <input type="range" class="form-range" name="repayment_period" min="1" max="24" value="{{ default_settings.repayment_period }}">
-                        <span>{{ default_settings.repayment_period }} {{ t('months', user_language) }}</span>
+                        <span>{{ default_settings.repayment_period }} {{ _('months') }}</span>
                     </div>
                 </div>
             </div>
             <div class="settings-card">
-                <h4><i class="bi bi-shield-check"></i> {{ t('withdrawal_approvals', user_language) }}</h4>
-                <div class="help-text">{{ t('require_dual_approval_help', user_language) }}</div>
+                <h4><i class="bi bi-shield-check"></i> {{ _('Withdrawal Approvals') }}</h4>
+                <div class="help-text">{{ _('Require dual approval for member withdrawals.') }}</div>
                 <div class="setting-controls flex-column align-items-start">
                     <div class="form-check form-switch">
                         <input class="form-check-input" type="checkbox" id="withdrawalApproval" checked>
-                        <label class="form-check-label" for="withdrawalApproval">{{ t('enable_dual_approval_for_withdrawals', user_language) }}</label>
+                        <label class="form-check-label" for="withdrawalApproval">{{ _('Enable Dual Approval for Withdrawals') }}</label>
                     </div>
                     <div class="input-group" style="width: 150px;">
                         <span class="input-group-text">R</span>
@@ -345,66 +345,66 @@
         <!-- Meetings & Events Tab (hidden by default) -->
         <div class="settings-section d-none" id="meetings">
             <div class="settings-card">
-                <h4><i class="bi bi-calendar-week"></i> {{ t('recurring_meetings', user_language) }}</h4>
-                <div class="help-text">{{ t('schedule_meetings_help', user_language) }}</div>
+                <h4><i class="bi bi-calendar-week"></i> {{ _('Recurring Meetings') }}</h4>
+                <div class="help-text">{{ _('Schedule and manage recurring meetings.') }}</div>
                 <div class="setting-controls flex-column align-items-start">
                     <div class="control-group">
-                        <label>{{ t('meeting_frequency', user_language) }}:</label>
+                        <label>{{ _('Meeting Frequency') }}:</label>
                         <select class="form-select" name="meeting_frequency" style="width: 150px;">
-                            <option value="weekly" {% if default_settings.meeting_frequency == 'weekly' %}selected{% endif %}>{{ t('weekly', user_language) }}</option>
-                            <option value="biweekly" {% if default_settings.meeting_frequency == 'biweekly' %}selected{% endif %}>{{ t('biweekly', user_language) }}</option>
-                            <option value="monthly" {% if default_settings.meeting_frequency == 'monthly' %}selected{% endif %}>{{ t('monthly', user_language) }}</option>
+                            <option value="weekly" {% if default_settings.meeting_frequency == 'weekly' %}selected{% endif %}>{{ _('Weekly') }}</option>
+                            <option value="biweekly" {% if default_settings.meeting_frequency == 'biweekly' %}selected{% endif %}>{{ _('Biweekly') }}</option>
+                            <option value="monthly" {% if default_settings.meeting_frequency == 'monthly' %}selected{% endif %}>{{ _('Monthly') }}</option>
                         </select>
                     </div>
                     <div class="control-group">
-                        <label>{{ t('day_of_week', user_language) }}:</label>
+                        <label>{{ _('Day of Week') }}:</label>
                         <select class="form-select" name="meeting_day" style="width: 180px;">
-                            <option value="Monday" {% if default_settings.meeting_day == 'Monday' %}selected{% endif %}>{{ t('monday', user_language) }}</option>
-                            <option value="Tuesday" {% if default_settings.meeting_day == 'Tuesday' %}selected{% endif %}>{{ t('tuesday', user_language) }}</option>
-                            <option value="Wednesday" {% if default_settings.meeting_day == 'Wednesday' %}selected{% endif %}>{{ t('wednesday', user_language) }}</option>
-                            <option value="Thursday" {% if default_settings.meeting_day == 'Thursday' %}selected{% endif %}>{{ t('thursday', user_language) }}</option>
-                            <option value="Friday" {% if default_settings.meeting_day == 'Friday' %}selected{% endif %}>{{ t('friday', user_language) }}</option>
-                            <option value="Saturday" {% if default_settings.meeting_day == 'Saturday' %}selected{% endif %}>{{ t('saturday', user_language) }}</option>
-                            <option value="Sunday" {% if default_settings.meeting_day == 'Sunday' %}selected{% endif %}>{{ t('sunday', user_language) }}</option>
+                            <option value="Monday" {% if default_settings.meeting_day == 'Monday' %}selected{% endif %}>{{ _('Monday') }}</option>
+                            <option value="Tuesday" {% if default_settings.meeting_day == 'Tuesday' %}selected{% endif %}>{{ _('Tuesday') }}</option>
+                            <option value="Wednesday" {% if default_settings.meeting_day == 'Wednesday' %}selected{% endif %}>{{ _('Wednesday') }}</option>
+                            <option value="Thursday" {% if default_settings.meeting_day == 'Thursday' %}selected{% endif %}>{{ _('Thursday') }}</option>
+                            <option value="Friday" {% if default_settings.meeting_day == 'Friday' %}selected{% endif %}>{{ _('Friday') }}</option>
+                            <option value="Saturday" {% if default_settings.meeting_day == 'Saturday' %}selected{% endif %}>{{ _('Saturday') }}</option>
+                            <option value="Sunday" {% if default_settings.meeting_day == 'Sunday' %}selected{% endif %}>{{ _('Sunday') }}</option>
                         </select>
                     </div>
                     <div class="control-group">
-                        <label>{{ t('time', user_language) }}:</label>
+                        <label>{{ _('Time') }}:</label>
                         <input type="time" class="form-control" name="meeting_time" style="width: 120px;" value="{{ default_settings.meeting_time }}">
                     </div>
                     <div class="form-check form-switch">
                         <input class="form-check-input" type="checkbox" name="meeting_reminders" id="meetingReminders" {% if default_settings.meeting_reminders %}checked{% endif %}>
-                        <label class="form-check-label" for="meetingReminders">{{ t('send_automatic_reminders', user_language) }}</label>
+                        <label class="form-check-label" for="meetingReminders">{{ _('Send Automatic Reminders') }}</label>
                     </div>
                 </div>
             </div>
             <div class="settings-card">
-                <h4><i class="bi bi-person-check"></i> {{ t('attendance_tracking', user_language) }}</h4>
-                <div class="help-text">{{ t('record_attendance_help', user_language) }}</div>
+                <h4><i class="bi bi-person-check"></i> {{ _('Attendance Tracking') }}</h4>
+                <div class="help-text">{{ _('Record and manage member attendance.') }}</div>
                 <div class="setting-controls flex-column align-items-start">
                     <div class="form-check form-switch">
                         <input class="form-check-input" type="checkbox" id="attendanceTracking" checked>
-                        <label class="form-check-label" for="attendanceTracking">{{ t('enable_attendance_tracking', user_language) }}</label>
+                        <label class="form-check-label" for="attendanceTracking">{{ _('Enable Attendance Tracking') }}</label>
                     </div>
                     <div class="control-group">
-                        <label>{{ t('absence_penalty', user_language) }}:</label>
+                        <label>{{ _('Absence Penalty') }}:</label>
                         <div class="input-group" style="width: 150px;">
                             <span class="input-group-text">R</span>
                             <input type="number" class="form-control" value="50">
                         </div>
-                        <span>{{ t('after', user_language) }}</span>
+                        <span>{{ _('after') }}</span>
                         <input type="number" class="form-control" style="width: 70px;" value="3">
-                        <span>{{ t('missed_meetings', user_language) }}</span>
+                        <span>{{ _('missed_meetings') }}</span>
                     </div>
                 </div>
                 <div class="mt-3">
                     <table class="table audit-log-table">
                         <thead>
                             <tr>
-                                <th>{{ t('meeting', user_language) }}</th>
-                                <th>{{ t('date', user_language) }}</th>
-                                <th>{{ t('present', user_language) }}</th>
-                                <th>{{ t('absent', user_language) }}</th>
+                                <th>{{ _('Meeting') }}</th>
+                                <th>{{ _('Date') }}</th>
+                                <th>{{ _('Present') }}</th>
+                                <th>{{ _('Absent') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -424,16 +424,16 @@
         <!-- Data & Security Tab (hidden by default) -->
         <div class="settings-section d-none" id="security">
             <div class="settings-card">
-                <h4><i class="bi bi-download"></i> {{ t('data_export', user_language) }}</h4>
-                <div class="help-text">{{ t('download_data_help', user_language) }}</div>
+                <h4><i class="bi bi-download"></i> {{ _('Data Export') }}</h4>
+                <div class="help-text">{{ _('Download member and transaction data.') }}</div>
                 <div class="setting-controls">
                     <form id="member-export-form" method="GET" action="{{ url_for('admin.export_members') }}" style="display:inline;">
                         <input type="hidden" name="format" value="csv">
-                        <button type="submit" class="btn btn-primary"><i class="bi bi-download"></i> {{ t('export_member_data', user_language) }}</button>
+                        <button type="submit" class="btn btn-primary"><i class="bi bi-download"></i> {{ _('Export Member Data') }}</button>
                     </form>
                     <form id="transaction-export-form" method="GET" action="{{ url_for('admin.export_transactions') }}" style="display:inline;">
                         <input type="hidden" name="format" value="csv">
-                        <button type="submit" class="btn btn-primary ms-2"><i class="bi bi-download"></i> {{ t('export_transactions', user_language) }}</button>
+                        <button type="submit" class="btn btn-primary ms-2"><i class="bi bi-download"></i> {{ _('Export Transactions') }}</button>
                     </form>
                     <select class="form-select ms-2" style="width: 120px; display:inline-block;" id="export-format-select">
                         <option value="csv">CSV</option>
@@ -443,35 +443,35 @@
                 </div>
             </div>
             <div class="settings-card">
-                <h4><i class="bi bi-shield-lock"></i> {{ t('two_factor_auth', user_language) }}</h4>
-                <div class="help-text">{{ t('enable_2fa_help', user_language) }}</div>
+                <h4><i class="bi bi-shield-lock"></i> {{ _('Two Factor Authentication') }}</h4>
+                <div class="help-text">{{ _('Enable two-factor authentication for admin users.') }}</div>
                 <div class="setting-controls flex-column align-items-start">
                     <div class="form-check form-switch">
                         <input class="form-check-input" type="checkbox" name="enable_2fa" id="enable2FA" {% if default_settings.enable_2fa %}checked{% endif %}>
-                        <label class="form-check-label" for="enable2FA">{{ t('require_2fa_for_admins', user_language) }}</label>
+                        <label class="form-check-label" for="enable2FA">{{ _('Require 2FA for Admins') }}</label>
                     </div>
                     {% if default_settings.enable_2fa %}
                     <div class="mt-2">
                         <select class="form-select" style="width: 200px;">
-                            <option value="authenticator">{{ t('authenticator_app', user_language) }}</option>
-                            <option value="sms">{{ t('sms_verification', user_language) }}</option>
-                            <option value="email">{{ t('email_verification', user_language) }}</option>
+                            <option value="authenticator">{{ _('Authenticator App') }}</option>
+                            <option value="sms">{{ _('SMS Verification') }}</option>
+                            <option value="email">{{ _('Email Verification') }}</option>
                         </select>
                     </div>
                     {% endif %}
                 </div>
             </div>
             <div class="settings-card">
-                <h4><i class="bi bi-archive"></i> {{ t('data_retention', user_language) }}</h4>
-                <div class="help-text">{{ t('configure_data_retention_help', user_language) }}</div>
+                <h4><i class="bi bi-archive"></i> {{ _('Data Retention') }}</h4>
+                <div class="help-text">{{ _('Configure how long data is kept.') }}</div>
                 <div class="setting-controls flex-column align-items-start">
                     <div class="control-group">
-                        <label>{{ t('keep_transaction_history_for', user_language) }}:</label>
+                        <label>{{ _('Keep Transaction History For') }}:</label>
                         <select class="form-select" name="data_retention" style="width: 150px;">
-                            <option value="1" {% if default_settings.data_retention == '1' %}selected{% endif %}>{{ t('1_year', user_language) }}</option>
-                            <option value="3" {% if default_settings.data_retention == '3' %}selected{% endif %}>{{ t('3_years', user_language) }}</option>
-                            <option value="5" {% if default_settings.data_retention == '5' %}selected{% endif %}>{{ t('5_years', user_language) }}</option>
-                            <option value="forever" {% if default_settings.data_retention == 'forever' %}selected{% endif %}>{{ t('indefinitely', user_language) }}</option>
+                            <option value="1" {% if default_settings.data_retention == '1' %}selected{% endif %}>{{ _('1 Year') }}</option>
+                            <option value="3" {% if default_settings.data_retention == '3' %}selected{% endif %}>{{ _('3 Years') }}</option>
+                            <option value="5" {% if default_settings.data_retention == '5' %}selected{% endif %}>{{ _('5 Years') }}</option>
+                            <option value="forever" {% if default_settings.data_retention == 'forever' %}selected{% endif %}>{{ _('Indefinitely') }}</option>
                         </select>
                     </div>
                 </div>
@@ -479,8 +479,8 @@
         </div>
     </div>
     <div class="d-flex justify-content-end mt-4">
-        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary me-2">{{ t('cancel', user_language) }}</a>
-        <button type="submit" class="btn btn-primary">{{ t('save_settings', user_language) }}</button>
+        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary me-2">{{ _('Cancel') }}</a>
+        <button type="submit" class="btn btn-primary">{{ _('Save Settings') }}</button>
     </div>
 </div>
 </form>
@@ -566,5 +566,9 @@
                 updateSettingsThemeIcon();
             }
         });
+    function changeAdminLanguage() {
+        var lang = document.getElementById('admin-language-select').value;
+        window.location.href = '/admin/set_language?lang=' + lang;
+    }
 </script>
 {% endblock %}

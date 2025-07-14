@@ -1,22 +1,22 @@
 {% extends 'admin_base.html' %}
 {% block admin_content %}
-<h1 style="color:#60efff;">{{ t('admin_notifications', user_language) if t('admin_notifications', user_language) != 'admin_notifications' else 'Admin Notifications' }}</h1>
-<p style="color:#eaf6fb;">{{ t('admin_notifications_description', user_language) if t('admin_notifications_description', user_language) != 'admin_notifications_description' else 'Here you can send notifications to users.' }}</p>
+<h1 style="color:#60efff;">{{ _('Admin Notifications') }}</h1>
+<p style="color:#eaf6fb;">{{ _('Here you can send notifications to users.') }}</p>
 <!-- Search/filter bar -->
 <div class="mb-6 flex items-center gap-4 bg-[#101c2c] rounded-xl shadow-lg p-4">
-  <button class="admin-card btn px-6 py-2 text-base font-semibold shadow-md" style="background:linear-gradient(90deg,#00ff87 0%,#60efff 100%);color:#101c2c;min-width:180px;" onclick="openSendNotificationModal()">{{ t('create_notification', user_language) if t('create_notification', user_language) != 'create_notification' else 'Create Notification' }}</button>
+  <button class="admin-card btn px-6 py-2 text-base font-semibold shadow-md" style="background:linear-gradient(90deg,#00ff87 0%,#60efff 100%);color:#101c2c;min-width:180px;" onclick="openSendNotificationModal()">{{ _('Create Notification') }}</button>
 </div>
 <table class="table-auto w-full mt-2 text-sm admin-card" style="background:linear-gradient(135deg,#101c2c 60%,#1e3357 100%);color:#eaf6fb;">
   <thead>
     <tr style="color:#60efff;">
-      <th>{{ t('id', user_language) if t('id', user_language) != 'id' else 'ID' }}</th>
-      <th>{{ t('user_id', user_language) if t('user_id', user_language) != 'user_id' else 'User ID' }}</th>
-      <th>{{ t('stokvel', user_language) }}</th>
-      <th>{{ t('urgent', user_language) }}</th>
-      <th>{{ t('message', user_language) }}</th>
-      <th>{{ t('type', user_language) }}</th>
-      <th>{{ t('created_at', user_language) }}</th>
-      <th>{{ t('actions', user_language) }}</th>
+      <th>{{ _('ID') }}</th>
+      <th>{{ _('User ID') }}</th>
+      <th>{{ _('Stokvel') }}</th>
+      <th>{{ _('Urgent') }}</th>
+      <th>{{ _('Message') }}</th>
+      <th>{{ _('Type') }}</th>
+      <th>{{ _('Created At') }}</th>
+      <th>{{ _('Actions') }}</th>
     </tr>
   </thead>
   <tbody>
@@ -24,18 +24,18 @@
     <tr>
       <td>{{ n[0] }}</td>
       <td>{{ n[1] }}</td>
-      <td>{{ t('stokvel_a', user_language) if t('stokvel_a', user_language) != 'stokvel_a' else 'Stokvel A' }}</td>
-      <td>{{ t('no', user_language) }}</td>
+      <td>{{ _('Stokvel A') }}</td>
+      <td>{{ _('No') }}</td>
       <td>{{ n[2] }}</td>
       <td>{{ n[3] }}</td>
       <td>{{ n[4] }}</td>
       <td class="flex gap-2 justify-center">
-        <button class="admin-card btn px-4 py-1 text-sm font-semibold shadow" style="background:linear-gradient(90deg,#60efff 0%,#00ff87 100%);color:#101c2c;" onclick="openViewNotificationModal('{{ n[0] }}', '{{ n[1] }}', '{{ n[2] }}', '{{ n[3] }}', '{{ n[4] }}')">{{ t('view', user_language) }}</button>
-        <button class="admin-card btn px-4 py-1 text-sm font-semibold shadow" style="background:linear-gradient(90deg,#ff4e50 0%,#f9d423 100%);color:#101c2c;opacity:0.7;" disabled title="Coming soon">{{ t('delete', user_language) }}</button>
+        <button class="admin-card btn px-4 py-1 text-sm font-semibold shadow" style="background:linear-gradient(90deg,#60efff 0%,#00ff87 100%);color:#101c2c;" onclick="openViewNotificationModal('{{ n[0] }}', '{{ n[1] }}', '{{ n[2] }}', '{{ n[3] }}', '{{ n[4] }}')">{{ _('View') }}</button>
+        <button class="admin-card btn px-4 py-1 text-sm font-semibold shadow" style="background:linear-gradient(90deg,#ff4e50 0%,#f9d423 100%);color:#101c2c;opacity:0.7;" disabled title="Coming soon">{{ _('Delete') }}</button>
       </td>
     </tr>
     {% else %}
-    <tr><td colspan="8">{{ t('no_notifications_found', user_language) if t('no_notifications_found', user_language) != 'no_notifications_found' else 'No notifications found.' }}</td></tr>
+    <tr><td colspan="8">{{ _('No notifications found.') }}</td></tr>
     {% endfor %}
   </tbody>
 </table>
@@ -43,53 +43,53 @@
 <div id="sendNotificationModal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden">
   <div class="admin-card p-6 max-w-md w-full relative" style="background:#1b1f27;color:#eaf6fb;">
     <button type="button" onclick="closeSendNotificationModal();" class="absolute top-2 right-2 text-gray-500 hover:text-gray-200 text-2xl">&times;</button>
-    <h3 class="text-xl font-bold mb-4" style="color:#60efff;">{{ t('send_notification', user_language) }}</h3>
+    <h3 class="text-xl font-bold mb-4" style="color:#60efff;">{{ _('Send Notification') }}</h3>
     <form id="sendNotificationForm" method="POST" action="{{ url_for('admin.send_notification') }}" class="space-y-3">
       {{ csrf_token }}
       <div>
-        <label class="block font-semibold mb-1">Notification Type</label>
+        <label class="block font-semibold mb-1">{{ _('Notification Type') }}</label>
         <select name="notification_type" id="notificationType" class="border border-[#22304a] rounded-lg px-4 py-2 w-full text-black" required onchange="toggleNotificationOptions()">
-          <option value="stokvel">Send to Stokvel Members</option>
-          <option value="all_users">Send to All Users</option>
-          <option value="specific_user">Send to Specific User</option>
+          <option value="stokvel">{{ _('Send to Stokvel Members') }}</option>
+          <option value="all_users">{{ _('Send to All Users') }}</option>
+          <option value="specific_user">{{ _('Send to Specific User') }}</option>
         </select>
       </div>
       
       <!-- Stokvel Selection (shown when notification_type is 'stokvel') -->
       <div id="stokvelSection" class="notification-option">
-        <label class="block font-semibold mb-1">{{ t('stokvel', user_language) }}</label>
+        <label class="block font-semibold mb-1">{{ _('Stokvel') }}</label>
         <select name="stokvel" class="border border-[#22304a] rounded-lg px-4 py-2 w-full text-black">
-          <option value="">{{ t('select_stokvel', user_language) if t('select_stokvel', user_language) != 'select_stokvel' else 'Select a stokvel' }}</option>
-          <option>{{ t('stokvel_a', user_language) if t('stokvel_a', user_language) != 'stokvel_a' else 'Stokvel A' }}</option>
-          <option>{{ t('stokvel_b', user_language) if t('stokvel_b', user_language) != 'stokvel_b' else 'Stokvel B' }}</option>
-          <option>{{ t('stokvel_c', user_language) if t('stokvel_c', user_language) != 'stokvel_c' else 'Stokvel C' }}</option>
+          <option value="">{{ _('Select a stokvel') }}</option>
+          <option>{{ _('Stokvel A') }}</option>
+          <option>{{ _('Stokvel B') }}</option>
+          <option>{{ _('Stokvel C') }}</option>
         </select>
       </div>
       
       <!-- Specific User Selection (shown when notification_type is 'specific_user') -->
       <div id="specificUserSection" class="notification-option hidden">
-        <label class="block font-semibold mb-1">User Email</label>
-        <input type="email" name="specific_user_email" class="border border-[#22304a] rounded-lg px-4 py-2 w-full text-black" placeholder="Enter user email address">
+        <label class="block font-semibold mb-1">{{ _('User Email') }}</label>
+        <input type="email" name="specific_user_email" class="border border-[#22304a] rounded-lg px-4 py-2 w-full text-black" placeholder="{{ _('Enter user email address') }}">
       </div>
       
       <div class="flex items-center gap-2">
         <input type="checkbox" id="urgentCheckbox" name="urgent">
-        <label for="urgentCheckbox" class="font-semibold">{{ t('urgent', user_language) }}</label>
+        <label for="urgentCheckbox" class="font-semibold">{{ _('Urgent') }}</label>
       </div>
       <div>
-        <label class="block font-semibold mb-1">{{ t('message', user_language) }}</label>
-        <textarea name="message" class="border border-[#22304a] rounded-lg px-4 py-2 w-full text-black" rows="3" required placeholder="{{ t('enter_notification_message', user_language) if t('enter_notification_message', user_language) != 'enter_notification_message' else 'Enter your notification message...' }}"></textarea>
+        <label class="block font-semibold mb-1">{{ _('Message') }}</label>
+        <textarea name="message" class="border border-[#22304a] rounded-lg px-4 py-2 w-full text-black" rows="3" required placeholder="{{ _('Enter your notification message...') }}"></textarea>
       </div>
       <div>
-        <label class="block font-semibold mb-1">{{ t('type', user_language) }}</label>
+        <label class="block font-semibold mb-1">{{ _('Type') }}</label>
         <select name="type" class="border border-[#22304a] rounded-lg px-4 py-2 w-full text-black" required>
-          <option value="admin_notification">Admin Notification</option>
-          <option value="General">{{ t('general', user_language) if t('general', user_language) != 'general' else 'General' }}</option>
-          <option value="Alert">{{ t('alert', user_language) if t('alert', user_language) != 'alert' else 'Alert' }}</option>
-          <option value="Update">{{ t('update', user_language) if t('update', user_language) != 'update' else 'Update' }}</option>
+          <option value="admin_notification">{{ _('Admin Notification') }}</option>
+          <option value="General">{{ _('General') }}</option>
+          <option value="Alert">{{ _('Alert') }}</option>
+          <option value="Update">{{ _('Update') }}</option>
         </select>
       </div>
-      <button type="submit" class="admin-card btn w-full mt-4 py-2 text-base font-semibold shadow-md" style="background:linear-gradient(90deg,#60efff 0%,#00ff87 100%);color:#101c2c;">{{ t('send', user_language) if t('send', user_language) != 'send' else 'Send' }}</button>
+      <button type="submit" class="admin-card btn w-full mt-4 py-2 text-base font-semibold shadow-md" style="background:linear-gradient(90deg,#60efff 0%,#00ff87 100%);color:#101c2c;">{{ _('Send') }}</button>
     </form>
   </div>
 </div>
@@ -97,21 +97,12 @@
 <div id="viewNotificationModal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden">
   <div class="admin-card p-6 max-w-md w-full relative" style="background:#1b1f27;color:#eaf6fb;">
     <button type="button" onclick="closeViewNotificationModal();" class="absolute top-2 right-2 text-gray-500 hover:text-gray-200 text-2xl">&times;</button>
-    <h3 class="text-xl font-bold mb-4" style="color:#60efff;">{{ t('notification_details', user_language) if t('notification_details', user_language) != 'notification_details' else 'Notification Details' }}</h3>
+    <h3 class="text-xl font-bold mb-4" style="color:#60efff;">{{ _('Notification Details') }}</h3>
     <ul id="viewNotificationDetails" class="mb-2"></ul>
   </div>
 </div>
 {% endblock %}
 {% block extra_js %}
-{% set labels = {
-    'id': t('id', user_language) if t('id', user_language) != 'id' else 'ID',
-    'user_id': t('user_id', user_language) if t('user_id', user_language) != 'user_id' else 'User ID',
-    'stokvel': t('stokvel', user_language) if t('stokvel', user_language) != 'stokvel' else 'Stokvel',
-    'urgent': t('urgent', user_language) if t('urgent', user_language) != 'urgent' else 'Urgent',
-    'message': t('message', user_language) if t('message', user_language) != 'message' else 'Message',
-    'type': t('type', user_language) if t('type', user_language) != 'type' else 'Type',
-    'created_at': t('created_at', user_language) if t('created_at', user_language) != 'created_at' else 'Created At'
-} %}
 <script>
 function openSendNotificationModal() {
   document.getElementById('sendNotificationModal').classList.remove('hidden');
@@ -120,13 +111,12 @@ function closeSendNotificationModal() {
   document.getElementById('sendNotificationModal').classList.add('hidden');
 }
 function openViewNotificationModal(id, userId, message, type, createdAt) {
-  var labels = {{ labels|tojson }};
   var html = '';
-  html += `<li><strong>${labels.id}:</strong> ${id}</li>`;
-  html += `<li><strong>${labels.user_id}:</strong> ${userId}</li>`;
-  html += `<li><strong>${labels.message}:</strong> ${message}</li>`;
-  html += `<li><strong>${labels.type}:</strong> ${type}</li>`;
-  html += `<li><strong>${labels.created_at}:</strong> ${createdAt}</li>`;
+  html += `<li><strong>{{ _('ID') }}:</strong> ${id}</li>`;
+  html += `<li><strong>{{ _('User ID') }}:</strong> ${userId}</li>`;
+  html += `<li><strong>{{ _('Message') }}:</strong> ${message}</li>`;
+  html += `<li><strong>{{ _('Type') }}:</strong> ${type}</li>`;
+  html += `<li><strong>{{ _('Created At') }}:</strong> ${createdAt}</li>`;
   document.getElementById('viewNotificationDetails').innerHTML = html;
   document.getElementById('viewNotificationModal').classList.remove('hidden');
 }

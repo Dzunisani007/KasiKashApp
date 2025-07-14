@@ -52,15 +52,22 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your-secret-key-here')
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
 app.config['BABEL_DEFAULT_LOCALE'] = 'en'
 app.config['BABEL_SUPPORTED_LOCALES'] = ['en', 'af', 'zu', 'xh', 'st', 'tn', 'ts', 've', 'nr', 'ss', 'nso']
+app.config['BABEL_TRANSLATION_DIRECTORIES'] = 'translations'
 babel = Babel(app)
 
 def get_locale():
-    return request.args.get('lang') or 'en'
+    lang = request.cookies.get('language_preference')
+    if lang and lang in app.config['BABEL_SUPPORTED_LOCALES']:
+        print(f"[Babel] Language from cookie: {lang}")
+        return lang
+    print(f"[Babel] Using default language: {app.config['BABEL_DEFAULT_LOCALE']}")
+    return app.config['BABEL_DEFAULT_LOCALE']
 
 babel.locale_selector_func = get_locale
 
 # Initialize CSRF protection
-csrf = CSRFProtect(app)
+from extensions import csrf
+csrf.init_app(app)
 
 UPLOAD_FOLDER = 'static/profile_pics'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
