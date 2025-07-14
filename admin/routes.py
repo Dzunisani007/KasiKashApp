@@ -1,4 +1,3 @@
-<<<<<<< Updated upstream
 from flask import render_template, request, redirect, session, flash, url_for, jsonify, Response
 import support
 import psycopg2
@@ -1228,7 +1227,6 @@ def member_rewards():
         flash('Permission denied.', 'danger')
         return redirect(url_for('home'))
     return render_template('admin_member_rewards.html')
-=======
 from flask import render_template, request, redirect, session, flash, url_for, jsonify, Response
 import support
 import psycopg2
@@ -2042,4 +2040,3 @@ def delete_attendance(attendance_id):
     except Exception as e:
         flash(f'Error deleting attendance record: {e}', 'danger')
     return redirect(url_for('admin.settings'))
->>>>>>> Stashed changes
