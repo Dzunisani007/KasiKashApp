@@ -42,6 +42,7 @@ from werkzeug.utils import secure_filename
 import re
 from decimal import Decimal, InvalidOperation
 from flask_babel import Babel
+from flask_socketio import SocketIO, join_room, emit
 
 # Load environment variables
 load_dotenv()
@@ -530,6 +531,7 @@ def login_validation():
                                     # firebase_uid *before* updating users
                                     # table
                                     update_queries = [
+
                                         ("UPDATE stokvels SET created_by = %s WHERE created_by = %s",
                                          (new_firebase_uid, old_firebase_uid)),
                                         # Assuming stokvel_members uses
@@ -552,6 +554,14 @@ def login_validation():
                                          (new_firebase_uid, old_firebase_uid)),
                                         ("UPDATE savings_goals SET user_id = %s WHERE user_id = %s",
                                          (new_firebase_uid, old_firebase_uid)),
+                                        ("UPDATE stokvels SET created_by = %s WHERE created_by = %s", (new_firebase_uid, old_firebase_uid)),
+                                        ("UPDATE stokvel_members SET user_id = %s WHERE user_id = %s", (new_firebase_uid, old_firebase_uid)),
+                                        ("UPDATE transactions SET user_id = %s WHERE user_id = %s", (internal_user_id, internal_user_id)),
+                                        ("UPDATE chat_history SET user_id = %s WHERE user_id = %s", (new_firebase_uid, old_firebase_uid)),
+                                        ("UPDATE chatbot_preferences SET user_id = %s WHERE user_id = %s", (new_firebase_uid, old_firebase_uid)),
+                                        ("UPDATE payment_methods SET user_id = %s WHERE user_id = %s", (new_firebase_uid, old_firebase_uid)),
+                                        ("UPDATE payouts SET user_id = %s WHERE user_id = %s", (new_firebase_uid, old_firebase_uid)),
+                                        ("UPDATE savings_goals SET user_id = %s WHERE user_id = %s", (new_firebase_uid, old_firebase_uid)),
                                     ]
 
                                     for query, params in update_queries:
@@ -716,8 +726,8 @@ def forgot_password():
                                     # Update stokvel_members table
                                     cur.execute("""
                                         UPDATE stokvel_members 
-                                        SET firebase_uid = %s 
-                                        WHERE firebase_uid = %s
+                                        SET user_id = %s 
+                                        WHERE user_id = %s
                                     """, (new_firebase_uid, old_firebase_uid))
                                     # Update contributions table
                                     cur.execute("""
@@ -902,17 +912,22 @@ def registration():
                     email=email,
                     password=passwd,
                     display_name=username,
-                    email_verified=True  # Set to True since we're using email/password auth
+                    email_verified=False  # Set to False so user must verify
                 )
                 print(f"Created Firebase user: {user.uid}")
 
                 # Store Firebase UID and username/email in your PostgreSQL
                 # database
+                # Generate email verification link and send email
+                verification_link = auth.generate_email_verification_link(email)
+                send_email_verification(email, verification_link)
+
+                # Store Firebase UID and username/email in your PostgreSQL database
                 with support.db_connection() as conn:
                     with conn.cursor() as cur:
                         cur.execute(
-                            "INSERT INTO users (firebase_uid, username, email, password) VALUES (%s, %s, %s, %s) RETURNING id",
-                            (user.uid, username, email, passwd)
+                            "INSERT INTO users (firebase_uid, username, email) VALUES (%s, %s, %s) RETURNING id",
+                            (user.uid, username, email)
                         )
                         local_user_id = cur.fetchone()[0]
                         conn.commit()
@@ -1066,7 +1081,18 @@ def create_stokvel():
     (stokvel_id,
     user_id,
      'admin'))
-        
+        # Add the creator as the first member or update their role to admin if already a member
+        existing = support.execute_query("search", "SELECT id FROM stokvel_members WHERE stokvel_id = %s AND user_id = %s", (stokvel_id, user_id))
+        if existing:
+            support.execute_query("update", "UPDATE stokvel_members SET role = %s WHERE stokvel_id = %s AND user_id = %s", ('admin', stokvel_id, user_id))
+        else:
+            support.execute_query("insert", "INSERT INTO stokvel_members (stokvel_id, user_id, role) VALUES (%s, %s, %s)", (stokvel_id, user_id, 'admin'))
+        # Make the user a global admin and update session
+        with support.db_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("UPDATE users SET role = 'admin' WHERE firebase_uid = %s", (user_id,))
+                conn.commit()
+        session['role'] = 'admin'
         # Create a notification for the creator
         message = f"You successfully created the stokvel '{name}'!"
         link = url_for('view_stokvel_members', stokvel_id=stokvel_id)
@@ -2962,6 +2988,69 @@ app.register_blueprint(advisor_bp)
 
 # ... rest of the code ...
 
-if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5001))
-    app.run(host='0.0.0.0', port=port, debug=True)
+# Initialize Flask-SocketIO
+socketio = SocketIO(app, cors_allowed_origins="*")
+
+# --- Real-time Stokvel Chat Events ---
+@socketio.on('join_stokvel_room')
+def handle_join_stokvel_room(data):
+    stokvel_id = data.get('stokvel_id')
+    user_id = session.get('user_id')
+    if stokvel_id and user_id:
+        join_room(f'stokvel_{stokvel_id}')
+        emit('status', {'msg': f'User joined stokvel chat.'}, room=f'stokvel_{stokvel_id}')
+
+@socketio.on('send_message')
+def handle_send_message(data):
+    stokvel_id = data.get('stokvel_id')
+    message = data.get('message')
+    user_id = session.get('user_id')
+    username = None
+    if not (stokvel_id and message and user_id):
+        return
+    # Save message to DB
+    with support.db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute("INSERT INTO stokvel_chat_messages (stokvel_id, user_id, message) VALUES (%s, %s, %s) RETURNING timestamp", (stokvel_id, user_id, message))
+            timestamp = cur.fetchone()[0]
+            conn.commit()
+            # Get username for display
+            cur.execute("SELECT username FROM users WHERE firebase_uid = %s", (user_id,))
+            user_row = cur.fetchone()
+            if user_row:
+                username = user_row[0]
+    emit('receive_message', {
+        'stokvel_id': stokvel_id,
+        'user_id': user_id,
+        'username': username,
+        'message': message,
+        'timestamp': str(timestamp)
+    }, room=f'stokvel_{stokvel_id}')
+
+@socketio.on('fetch_messages')
+def handle_fetch_messages(data):
+    stokvel_id = data.get('stokvel_id')
+    if not stokvel_id:
+        return
+    messages = []
+    with support.db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT m.user_id, u.username, m.message, m.timestamp
+                FROM stokvel_chat_messages m
+                JOIN users u ON m.user_id = u.firebase_uid
+                WHERE m.stokvel_id = %s
+                ORDER BY m.timestamp ASC
+            """, (stokvel_id,))
+            for row in cur.fetchall():
+                messages.append({
+                    'user_id': row[0],
+                    'username': row[1],
+                    'message': row[2],
+                    'timestamp': str(row[3])
+                })
+    emit('chat_history', {'messages': messages})
+
+# --- Replace app.run with socketio.run ---
+if __name__ == "__main__":
+    socketio.run(app, host="127.0.0.1", port=5001, debug=True)
