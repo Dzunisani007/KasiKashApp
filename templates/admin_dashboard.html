@@ -356,7 +356,7 @@
       <a href="{{ url_for('admin.manage_users') }}" class="quick-action-btn users"><i class="fas fa-user-friends"></i> {{ t('Manage Users') }}</a>
       <a href="{{ url_for('admin.loan_approvals') }}" class="quick-action-btn loans"><i class="fas fa-hand-holding-usd"></i> {{ t('Loan Approvals') }}</a>
       <a href="/virtual-rewards" class="quick-action-btn rewards"><i class="fas fa-gift"></i> {{ t('Virtual Rewards') }}</a>
-      <a href="{{ url_for('admin.financial_reports') }}" class="quick-action-btn reports"><i class="fas fa-chart-bar"></i> {{ t('Generate Reports') }}</a>
+      {# <a href="{{ url_for('admin.financial_reports') }}" class="quick-action-btn reports"><i class="fas fa-chart-bar"></i> {{ t('Generate Reports') }}</a> #}
     </div>
   </div>
 
@@ -406,7 +406,7 @@
       </div>
       <div style="font-size:1.01rem; color:#eaf6fb;">{{ t('Generate comprehensive financial reports with advanced analytics and export capabilities.') }}</div>
       <div style="display:flex;flex-direction:column;gap:0.7rem;">
-        <a href="{{ url_for('admin.financial_reports') }}" style="background:rgba(255,255,255,0.18);border-radius:8px;padding:0.7rem 0;text-align:center;color:#fff;font-weight:500;text-decoration:none;transition:background 0.2s;">{{ t('Generate Reports') }}</a>
+        {# <a href="{{ url_for('admin.financial_reports') }}" style="background:rgba(255,255,255,0.18);border-radius:8px;padding:0.7rem 0;text-align:center;color:#fff;font-weight:500;text-decoration:none;transition:background 0.2s;">{{ t('Generate Reports') }}</a> #}
         <a href="#" style="background:rgba(255,255,255,0.18);border-radius:8px;padding:0.7rem 0;text-align:center;color:#fff;font-weight:500;text-decoration:none;transition:background 0.2s;">{{ t('Export Data') }}</a>
       </div>
     </div>

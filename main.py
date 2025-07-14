@@ -1154,17 +1154,17 @@ def contributions():
                             details = json.loads(details)
                         except json.JSONDecodeError:
                             details = {}
-                    
+                    # Ensure details is a dict
+                    if not isinstance(details, dict):
+                        details = {}
                     if method_type in ['credit_card', 'debit_card', 'card']:
                         card_number = details.get('card_number', '')
-                        last4 = card_number[-4:] if len(
-                            card_number) >= 4 else card_number
+                        last4 = card_number[-4:] if len(card_number) >= 4 else card_number
                         payment_info_text = f"Using card ending in {last4}"
                     elif method_type == 'bank_account':
                         bank_name = details.get('bank_name', 'bank')
                         account_number = details.get('account_number', '')
-                        last4 = account_number[-4:] if len(
-                            account_number) >= 4 else account_number
+                        last4 = account_number[-4:] if len(account_number) >= 4 else account_number
                         payment_info_text = f"Using {bank_name} account ending in {last4}"
 
         # Process and render as before
@@ -1501,30 +1501,31 @@ def savings_goals():
                 for g_tuple in goals_tuples:
                     goals_list.append(dict(zip(goal_keys, g_tuple)))
 
-        # Fetch default payment method for display
-        cur.execute(
-            "SELECT type, details FROM payment_methods WHERE user_id = %s AND is_default = TRUE",
-            (firebase_uid,)
-        )
-        payment_method = cur.fetchone()
-        payment_info_text = "No default payment method set. Please add one in settings."
-        if payment_method:
-            method_type, details = payment_method
-            if isinstance(details, str):
-                try:
-                    details = json.loads(details)
-                except json.JSONDecodeError:
-                    details = {}
-            
-            if method_type in ['credit_card', 'debit_card', 'card']:
-                card_number = details.get('card_number', '')
-                last4 = card_number[-4:] if len(card_number) >= 4 else card_number
-                payment_info_text = f"Using card ending in {last4}"
-            elif method_type == 'bank_account':
-                bank_name = details.get('bank_name', 'bank')
-                account_number = details.get('account_number', '')
-                last4 = account_number[-4:] if len(account_number) >= 4 else account_number
-                payment_info_text = f"Using {bank_name} account ending in {last4}"
+                # Fetch default payment method for display
+                cur.execute(
+                    "SELECT type, details FROM payment_methods WHERE user_id = %s AND is_default = TRUE",
+                    (firebase_uid,)
+                )
+                payment_method = cur.fetchone()
+                payment_info_text = "No default payment method set. Please add one in settings."
+                if payment_method:
+                    method_type, details = payment_method
+                    if isinstance(details, str):
+                        try:
+                            details = json.loads(details)
+                        except json.JSONDecodeError:
+                            details = {}
+                    if not isinstance(details, dict):
+                        details = {}
+                    if method_type in ['credit_card', 'debit_card', 'card']:
+                        card_number = details.get('card_number', '')
+                        last4 = card_number[-4:] if len(card_number) >= 4 else card_number
+                        payment_info_text = f"Using card ending in {last4}"
+                    elif method_type == 'bank_account':
+                        bank_name = details.get('bank_name', 'bank')
+                        account_number = details.get('account_number', '')
+                        last4 = account_number[-4:] if len(account_number) >= 4 else account_number
+                        payment_info_text = f"Using {bank_name} account ending in {last4}"
 
         return render_template(
             'savings_goals.html',
@@ -3050,6 +3051,45 @@ def handle_fetch_messages(data):
                     'timestamp': str(row[3])
                 })
     emit('chat_history', {'messages': messages})
+
+@app.route('/stokvel/<int:stokvel_id>/add_member', methods=['POST'])
+@login_required
+def add_stokvel_member(stokvel_id):
+    email = request.form.get('email')
+    if not email:
+        flash("Email is required to add a member.", "danger")
+        return redirect(url_for('view_stokvel_members', stokvel_id=stokvel_id))
+
+    try:
+        with support.db_connection() as conn:
+            with conn.cursor() as cur:
+                # Add a pending member with just an email (user_id is NULL)
+                cur.execute(
+                    "INSERT INTO stokvel_members (stokvel_id, email, role) VALUES (%s, %s, %s)",
+                    (stokvel_id, email, 'member')
+                )
+                conn.commit()
+        flash("Member invitation sent!", "success")
+    except Exception as e:
+        print(f"Error adding member: {e}")
+        flash("Failed to add member. Please try again.", "danger")
+    return redirect(url_for('view_stokvel_members', stokvel_id=stokvel_id))
+
+@app.route('/stokvel/<int:stokvel_id>/remove_member/<int:member_id>', methods=['POST'])
+@login_required
+def remove_stokvel_member(stokvel_id, member_id):
+    try:
+        with support.db_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "DELETE FROM stokvel_members WHERE id = %s AND stokvel_id = %s",
+                    (member_id, stokvel_id)
+                )
+                conn.commit()
+        flash("Member removed successfully.", "success")
+    except Exception as e:
+        flash(f"Failed to remove member: {e}", "danger")
+    return redirect(url_for('view_stokvel_members', stokvel_id=stokvel_id))
 
 # --- Replace app.run with socketio.run ---
 if __name__ == "__main__":

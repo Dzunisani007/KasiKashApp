@@ -620,3 +620,8 @@ form.contFrm {
     border-radius: 5px;
     margin-top: 20px;
 }
+
+select, .filter-select, .dropdown {
+    color: #222;
+    font-weight: 500;
+}
