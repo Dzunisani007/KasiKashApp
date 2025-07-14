@@ -1,4 +1,6 @@
 {% extends 'admin_base.html' %}
+{% import 'translations.html' as translations %}
+{% set t = translations.t %}
 {% block admin_content %}
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
@@ -215,6 +217,7 @@
                         <option value="ss" {% if default_settings.language == 'ss' %}selected{% endif %}>{{ t('siswati', user_language) }}</option>
                         <option value="ve" {% if default_settings.language == 've' %}selected{% endif %}>{{ t('tshivenda', user_language) }}</option>
                         <option value="nr" {% if default_settings.language == 'nr' %}selected{% endif %}>{{ t('ndebele', user_language) }}</option>
+                        <option value="nso" {% if default_settings.language == 'nso' %}selected{% endif %}>{{ t('northern_sotho', user_language) }}</option>
                     </select>
                 </div>
             </div>
@@ -245,8 +248,8 @@
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                     <h4><i class="bi bi-journal-text"></i> {{ t('audit_logs', user_language) }}</h4>
                     <div class="theme-toggle-settings" style="display: flex; align-items: center; gap: 0.5rem;">
-                        <span style="font-size: 0.9rem; color: #6b7280;">Theme:</span>
-                        <button class="btn btn-outline-primary btn-sm" id="settingsThemeToggle" title="Toggle Light/Dark Mode">
+                        <span style="font-size: 0.9rem; color: #6b7280;">{{ t('theme', user_language) }}:</span>
+                        <button class="btn btn-outline-primary btn-sm" id="settingsThemeToggle" title="{{ t('toggle_light_dark_mode', user_language) }}">
                             <i class="fas fa-moon" id="settingsThemeIcon"></i>
                         </button>
                     </div>

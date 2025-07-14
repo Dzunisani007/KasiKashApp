@@ -1,4 +1,6 @@
 {% extends 'admin_base.html' %}
+{% import 'translations.html' as translations %}
+{% set t = translations.t %}
 {% block admin_content %}
 <style>
   body {
@@ -305,8 +307,8 @@
 <div class="dashboard-main" style="background: transparent;">
   <div class="dashboard-header">
     <div>
-      <h1>Welcome, Admin <span style="font-size:1.8rem;">👋</span></h1>
-      <p>Stokvel Admin Dashboard</p>
+      <h1>{{ t('Welcome, Admin') }} 👋</h1>
+      <p>{{ t('Stokvel Admin Dashboard') }}</p>
     </div>
     <div>
       <a href="{{ url_for('admin.settings') }}" title="Admin Settings">
@@ -320,52 +322,52 @@
     <!-- Total Members Card -->
     <div class="stat-card stat-users">
       <span class="stat-icon"><i class="fas fa-user-friends"></i></span>
-      <div class="stat-label">Total Members</div>
+      <div class="stat-label">{{ t('Total Members') }}</div>
       <div class="stat-value" id="membersCount">{{ total_members }}</div>
-      <div class="stat-delta" id="membersChange"><i class="fas fa-arrow-up"></i> <span class="stat-extra">from last month</span></div>
+      <div class="stat-delta" id="membersChange"><i class="fas fa-arrow-up"></i> <span class="stat-extra">{{ t('from last month') }}</span></div>
     </div>
     <!-- Active Loans Card -->
     <div class="stat-card stat-loans">
       <span class="stat-icon"><i class="fas fa-hand-holding-usd"></i></span>
-      <div class="stat-label">Active Loans</div>
+      <div class="stat-label">{{ t('Active Loans') }}</div>
       <div class="stat-value" id="loansCount">{{ pending_loans }}</div>
-      <div class="stat-delta" id="loansChange"><i class="fas fa-arrow-up"></i> <span class="stat-extra">pending approval</span></div>
+      <div class="stat-delta" id="loansChange"><i class="fas fa-arrow-up"></i> <span class="stat-extra">{{ t('pending approval') }}</span></div>
     </div>
     <!-- Total Contributions Card -->
     <div class="stat-card stat-deposits">
       <span class="stat-icon"><i class="fas fa-piggy-bank"></i></span>
-      <div class="stat-label">Total Contributions</div>
+      <div class="stat-label">{{ t('Total Contributions') }}</div>
       <div class="stat-value" id="depositsCount">R {{ '{:,.2f}'.format(total_deposits) }}</div>
-      <div class="stat-delta" id="depositsChange"><i class="fas fa-arrow-up"></i> <span class="stat-extra">from last month</span></div>
+      <div class="stat-delta" id="depositsChange"><i class="fas fa-arrow-up"></i> <span class="stat-extra">{{ t('from last month') }}</span></div>
     </div>
     <!-- KYC Pending Card -->
     <div class="stat-card stat-kyc">
       <span class="stat-icon"><i class="fas fa-shield-alt"></i></span>
-      <div class="stat-label">KYC Pending</div>
+      <div class="stat-label">{{ t('KYC Pending') }}</div>
       <div class="stat-value" id="kycCount">{{ kyc_pending }}</div>
-      <div class="stat-delta negative" id="kycChange"><i class="fas fa-arrow-down"></i> <span class="stat-extra">urgent reviews</span></div>
+      <div class="stat-delta negative" id="kycChange"><i class="fas fa-arrow-down"></i> <span class="stat-extra">{{ t('urgent reviews') }}</span></div>
     </div>
   </div>
 
   <!-- Quick Actions -->
   <div class="quick-actions-panel">
-    <div class="quick-actions-title"><i class="fas fa-bolt"></i> Quick Actions</div>
+    <div class="quick-actions-title"><i class="fas fa-bolt"></i> {{ t('Quick Actions') }}</div>
     <div class="quick-actions-row">
-      <a href="{{ url_for('admin.manage_users') }}" class="quick-action-btn users"><i class="fas fa-user-friends"></i> Manage Users</a>
-      <a href="{{ url_for('admin.loan_approvals') }}" class="quick-action-btn loans"><i class="fas fa-hand-holding-usd"></i> Loan Approvals</a>
-      <a href="/virtual-rewards" class="quick-action-btn rewards"><i class="fas fa-gift"></i> Virtual Rewards</a>
-      <a href="{{ url_for('admin.financial_reports') }}" class="quick-action-btn reports"><i class="fas fa-chart-bar"></i> Generate Reports</a>
+      <a href="{{ url_for('admin.manage_users') }}" class="quick-action-btn users"><i class="fas fa-user-friends"></i> {{ t('Manage Users') }}</a>
+      <a href="{{ url_for('admin.loan_approvals') }}" class="quick-action-btn loans"><i class="fas fa-hand-holding-usd"></i> {{ t('Loan Approvals') }}</a>
+      <a href="/virtual-rewards" class="quick-action-btn rewards"><i class="fas fa-gift"></i> {{ t('Virtual Rewards') }}</a>
+      <a href="{{ url_for('admin.financial_reports') }}" class="quick-action-btn reports"><i class="fas fa-chart-bar"></i> {{ t('Generate Reports') }}</a>
     </div>
   </div>
 
   <!-- Charts & Analytics -->
   <div class="dashboard-charts">
     <div class="chart-card">
-      <div class="chart-title">Financial Chart</div>
+      <div class="chart-title">{{ t('Financial Chart') }}</div>
       <canvas id="financialChart" width="400" height="180"></canvas>
     </div>
     <div class="chart-card">
-      <div class="chart-title">User Growth Chart</div>
+      <div class="chart-title">{{ t('User Growth Chart') }}</div>
       <canvas id="userGrowthChart" width="400" height="180"></canvas>
     </div>
   </div>
@@ -375,37 +377,37 @@
     <!-- User Management Card -->
     <div style="flex:1 1 300px; min-width:260px; background:linear-gradient(135deg,#4f46e5 0%,#38bdf8 100%); border-radius:18px; color:#fff; padding:1.7rem 1.3rem 1.3rem 1.3rem; box-shadow:0 2px 12px #38bdf833; display:flex; flex-direction:column; gap:1.1rem;">
       <div style="display:flex;align-items:center;gap:0.7rem;font-size:1.18rem;font-weight:600;">
-        User Management <span style="font-size:1.3rem; margin-left:auto;"><i class="fas fa-users"></i></span>
+        {{ t('User Management') }} <span style="font-size:1.3rem; margin-left:auto;"><i class="fas fa-users"></i></span>
       </div>
-      <div style="font-size:1.01rem; color:#eaf6fb;">View, add, edit, or suspend user accounts with advanced filtering and bulk operations.</div>
+      <div style="font-size:1.01rem; color:#eaf6fb;">{{ t('View, add, edit, or suspend user accounts with advanced filtering and bulk operations.') }}</div>
       <div style="display:flex;flex-direction:column;gap:0.7rem;">
-        <a href="/users" style="background:rgba(255,255,255,0.18);border-radius:8px;padding:0.7rem 0;text-align:center;color:#fff;font-weight:500;text-decoration:none;transition:background 0.2s;">Manage Users</a>
-        <a href="#" style="background:rgba(255,255,255,0.18);border-radius:8px;padding:0.7rem 0;text-align:center;color:#fff;font-weight:500;text-decoration:none;transition:background 0.2s;">Bulk Operations</a>
+        <a href="/users" style="background:rgba(255,255,255,0.18);border-radius:8px;padding:0.7rem 0;text-align:center;color:#fff;font-weight:500;text-decoration:none;transition:background 0.2s;">{{ t('Manage Users') }}</a>
+        <a href="#" style="background:rgba(255,255,255,0.18);border-radius:8px;padding:0.7rem 0;text-align:center;color:#fff;font-weight:500;text-decoration:none;transition:background 0.2s;">{{ t('Bulk Operations') }}</a>
       </div>
     </div>
     <!-- Loan Approvals Card -->
     <div style="flex:1 1 300px; min-width:260px; background:linear-gradient(135deg,#fbbf24 0%,#f97316 100%); border-radius:18px; color:#fff; padding:1.7rem 1.3rem 1.3rem 1.3rem; box-shadow:0 2px 12px #fbbf2433; display:flex; flex-direction:column; gap:1.1rem;">
       <div style="display:flex;align-items:center;gap:0.7rem;font-size:1.18rem;font-weight:600;">
-        Loan Approvals <span style="font-size:1.3rem; margin-left:auto;"><i class="fas fa-coins"></i></span>
+        {{ t('Loan Approvals') }} <span style="font-size:1.3rem; margin-left:auto;"><i class="fas fa-coins"></i></span>
       </div>
-      <div style="font-size:1.01rem; color:#fff;">Review and approve loan applications with detailed financial analysis and risk assessment.</div>
+      <div style="font-size:1.01rem; color:#fff;">{{ t('Review and approve loan applications with detailed financial analysis and risk assessment.') }}</div>
       <div style="display:flex;flex-direction:column;gap:0.7rem;">
         <a href="{{ url_for('admin.loan_approvals') }}" style="background:rgba(255,255,255,0.18);border-radius:8px;padding:0.7rem 0;text-align:center;color:#fff;font-weight:500;text-decoration:none;position:relative;transition:background 0.2s;">
-          Review Applications
+          {{ t('Review Applications') }}
           <span style="position:absolute;right:1.2rem;top:50%;transform:translateY(-50%);background:#fff;color:#f97316;font-size:0.95rem;font-weight:700;border-radius:999px;padding:0.1rem 0.7rem;">12</span>
         </a>
-        <a href="#" style="background:rgba(255,255,255,0.18);border-radius:8px;padding:0.7rem 0;text-align:center;color:#fff;font-weight:500;text-decoration:none;transition:background 0.2s;">Approval History</a>
+        <a href="#" style="background:rgba(255,255,255,0.18);border-radius:8px;padding:0.7rem 0;text-align:center;color:#fff;font-weight:500;text-decoration:none;transition:background 0.2s;">{{ t('Approval History') }}</a>
       </div>
     </div>
     <!-- Financial Reports Card -->
     <div style="flex:1 1 300px; min-width:260px; background:linear-gradient(135deg,#34d399 0%,#38bdf8 100%); border-radius:18px; color:#fff; padding:1.7rem 1.3rem 1.3rem 1.3rem; box-shadow:0 2px 12px #34d39933; display:flex; flex-direction:column; gap:1.1rem;">
       <div style="display:flex;align-items:center;gap:0.7rem;font-size:1.18rem;font-weight:600;">
-        Financial Reports <span style="font-size:1.3rem; margin-left:auto;"><i class="fas fa-chart-bar"></i></span>
+        {{ t('Financial Reports') }} <span style="font-size:1.3rem; margin-left:auto;"><i class="fas fa-chart-bar"></i></span>
       </div>
-      <div style="font-size:1.01rem; color:#eaf6fb;">Generate comprehensive financial reports with advanced analytics and export capabilities.</div>
+      <div style="font-size:1.01rem; color:#eaf6fb;">{{ t('Generate comprehensive financial reports with advanced analytics and export capabilities.') }}</div>
       <div style="display:flex;flex-direction:column;gap:0.7rem;">
-        <a href="{{ url_for('admin.financial_reports') }}" style="background:rgba(255,255,255,0.18);border-radius:8px;padding:0.7rem 0;text-align:center;color:#fff;font-weight:500;text-decoration:none;transition:background 0.2s;">Generate Reports</a>
-        <a href="#" style="background:rgba(255,255,255,0.18);border-radius:8px;padding:0.7rem 0;text-align:center;color:#fff;font-weight:500;text-decoration:none;transition:background 0.2s;">Export Data</a>
+        <a href="{{ url_for('admin.financial_reports') }}" style="background:rgba(255,255,255,0.18);border-radius:8px;padding:0.7rem 0;text-align:center;color:#fff;font-weight:500;text-decoration:none;transition:background 0.2s;">{{ t('Generate Reports') }}</a>
+        <a href="#" style="background:rgba(255,255,255,0.18);border-radius:8px;padding:0.7rem 0;text-align:center;color:#fff;font-weight:500;text-decoration:none;transition:background 0.2s;">{{ t('Export Data') }}</a>
       </div>
     </div>
   </div>
@@ -413,18 +415,18 @@
   <!-- Activity & Notifications -->
   <div class="dashboard-activity-row">
     <div class="activity-section">
-      <div class="activity-title">Recent Activity</div>
+      <div class="activity-title">{{ t('Recent Activity') }}</div>
       <ul class="activity-list" id="activityFeed">
-        <li>Jane Smith deposited R500 <span style="color:#1edb8a;float:right;">2m ago</span></li>
-        <li>John Doe requested a loan <span style="color:#f59e42;float:right;">10m ago</span></li>
-        <li>Mike Lee completed KYC <span style="color:#b13be0;float:right;">30m ago</span></li>
+        <li>{{ t('Jane Smith deposited R500') }} <span style="color:#1edb8a;float:right;">{{ t('2m ago') }}</span></li>
+        <li>{{ t('John Doe requested a loan') }} <span style="color:#f59e42;float:right;">{{ t('10m ago') }}</span></li>
+        <li>{{ t('Mike Lee completed KYC') }} <span style="color:#b13be0;float:right;">{{ t('30m ago') }}</span></li>
       </ul>
     </div>
     <div class="notifications-section">
-      <div class="notifications-title">System Notifications</div>
+      <div class="notifications-title">{{ t('System Notifications') }}</div>
       <ul class="notifications-list" id="notificationsFeed">
-        <li>System backup completed <span style="color:#60efff;float:right;">1h ago</span></li>
-        <li>4 KYC reviews pending <span style="color:#ff4d6d;float:right;">now</span></li>
+        <li>{{ t('System backup completed') }} <span style="color:#60efff;float:right;">{{ t('1h ago') }}</span></li>
+        <li>{{ t('4 KYC reviews pending') }} <span style="color:#ff4d6d;float:right;">{{ t('now') }}</span></li>
       </ul>
     </div>
   </div>
@@ -516,13 +518,13 @@ async function fetchAndUpdateStats() {
     if (membersChange) {
       const icon = data.members_change >= 0 ? 'fas fa-arrow-up' : 'fas fa-arrow-down';
       const color = data.members_change >= 0 ? '' : 'negative';
-      membersChange.innerHTML = `<i class=\"${icon}\"></i> ${Math.abs(data.members_change).toFixed(1)}% <span class=\"stat-extra\">from last month</span>`;
+      membersChange.innerHTML = `<i class=\"${icon}\"></i> ${Math.abs(data.members_change).toFixed(1)}% <span class=\"stat-extra\">${t('from last month')}</span>`;
       membersChange.className = `stat-delta ${color}`;
     }
     if (depositsChange) {
       const icon = data.deposits_change >= 0 ? 'fas fa-arrow-up' : 'fas fa-arrow-down';
       const color = data.deposits_change >= 0 ? '' : 'negative';
-      depositsChange.innerHTML = `<i class=\"${icon}\"></i> ${Math.abs(data.deposits_change).toFixed(1)}% <span class=\"stat-extra\">from last month</span>`;
+      depositsChange.innerHTML = `<i class=\"${icon}\"></i> ${Math.abs(data.deposits_change).toFixed(1)}% <span class=\"stat-extra\">${t('from last month')}</span>`;
       depositsChange.className = `stat-delta ${color}`;
     }
   } catch (e) { 

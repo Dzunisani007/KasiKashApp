@@ -41,6 +41,7 @@ from email.mime.multipart import MIMEMultipart
 from werkzeug.utils import secure_filename
 import re
 from decimal import Decimal, InvalidOperation
+from flask_babel import Babel
 
 # Load environment variables
 load_dotenv()
@@ -49,6 +50,14 @@ load_dotenv()
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your-secret-key-here')
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
+app.config['BABEL_DEFAULT_LOCALE'] = 'en'
+app.config['BABEL_SUPPORTED_LOCALES'] = ['en', 'af', 'zu', 'xh', 'st', 'tn', 'ts', 've', 'nr', 'ss', 'nso']
+babel = Babel(app)
+
+def get_locale():
+    return request.args.get('lang') or 'en'
+
+babel.locale_selector_func = get_locale
 
 # Initialize CSRF protection
 csrf = CSRFProtect(app)
