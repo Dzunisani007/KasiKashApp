@@ -41,7 +41,6 @@ from email.mime.multipart import MIMEMultipart
 from werkzeug.utils import secure_filename
 import re
 from decimal import Decimal, InvalidOperation
-from flask_babel import Babel
 
 # Load environment variables
 load_dotenv()
@@ -50,24 +49,6 @@ load_dotenv()
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your-secret-key-here')
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
-app.config['BABEL_DEFAULT_LOCALE'] = 'en'
-app.config['BABEL_SUPPORTED_LOCALES'] = ['en', 'af', 'zu', 'xh', 'st', 'tn', 'ts', 've', 'nr', 'ss', 'nso']
-app.config['BABEL_TRANSLATION_DIRECTORIES'] = 'translations'
-babel = Babel(app)
-
-def get_locale():
-    lang = request.cookies.get('language_preference')
-    if lang and lang in app.config['BABEL_SUPPORTED_LOCALES']:
-        print(f"[Babel] Language from cookie: {lang}")
-        return lang
-    print(f"[Babel] Using default language: {app.config['BABEL_DEFAULT_LOCALE']}")
-    return app.config['BABEL_DEFAULT_LOCALE']
-
-babel.locale_selector_func = get_locale
-
-# Initialize CSRF protection
-from extensions import csrf
-csrf.init_app(app)
 
 UPLOAD_FOLDER = 'static/profile_pics'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
@@ -1482,30 +1463,30 @@ def savings_goals():
                 for g_tuple in goals_tuples:
                     goals_list.append(dict(zip(goal_keys, g_tuple)))
 
-        # Fetch default payment method for display
-        cur.execute(
-            "SELECT type, details FROM payment_methods WHERE user_id = %s AND is_default = TRUE",
-            (firebase_uid,)
-        )
-        payment_method = cur.fetchone()
-        payment_info_text = "No default payment method set. Please add one in settings."
-        if payment_method:
-            method_type, details = payment_method
-            if isinstance(details, str):
-                try:
-                    details = json.loads(details)
-                except json.JSONDecodeError:
-                    details = {}
+                # Fetch default payment method for display
+                cur.execute(
+                    "SELECT type, details FROM payment_methods WHERE user_id = %s AND is_default = TRUE",
+                    (firebase_uid,)
+                )
+                payment_method = cur.fetchone()
+                payment_info_text = "No default payment method set. Please add one in settings."
+                if payment_method:
+                    method_type, details = payment_method
+                    if isinstance(details, str):
+                        try:
+                            details = json.loads(details)
+                        except json.JSONDecodeError:
+                            details = {}
             
-            if method_type in ['credit_card', 'debit_card', 'card']:
-                card_number = details.get('card_number', '')
-                last4 = card_number[-4:] if len(card_number) >= 4 else card_number
-                payment_info_text = f"Using card ending in {last4}"
-            elif method_type == 'bank_account':
-                bank_name = details.get('bank_name', 'bank')
-                account_number = details.get('account_number', '')
-                last4 = account_number[-4:] if len(account_number) >= 4 else account_number
-                payment_info_text = f"Using {bank_name} account ending in {last4}"
+                    if method_type in ['credit_card', 'debit_card', 'card']:
+                        card_number = details.get('card_number', '')
+                        last4 = card_number[-4:] if len(card_number) >= 4 else card_number
+                        payment_info_text = f"Using card ending in {last4}"
+                    elif method_type == 'bank_account':
+                        bank_name = details.get('bank_name', 'bank')
+                        account_number = details.get('account_number', '')
+                        last4 = account_number[-4:] if len(account_number) >= 4 else account_number
+                        payment_info_text = f"Using {bank_name} account ending in {last4}"
 
         return render_template(
             'savings_goals.html',
