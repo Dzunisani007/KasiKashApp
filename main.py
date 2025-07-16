@@ -12,7 +12,7 @@ import psycopg2
 import psycopg2.extras
 from dotenv import load_dotenv
 import openai
-from flask_wtf.csrf import CSRFProtect, generate_csrf
+from extensions import csrf
 import firebase_admin
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField
@@ -61,6 +61,7 @@ KYC_UPLOAD_FOLDER = 'static/kyc_docs'
 ALLOWED_KYC_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'pdf'}
 app.config['KYC_UPLOAD_FOLDER'] = KYC_UPLOAD_FOLDER
 
+csrf.init_app(app)  # Initialize CSRF protection
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit(
@@ -156,7 +157,6 @@ print(
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 app.secret_key = os.getenv('SECRET_KEY')
-csrf = CSRFProtect(app)  # Initialize CSRF protection
 app.config['SESSION_TYPE'] = 'filesystem'
 app.config['SESSION_PERMANENT'] = False
 app.config['SESSION_FILE_DIR'] = os.path.join(

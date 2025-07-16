@@ -590,20 +590,41 @@ body {
 {% endblock %}
 {% block extra_js %}
 <script>
-// Progress circle calculation (example)
 document.querySelectorAll('.progress-circle').forEach(function(circle) {
   var percent = parseFloat(circle.getAttribute('data-percent')) || 0;
   var offset = 283 - (percent / 100) * 283;
   circle.style.strokeDashoffset = offset;
 });
-// Card hover animation is handled by CSS
-// Calendar navigation example
+
+// Use Jinja to output numbers directly for month/year
 function prevMonth() {
-  // Implement AJAX or page reload for previous month
+  const url = new URL(window.location.href);
+  var month = parseInt(url.searchParams.get('month')) || parseInt('{{ calendar_month_num|int }}', 10);
+  var year = parseInt(url.searchParams.get('year')) || parseInt('{{ calendar_year|int }}', 10);
+  month--;
+  if (month < 1) {
+    month = 12;
+    year--;
+  }
+  url.searchParams.set('month', month);
+  url.searchParams.set('year', year);
+  window.location.href = url.toString();
 }
+
 function nextMonth() {
-  // Implement AJAX or page reload for next month
+  const url = new URL(window.location.href);
+  var month = parseInt(url.searchParams.get('month')) || parseInt('{{ calendar_month_num|int }}', 10);
+  var year = parseInt(url.searchParams.get('year')) || parseInt('{{ calendar_year|int }}', 10);
+  month++;
+  if (month > 12) {
+    month = 1;
+    year++;
+  }
+  url.searchParams.set('month', month);
+  url.searchParams.set('year', year);
+  window.location.href = url.toString();
 }
+
 document.querySelectorAll('.day-bar').forEach(function(bar) {
   var h = bar.getAttribute('data-bar-height');
   if (h) bar.style.height = h + 'px';

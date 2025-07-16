@@ -313,28 +313,49 @@ def events():
 
     if request.method == 'POST':
         stokvel_id = request.form.get('stokvel')
-        event_type = request.form.get('event_type')
+        name = request.form.get('name')
         description = request.form.get('description')
         target_date = request.form.get('target_date')
         send_notification = 'send_notification' in request.form
         try:
             with support.db_connection() as conn:
                 with conn.cursor() as cur:
+                    # Insert event
                     cur.execute(
-                        "INSERT INTO events (stokvel_id, event_type, description, target_date) VALUES (%s, %s, %s, %s)",
-                        (stokvel_id, event_type, description, target_date)
+                        "INSERT INTO events (stokvel_id, name, description, target_date) VALUES (%s, %s, %s, %s) RETURNING id",
+                        (stokvel_id, name, description, target_date)
                     )
+                    event_id = cur.fetchone()[0]
                     conn.commit()
+                    # Fetch all members of the stokvel
+                    cur.execute("SELECT user_id FROM stokvel_members WHERE stokvel_id = %s", (stokvel_id,))
+                    members = cur.fetchall()
+                    # Add event to each member's diary (placeholder logic)
+                    for member in members:
+                        user_id = member[0]
+                        if user_id:
+                            # Example: insert into diary table if exists
+                            try:
+                                cur.execute("INSERT INTO diary (user_id, event_id, event_name, event_date, description) VALUES (%s, %s, %s, %s, %s)",
+                                    (user_id, event_id, name, target_date, description))
+                            except Exception as diary_e:
+                                print(f"Could not add to diary for user {user_id}: {diary_e}")
+                    conn.commit()
+                    # Notify all members and the creator
                     if send_notification:
-                        cur.execute("SELECT user_id FROM stokvel_members WHERE stokvel_id = %s", (stokvel_id,))
-                        members = cur.fetchall()
                         for member in members:
                             user_id = member[0]
                             if user_id:
-                                message = f"New event of type '{event_type}' has been scheduled for your stokvel."
+                                message = f"New event of type '{name}' has been scheduled for your stokvel."
                                 link = url_for('home')
                                 create_notification(user_id, message, link_url=link, notification_type='event')
-            flash('Event created successfully!', 'success')
+                        # Also notify the creator (admin)
+                        creator_id = session.get('user_id')
+                        if creator_id:
+                            message = f"You have created a new event '{name}' for your stokvel."
+                            link = url_for('admin.events')
+                            create_notification(creator_id, message, link_url=link, notification_type='event')
+            flash('Event created and notifications sent!', 'success')
         except Exception as e:
             print(f"Error creating event: {e}")
             flash('Failed to create event.', 'danger')
