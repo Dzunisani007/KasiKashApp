@@ -307,7 +307,7 @@ def events():
 
     if request.method == 'POST':
         stokvel_id = request.form.get('stokvel')
-        name = request.form.get('name')
+        event_type = request.form.get('event_type')
         description = request.form.get('description')
         target_date = request.form.get('target_date')
         send_notification = 'send_notification' in request.form
@@ -315,8 +315,8 @@ def events():
             with support.db_connection() as conn:
                 with conn.cursor() as cur:
                     cur.execute(
-                        "INSERT INTO events (stokvel_id, name, description, target_date) VALUES (%s, %s, %s, %s)",
-                        (stokvel_id, name, description, target_date)
+                        "INSERT INTO events (stokvel_id, event_type, description, target_date) VALUES (%s, %s, %s, %s)",
+                        (stokvel_id, event_type, description, target_date)
                     )
                     conn.commit()
                     if send_notification:
@@ -325,7 +325,7 @@ def events():
                         for member in members:
                             user_id = member[0]
                             if user_id:
-                                message = f"New event '{name}' has been scheduled for your stokvel."
+                                message = f"New event of type '{event_type}' has been scheduled for your stokvel."
                                 link = url_for('home')
                                 create_notification(user_id, message, link_url=link, notification_type='event')
             flash('Event created successfully!', 'success')
@@ -1195,58 +1195,5 @@ def reward_analytics():
     if session.get('role') != 'admin':
         flash('Permission denied.', 'danger')
         return redirect(url_for('admin.virtual_rewards'))
-    
-    try:
-        with support.db_connection() as conn:
-            with conn.cursor() as cur:
-                cur.execute('''
-                    INSERT INTO meeting_attendance (meeting_name, meeting_date, present_count, absent_count)
-                    VALUES (%s, %s, %s, %s)
-                ''', (meeting_name, meeting_date, present_count, absent_count))
-            conn.commit()
-        flash('Attendance record added.', 'success')
-    except Exception as e:
-        flash(f'Error adding attendance record: {e}', 'danger')
-    return redirect(url_for('admin.settings'))
-
-@admin_bp.route('/admin/edit_attendance/<int:attendance_id>', methods=['POST'])
-@login_required
-def edit_attendance(attendance_id):
-    print(f'edit_attendance route called for id={attendance_id}')
-    if 'user_id' not in session or session.get('role') != 'admin':
-        flash('You do not have permission to perform this action.', 'danger')
-        return redirect(url_for('admin.settings'))
-    meeting_name = request.form.get('meeting_name')
-    meeting_date = request.form.get('meeting_date')
-    present_count = request.form.get('present_count', type=int)
-    absent_count = request.form.get('absent_count', type=int)
-    try:
-        with support.db_connection() as conn:
-            with conn.cursor() as cur:
-                cur.execute('''
-                    UPDATE meeting_attendance
-                    SET meeting_name=%s, meeting_date=%s, present_count=%s, absent_count=%s
-                    WHERE id=%s
-                ''', (meeting_name, meeting_date, present_count, absent_count, attendance_id))
-            conn.commit()
-        flash('Attendance record updated.', 'success')
-    except Exception as e:
-        print(f"Error updating attendance record: {e}")
-        flash(f'Error updating attendance record: {e}', 'danger')
-    return redirect(url_for('admin.settings'))
-
-@admin_bp.route('/admin/delete_attendance/<int:attendance_id>', methods=['POST'])
-@login_required
-def delete_attendance(attendance_id):
-    if 'user_id' not in session or session.get('role') != 'admin':
-        flash('You do not have permission to perform this action.', 'danger')
-        return redirect(url_for('admin.settings'))
-    try:
-        with support.db_connection() as conn:
-            with conn.cursor() as cur:
-                cur.execute('DELETE FROM meeting_attendance WHERE id=%s', (attendance_id,))
-            conn.commit()
-        flash('Attendance record deleted.', 'success')
-    except Exception as e:
-        flash(f'Error deleting attendance record: {e}', 'danger')
-    return redirect(url_for('admin.settings'))
+    # TODO: Add analytics logic here if needed
+    return render_template('admin_reward_analytics.html')
