@@ -308,7 +308,7 @@ def events():
 
     if request.method == 'POST':
         stokvel_id = request.form.get('stokvel')
-        name = request.form.get('name')
+        event_type = request.form.get('event_type')
         description = request.form.get('description')
         target_date = request.form.get('target_date')
         send_notification = 'send_notification' in request.form
@@ -316,8 +316,8 @@ def events():
             with support.db_connection() as conn:
                 with conn.cursor() as cur:
                     cur.execute(
-                        "INSERT INTO events (stokvel_id, name, description, target_date) VALUES (%s, %s, %s, %s)",
-                        (stokvel_id, name, description, target_date)
+                        "INSERT INTO events (stokvel_id, event_type, description, target_date) VALUES (%s, %s, %s, %s)",
+                        (stokvel_id, event_type, description, target_date)
                     )
                     conn.commit()
                     if send_notification:
@@ -326,7 +326,7 @@ def events():
                         for member in members:
                             user_id = member[0]
                             if user_id:
-                                message = f"New event '{name}' has been scheduled for your stokvel."
+                                message = f"New event of type '{event_type}' has been scheduled for your stokvel."
                                 link = url_for('home')
                                 create_notification(user_id, message, link_url=link, notification_type='event')
             flash('Event created successfully!', 'success')
