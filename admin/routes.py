@@ -9,7 +9,7 @@ import csv
 import pandas as pd
 from io import BytesIO
 from fpdf import FPDF
-from translations import t
+from extensions import csrf
 
 def get_user_language():
     return session.get('language_preference', 'en')
@@ -19,7 +19,7 @@ def get_user_language():
 def dashboard():
     user_language = get_user_language()
     if session.get('role') != 'admin':
-        flash(t('error'), 'danger')
+        flash('Permission denied.', 'danger')
         return redirect(url_for('home'))
     firebase_uid = session.get('user_id')
     stokvels = []
@@ -72,7 +72,7 @@ def dashboard():
 def manage_users():
     user_language = get_user_language()
     if session.get('role') != 'admin':
-        flash(t('error', user_language), 'danger')
+        flash('Permission denied.', 'danger')
         return redirect(url_for('home'))
 
     search_query = request.args.get('search', '')
@@ -107,7 +107,7 @@ def manage_users():
         print(f"Error fetching users or stokvels for admin: {e}")
         flash('Could not load users or stokvels.', 'danger')
 
-    return render_template('admin_manage_users.html', users=users, search_query=search_query, stokvels=stokvels, t=t, user_language=user_language)
+    return render_template('admin_manage_users.html', users=users, search_query=search_query, stokvels=stokvels, user_language=user_language)
 
 @admin_bp.route('/users/add', methods=['POST'])
 @login_required
@@ -168,7 +168,7 @@ def add_user():
 def loan_approvals():
     user_language = get_user_language()
     if session.get('role') != 'admin':
-        flash(t('error', user_language), 'danger')
+        flash('Permission denied.', 'danger')
         return redirect(url_for('home'))
 
     status = request.args.get('status', 'pending')
@@ -187,7 +187,7 @@ def loan_approvals():
     except Exception as e:
         print(f"Error fetching loan approvals: {e}")
         flash('Could not load loan approvals.', 'danger')
-    return render_template('admin_loan_approvals.html', loans=loans, current_status=status, t=t, user_language=user_language)
+    return render_template('admin_loan_approvals.html', loans=loans, current_status=status, user_language=user_language)
 
 @admin_bp.route('/loans/approve', methods=['POST'])
 @login_required
@@ -302,7 +302,7 @@ def user_loan_history(email):
 def events():
     user_language = get_user_language()
     if 'user_id' not in session or session.get('role') != 'admin':
-        flash(t('error', user_language), 'danger')
+        flash('An error occurred.', 'danger')
         return redirect(url_for('home'))
 
     if request.method == 'POST':
@@ -345,14 +345,14 @@ def events():
     except Exception as e:
         print(f"Error fetching events or stokvels: {e}")
         flash('Could not load page data.', 'danger')
-    return render_template('admin_events.html', events=events, stokvels=stokvels, t=t, user_language=user_language)
+    return render_template('admin_events.html', events=events, stokvels=stokvels, user_language=user_language)
 
 @admin_bp.route('/memberships', methods=['GET'])
 @login_required
 def memberships():
     user_language = get_user_language()
     if 'user_id' not in session or session.get('role') != 'admin':
-        flash(t('error', user_language), 'danger')
+        flash('An error occurred.', 'danger')
         return redirect(url_for('home'))
     search_query = request.args.get('q', '').strip()
     memberships = []
@@ -367,7 +367,7 @@ def memberships():
     except Exception as e:
         print(f"Error fetching membership plans: {e}")
         flash('Could not load membership plans.', 'danger')
-    return render_template('admin_memberships.html', memberships=memberships, search_query=search_query, t=t, user_language=user_language)
+    return render_template('admin_memberships.html', memberships=memberships, search_query=search_query, user_language=user_language)
 
 @admin_bp.route('/memberships/add', methods=['POST'])
 @login_required
@@ -386,7 +386,7 @@ def add_membership_plan():
         flash('Membership plan added successfully!', 'success')
     except Exception as e:
         print(f"Error adding membership plan: {e}")
-        flash('Failed to add membership plan.', 'danger')
+        flash('Could not add membership plan.', 'danger')
     return redirect(url_for('admin.memberships'))
 
 @admin_bp.route('/notifications')
@@ -394,9 +394,28 @@ def add_membership_plan():
 def notifications():
     user_language = get_user_language()
     if 'user_id' not in session or session.get('role') != 'admin':
-        flash(t('error', user_language), 'danger')
+        flash('An error occurred.', 'danger')
         return redirect(url_for('home'))
-    return render_template('admin_notifications.html', t=t, user_language=user_language)
+    
+    # Fetch all notifications
+    notifications = []
+    try:
+        with support.db_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    SELECT n.id, n.user_id, n.message, n.type, n.created_at, u.username, u.email
+                    FROM notifications n
+                    LEFT JOIN users u ON n.user_id = u.firebase_uid
+                    WHERE n.type = 'admin_notification'
+                    ORDER BY n.created_at DESC
+                    LIMIT 100
+                """)
+                notifications = cur.fetchall()
+    except Exception as e:
+        print(f"Error fetching notifications: {e}")
+        flash('Could not load notifications.', 'danger')
+    
+    return render_template('admin_notifications.html', notifications=notifications, user_language=user_language)
 
 @admin_bp.route('/notifications/send', methods=['POST'])
 @login_required
@@ -455,13 +474,36 @@ def send_notification():
                 # Create success message with count
                 recipient_count = len(user_ids)
                 if recipient_count == 1:
-                    flash(f'Notification sent successfully to 1 user!', 'success')
+                    flash('Notification sent successfully to 1 user!', 'success')
                 else:
                     flash(f'Notification sent successfully to {recipient_count} users!', 'success')
                     
     except Exception as e:
         print(f"Error sending notification: {e}")
-        flash('Failed to send notification.', 'danger')
+        flash('Could not send notification.', 'danger')
+    return redirect(url_for('admin.notifications'))
+
+@admin_bp.route('/notifications/delete/<int:notification_id>', methods=['POST'])
+@login_required
+def delete_notification(notification_id):
+    if session.get('role') != 'admin':
+        flash('Permission denied.', 'danger')
+        return redirect(url_for('admin.notifications'))
+    
+    try:
+        with support.db_connection() as conn:
+            with conn.cursor() as cur:
+                # Delete the notification
+                cur.execute("DELETE FROM notifications WHERE id = %s", (notification_id,))
+                if cur.rowcount == 0:
+                    flash('Notification not found.', 'danger')
+                else:
+                    conn.commit()
+                    flash('Notification deleted successfully!', 'success')
+    except Exception as e:
+        print(f"Error deleting notification: {e}")
+        flash('Could not delete notification.', 'danger')
+    
     return redirect(url_for('admin.notifications'))
 
 @admin_bp.route('/kyc-approvals')
@@ -469,7 +511,7 @@ def send_notification():
 def kyc_approvals():
     user_language = get_user_language()
     if 'user_id' not in session or session.get('role') != 'admin':
-        flash(t('error', user_language), 'danger')
+        flash('An error occurred.', 'danger')
         return redirect(url_for('home'))
 
     search_query = request.args.get('q', '').strip()
@@ -500,7 +542,7 @@ def kyc_approvals():
         print(f"Error fetching KYC approvals: {e}")
         traceback.print_exc()
         flash('Could not load KYC approvals.', 'danger')
-    return render_template('admin_kyc_approvals.html', kyc_users=kyc_users, search_query=search_query, debug_kyc_users=kyc_users, t=t, user_language=user_language)
+    return render_template('admin_kyc_approvals.html', kyc_users=kyc_users, search_query=search_query, debug_kyc_users=kyc_users, user_language=user_language)
 
 @admin_bp.route('/kyc-approve/<int:user_id>', methods=['POST'])
 @login_required
@@ -537,7 +579,7 @@ def approve_kyc(user_id):
         flash(f'KYC for {email} approved successfully.', 'success')
     except Exception as e:
         print(f"Error approving KYC: {e}")
-        flash('Failed to approve KYC.', 'danger')
+        flash('Could not approve KYC.', 'danger')
     return redirect(url_for('admin.kyc_approvals'))
 
 @admin_bp.route('/kyc-reject/<int:user_id>', methods=['POST'])
@@ -577,7 +619,7 @@ def reject_kyc(user_id):
         flash(f'KYC for {email} rejected successfully.', 'success')
     except Exception as e:
         print(f"Error rejecting KYC: {e}")
-        flash('Failed to reject KYC.', 'danger')
+        flash('Could not reject KYC.', 'danger')
     return redirect(url_for('admin.kyc_approvals'))
 
 @admin_bp.route('/admin/settings', methods=['GET', 'POST'])
@@ -585,7 +627,7 @@ def reject_kyc(user_id):
 def settings():
     user_language = get_user_language()
     if 'user_id' not in session or session.get('role') != 'admin':
-        flash(t('error', user_language), 'danger')
+        flash('An error occurred.', 'danger')
         return redirect(url_for('home'))
 
     # Ensure the admin_settings table exists
@@ -699,7 +741,8 @@ def settings():
                             data_retention, enable_2fa, meeting_day, enable_dual_approval, withdrawal_threshold, enable_attendance_tracking, absence_penalty, missed_meetings_threshold
                         ))
                 conn.commit()
-            flash('Settings saved successfully!', 'success')
+            session['language_preference'] = language  # Ensure session is updated for immediate effect
+            flash('Settings updated successfully!', 'success')
         except Exception as e:
             flash(f'Error saving settings: {e}', 'danger')
         return redirect(url_for('admin.settings'))
@@ -739,6 +782,9 @@ def settings():
                     # Convert comma-separated roles to list if needed
                     if 'loan_approval_roles' in default_settings and default_settings['loan_approval_roles']:
                         default_settings['loan_approval_roles'] = default_settings['loan_approval_roles'].split(',')
+        # Sync session language with admin settings
+        if default_settings.get('language'):
+            session['language_preference'] = default_settings['language']
     except Exception as e:
         flash(f'Error loading settings: {e}', 'danger')
 
@@ -918,6 +964,274 @@ def edit_attendance(attendance_id):
             conn.commit()
         flash('Attendance record updated.', 'success')
     except Exception as e:
+        print(f"Error updating attendance record: {e}")
+        flash(f'Error updating attendance record: {e}', 'danger')
+    return redirect(url_for('admin.settings'))
+
+@admin_bp.route('/admin/delete_attendance/<int:attendance_id>', methods=['POST'])
+@login_required
+def delete_attendance(attendance_id):
+    if 'user_id' not in session or session.get('role') != 'admin':
+        flash('You do not have permission to perform this action.', 'danger')
+        return redirect(url_for('admin.settings'))
+    try:
+        with support.db_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute('DELETE FROM meeting_attendance WHERE id=%s', (attendance_id,))
+            conn.commit()
+        flash('Attendance record deleted.', 'success')
+    except Exception as e:
+        flash(f'Error deleting attendance record: {e}', 'danger')
+    return redirect(url_for('admin.settings'))
+
+@admin_bp.route('/set-language', methods=['POST'])
+def set_language():
+    """
+    Allows the user to switch to any language. Stores the selected language in the session.
+    Expects a 'language' field in the POST form data.
+    Redirects back to the referring page or dashboard.
+    """
+    language = request.form.get('language')
+    valid_codes = ['en', 'zu', 'xh', 'af', 'st', 'ts', 'tn', 'ss', 've', 'nr', 'nso']
+    if language not in valid_codes:
+        language = 'en'
+    session['language_preference'] = language
+    flash('Language updated successfully!', 'success')
+    return redirect(request.referrer or url_for('admin.dashboard'))
+csrf.exempt(set_language)
+
+@admin_bp.route('/set_language')
+def admin_set_language():
+    lang = request.args.get('lang')
+    from flask import current_app, make_response, request, url_for
+    supported = current_app.config.get('BABEL_SUPPORTED_LOCALES', ['en'])
+    resp = make_response(redirect(request.referrer or url_for('dashboard')))
+    if lang and lang in supported:
+        resp.set_cookie('language_preference', lang, max_age=60*60*24*30)  # 30 days
+        flash(f"Admin language changed to {lang}", "success")
+    else:
+        flash("Invalid language selected.", "error")
+    return resp
+
+@admin_bp.route('/financial-reports')
+@login_required
+def financial_reports():
+    if session.get('role') != 'admin':
+        flash('Permission denied.', 'danger')
+        return redirect(url_for('home'))
+    # Placeholder: In the future, fetch and filter report data here
+    return render_template('admin_financial_reports.html')
+
+@admin_bp.route('/virtual-rewards')
+@login_required
+def virtual_rewards():
+    if session.get('role') != 'admin':
+        flash('Permission denied.', 'danger')
+        return redirect(url_for('home'))
+    
+    try:
+        with support.db_connection() as conn:
+            with conn.cursor() as cur:
+                # Get all users with their reward card balances
+                cur.execute("""
+                    SELECT u.id, u.username, u.email, vrc.balance, vrc.card_number
+                    FROM users u
+                    LEFT JOIN virtual_reward_cards vrc ON u.id = vrc.user_id
+                    ORDER BY u.username
+                """)
+                users = cur.fetchall()
+                
+                # Get recent reward transactions
+                cur.execute("""
+                    SELECT rt.amount, rt.transaction_type, rt.description, rt.created_at, u.username, u.email
+                    FROM reward_transactions rt
+                    JOIN users u ON rt.user_id = u.id
+                    ORDER BY rt.created_at DESC
+                    LIMIT 20
+                """)
+                transactions = cur.fetchall()
+                
+                # Get total reward statistics
+                cur.execute("""
+                    SELECT 
+                        COUNT(DISTINCT vrc.user_id) as total_users_with_cards,
+                        COALESCE(SUM(vrc.balance), 0) as total_balance,
+                        COUNT(rt.id) as total_transactions
+                    FROM virtual_reward_cards vrc
+                    LEFT JOIN reward_transactions rt ON vrc.user_id = rt.user_id
+                """)
+                stats = cur.fetchone()
+                
+    except Exception as e:
+        print(f"Error fetching virtual rewards data: {e}")
+        users = []
+        transactions = []
+        stats = (0, 0, 0)
+    
+    return render_template('admin_virtual_rewards.html', 
+                         users=users, 
+                         transactions=transactions, 
+                         stats=stats)
+
+@admin_bp.route('/virtual-rewards/distribute', methods=['POST'])
+@login_required
+def distribute_rewards():
+    if session.get('role') != 'admin':
+        flash('Permission denied.', 'danger')
+        return redirect(url_for('admin.virtual_rewards'))
+    
+    email = request.form.get('email')
+    reward_type = request.form.get('reward_type')
+    amount = request.form.get('amount')
+    description = request.form.get('description', 'Admin reward distribution')
+    
+    if not all([email, reward_type, amount]):
+        flash('Email, reward type, and amount are required.', 'danger')
+        return redirect(url_for('admin.virtual_rewards'))
+    
+    try:
+        amount = int(amount)
+        if amount <= 0:
+            flash('Amount must be positive.', 'danger')
+            return redirect(url_for('admin.virtual_rewards'))
+            
+        with support.db_connection() as conn:
+            with conn.cursor() as cur:
+                # Get user by email
+                cur.execute("SELECT firebase_uid FROM users WHERE email = %s", (email,))
+                user = cur.fetchone()
+                
+                if not user:
+                    flash('User not found.', 'danger')
+                    return redirect(url_for('admin.virtual_rewards'))
+                
+                firebase_uid = user[0]
+                
+                # Import and use the add_reward function from rewards module
+                from rewards import add_reward
+                success = add_reward(firebase_uid, amount, reward_type, description)
+                
+                if success:
+                    flash('Rewards distributed successfully!', 'success')
+                else:
+                    flash('Failed to distribute reward. User may not have a reward card.', 'danger')
+                    
+    except ValueError:
+        flash('Amount must be a valid number.', 'danger')
+    except Exception as e:
+        print(f"Error distributing reward: {e}")
+        flash('Could not distribute rewards.', 'danger')
+
+    return redirect(url_for('admin.virtual_rewards'))
+
+@admin_bp.route('/virtual-rewards/bulk-distribute', methods=['POST'])
+@login_required
+def bulk_distribute_rewards():
+    if session.get('role') != 'admin':
+        flash('Permission denied.', 'danger')
+        return redirect(url_for('admin.virtual_rewards'))
+    
+    reward_type = request.form.get('reward_type')
+    amount = request.form.get('amount')
+    description = request.form.get('description', 'Bulk admin reward distribution')
+    user_filter = request.form.get('user_filter', 'all')  # all, active, new_users
+    
+    if not all([reward_type, amount]):
+        flash('Reward type and amount are required.', 'danger')
+        return redirect(url_for('admin.virtual_rewards'))
+    
+    try:
+        amount = int(amount)
+        if amount <= 0:
+            flash('Amount must be positive.', 'danger')
+            return redirect(url_for('admin.virtual_rewards'))
+            
+        with support.db_connection() as conn:
+            with conn.cursor() as cur:
+                # Build query based on filter
+                if user_filter == 'active':
+                    # Users with recent activity (last 30 days)
+                    cur.execute("""
+                        SELECT DISTINCT u.id 
+                        FROM users u
+                        JOIN reward_transactions rt ON u.id = rt.user_id
+                        WHERE rt.created_at >= CURRENT_DATE - INTERVAL '30 days'
+                    """)
+                elif user_filter == 'new_users':
+                    # Users who joined in last 30 days
+                    cur.execute("""
+                        SELECT id FROM users 
+                        WHERE created_at >= CURRENT_DATE - INTERVAL '30 days'
+                    """)
+                else:
+                    # All users
+                    cur.execute("SELECT id FROM users")
+                
+                users = cur.fetchall()
+                success_count = 0
+                
+                from rewards import add_reward
+                for user in users:
+                    # Get firebase_uid for the user
+                    cur.execute("SELECT firebase_uid FROM users WHERE id = %s", (user[0],))
+                    firebase_uid_result = cur.fetchone()
+                    if firebase_uid_result and firebase_uid_result[0]:
+                        if add_reward(firebase_uid_result[0], amount, reward_type, description):
+                            success_count += 1
+                
+                flash(f'Bulk rewards distributed successfully!', 'success')
+                    
+    except ValueError:
+        flash('Amount must be a valid number.', 'danger')
+    except Exception as e:
+        print(f"Error bulk distributing rewards: {e}")
+        flash('Could not bulk distribute rewards.', 'danger')
+    
+    return redirect(url_for('admin.virtual_rewards'))
+
+@admin_bp.route('/virtual-rewards/analytics')
+@login_required
+def reward_analytics():
+    if session.get('role') != 'admin':
+        flash('Permission denied.', 'danger')
+        return redirect(url_for('admin.virtual_rewards'))
+    
+    try:
+        with support.db_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute('''
+                    INSERT INTO meeting_attendance (meeting_name, meeting_date, present_count, absent_count)
+                    VALUES (%s, %s, %s, %s)
+                ''', (meeting_name, meeting_date, present_count, absent_count))
+            conn.commit()
+        flash('Attendance record added.', 'success')
+    except Exception as e:
+        flash(f'Error adding attendance record: {e}', 'danger')
+    return redirect(url_for('admin.settings'))
+
+@admin_bp.route('/admin/edit_attendance/<int:attendance_id>', methods=['POST'])
+@login_required
+def edit_attendance(attendance_id):
+    print(f'edit_attendance route called for id={attendance_id}')
+    if 'user_id' not in session or session.get('role') != 'admin':
+        flash('You do not have permission to perform this action.', 'danger')
+        return redirect(url_for('admin.settings'))
+    meeting_name = request.form.get('meeting_name')
+    meeting_date = request.form.get('meeting_date')
+    present_count = request.form.get('present_count', type=int)
+    absent_count = request.form.get('absent_count', type=int)
+    try:
+        with support.db_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute('''
+                    UPDATE meeting_attendance
+                    SET meeting_name=%s, meeting_date=%s, present_count=%s, absent_count=%s
+                    WHERE id=%s
+                ''', (meeting_name, meeting_date, present_count, absent_count, attendance_id))
+            conn.commit()
+        flash('Attendance record updated.', 'success')
+    except Exception as e:
+        print(f"Error updating attendance record: {e}")
         flash(f'Error updating attendance record: {e}', 'danger')
     return redirect(url_for('admin.settings'))
 

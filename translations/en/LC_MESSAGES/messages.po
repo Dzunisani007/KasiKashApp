@@ -5,849 +5,836 @@ msgid ""
 msgstr ""
 "Project-Id-Version: KasiKash Admin Dashboard 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-01 12:00+0000\n"
+"POT-Creation-Date: 2025-07-14 11:50+0200\n"
 "PO-Revision-Date: 2024-01-01 12:00+0000\n"
 "Last-Translator: \n"
 "Language: en\n"
-"MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit\n"
+"Language-Team: en <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
 
 # Admin Settings
-msgid "admin_settings"
-msgstr "Admin Settings"
+#~ msgid "admin_settings"
+#~ msgstr "Admin Settings"
 
-msgid "switch_to_user_view"
-msgstr "Switch to User View"
+#~ msgid "switch_to_user_view"
+#~ msgstr "Switch to User View"
 
-msgid "admin_settings_subtitle"
-msgstr "Configure system settings and permissions"
+#~ msgid "admin_settings_subtitle"
+#~ msgstr "Configure system settings and permissions"
 
-msgid "user_permissions"
-msgstr "User Permissions"
+#~ msgid "user_permissions"
+#~ msgstr "User Permissions"
 
-msgid "financial_controls"
-msgstr "Financial Controls"
+#~ msgid "financial_controls"
+#~ msgstr "Financial Controls"
 
-msgid "notifications"
-msgstr "Notifications"
+#~ msgid "notifications"
+#~ msgstr "Notifications"
 
-msgid "meetings_events"
-msgstr "Meetings & Events"
+#~ msgid "meetings_events"
+#~ msgstr "Meetings & Events"
 
-msgid "data_security"
-msgstr "Data Security"
+#~ msgid "data_security"
+#~ msgstr "Data Security"
 
-msgid "languages"
-msgstr "Languages"
+#~ msgid "languages"
+#~ msgstr "Languages"
 
-msgid "select_admin_language"
-msgstr "Select Admin Language"
+#~ msgid "select_admin_language"
+#~ msgstr "Select Admin Language"
 
-msgid "english"
-msgstr "English"
+#~ msgid "english"
+#~ msgstr "English"
 
-msgid "role_management"
-msgstr "Role Management"
+#~ msgid "role_management"
+#~ msgstr "Role Management"
 
-msgid "assign_roles_help"
-msgstr "Assign roles to manage permissions"
+#~ msgid "assign_roles_help"
+#~ msgstr "Assign roles to manage permissions"
 
-msgid "admin_full_access"
-msgstr "Admin - Full Access"
+#~ msgid "admin_full_access"
+#~ msgstr "Admin - Full Access"
 
-msgid "loan_approval_permissions"
-msgstr "Loan Approval Permissions"
+#~ msgid "loan_approval_permissions"
+#~ msgstr "Loan Approval Permissions"
 
-msgid "choose_loan_approval_roles"
-msgstr "Choose roles that can approve loans"
+#~ msgid "choose_loan_approval_roles"
+#~ msgstr "Choose roles that can approve loans"
 
-msgid "adminstreasurerssecretaries"
-msgstr "Admins, Treasurers, Secretaries"
+#~ msgid "adminstreasurerssecretaries"
+#~ msgstr "Admins, Treasurers, Secretaries"
 
-msgid "audit_logs"
-msgstr "Audit Logs"
+#~ msgid "audit_logs"
+#~ msgstr "Audit Logs"
 
-msgid "theme"
-msgstr "Theme:"
+#~ msgid "theme"
+#~ msgstr "Theme:"
 
-msgid "view_audit_logs_help"
-msgstr "View system activity and changes"
+#~ msgid "view_audit_logs_help"
+#~ msgstr "View system activity and changes"
 
-msgid "action"
-msgstr "Action"
+#~ msgid "action"
+#~ msgstr "Action"
 
-msgid "performed_by"
-msgstr "Performed By"
+#~ msgid "performed_by"
+#~ msgstr "Performed By"
 
-msgid "target"
-msgstr "Target"
+#~ msgid "target"
+#~ msgstr "Target"
 
-msgid "amount"
-msgstr "Amount"
+#~ msgid "amount"
+#~ msgstr "Amount"
 
-msgid "date"
-msgstr "Date"
+#~ msgid "date"
+#~ msgstr "Date"
 
-msgid "cancel"
-msgstr "Cancel"
+#~ msgid "cancel"
+#~ msgstr "Cancel"
 
-msgid "save_settings"
-msgstr "Save Settings"
+#~ msgid "save_settings"
+#~ msgstr "Save Settings"
 
-msgid "contribution_rules"
-msgstr "Contribution Rules"
+#~ msgid "contribution_rules"
+#~ msgstr "Contribution Rules"
 
-msgid "set_contribution_rules_help"
-msgstr "Set rules for member contributions"
+#~ msgid "set_contribution_rules_help"
+#~ msgstr "Set rules for member contributions"
 
-msgid "monthly_amount"
-msgstr "Monthly Amount:"
+#~ msgid "monthly_amount"
+#~ msgstr "Monthly Amount:"
 
-msgid "R"
-msgstr "R"
+#~ msgid "R"
+#~ msgstr "R"
 
-msgid "100"
-msgstr "100"
+#~ msgid "100"
+#~ msgstr "100"
 
-msgid "late_penalty"
-msgstr "Late Penalty:"
+#~ msgid "late_penalty"
+#~ msgstr "Late Penalty:"
 
-msgid "10%"
-msgstr "10%"
+#~ msgid "10%"
+#~ msgstr "10%"
 
-msgid "grace_period"
-msgstr "Grace Period:"
+#~ msgid "grace_period"
+#~ msgstr "Grace Period:"
 
-msgid "7"
-msgstr "7"
+#~ msgid "7"
+#~ msgstr "7"
 
-msgid "days"
-msgstr "Days"
+#~ msgid "days"
+#~ msgstr "Days"
 
-msgid "loan_settings"
-msgstr "Loan Settings"
+#~ msgid "loan_settings"
+#~ msgstr "Loan Settings"
 
-msgid "configure_loan_settings_help"
-msgstr "Configure loan parameters and rules"
+#~ msgid "configure_loan_settings_help"
+#~ msgstr "Configure loan parameters and rules"
 
-msgid "max_loan_percent"
-msgstr "Max Loan Percent:"
+#~ msgid "max_loan_percent"
+#~ msgstr "Max Loan Percent:"
 
-msgid "50%"
-msgstr "50%"
+#~ msgid "50%"
+#~ msgstr "50%"
 
-msgid "interest_rate"
-msgstr "Interest Rate:"
+#~ msgid "interest_rate"
+#~ msgstr "Interest Rate:"
 
-msgid "5%"
-msgstr "5%"
+#~ msgid "5%"
+#~ msgstr "5%"
 
-msgid "repayment_period"
-msgstr "Repayment Period:"
+#~ msgid "repayment_period"
+#~ msgstr "Repayment Period:"
 
-msgid "6 months"
-msgstr "6 Months"
+#~ msgid "6 months"
+#~ msgstr "6 Months"
 
-msgid "withdrawal_approvals"
-msgstr "Withdrawal Approvals"
+#~ msgid "withdrawal_approvals"
+#~ msgstr "Withdrawal Approvals"
 
-msgid "require_dual_approval_help"
-msgstr "Require two approvals for withdrawals"
+#~ msgid "require_dual_approval_help"
+#~ msgstr "Require two approvals for withdrawals"
 
-msgid "enable_dual_approval_for_withdrawals"
-msgstr "Enable Dual Approval for Withdrawals"
+#~ msgid "enable_dual_approval_for_withdrawals"
+#~ msgstr "Enable Dual Approval for Withdrawals"
 
-msgid "recurring_meetings"
-msgstr "Recurring Meetings"
+#~ msgid "recurring_meetings"
+#~ msgstr "Recurring Meetings"
 
-msgid "schedule_meetings_help"
-msgstr "Schedule regular meetings"
+#~ msgid "schedule_meetings_help"
+#~ msgstr "Schedule regular meetings"
 
-msgid "meeting_frequency"
-msgstr "Meeting Frequency:"
+#~ msgid "meeting_frequency"
+#~ msgstr "Meeting Frequency:"
 
-msgid "monthly"
-msgstr "Monthly"
+#~ msgid "monthly"
+#~ msgstr "Monthly"
 
-msgid "day_of_week"
-msgstr "Day of Week:"
+#~ msgid "day_of_week"
+#~ msgstr "Day of Week:"
 
-msgid "monday"
-msgstr "Monday"
+#~ msgid "monday"
+#~ msgstr "Monday"
 
-msgid "time"
-msgstr "Time:"
+#~ msgid "time"
+#~ msgstr "Time:"
 
-msgid "14:00"
-msgstr "14:00"
+#~ msgid "14:00"
+#~ msgstr "14:00"
 
-msgid "send_automatic_reminders"
-msgstr "Send Automatic Reminders"
+#~ msgid "send_automatic_reminders"
+#~ msgstr "Send Automatic Reminders"
 
-msgid "attendance_tracking"
-msgstr "Attendance Tracking"
+#~ msgid "attendance_tracking"
+#~ msgstr "Attendance Tracking"
 
-msgid "record_attendance_help"
-msgstr "Record member attendance at meetings"
+#~ msgid "record_attendance_help"
+#~ msgstr "Record member attendance at meetings"
 
-msgid "enable_attendance_tracking"
-msgstr "Enable Attendance Tracking"
+#~ msgid "enable_attendance_tracking"
+#~ msgstr "Enable Attendance Tracking"
 
-msgid "absence_penalty"
-msgstr "Absence Penalty:"
+#~ msgid "absence_penalty"
+#~ msgstr "Absence Penalty:"
 
-msgid "5after"
-msgstr "5% After"
+#~ msgid "5after"
+#~ msgstr "5% After"
 
-msgid "missed_meetings"
-msgstr "Missed Meetings"
+#~ msgid "missed_meetings"
+#~ msgstr "Missed Meetings"
 
-msgid "meeting"
-msgstr "Meeting"
+#~ msgid "meeting"
+#~ msgstr "Meeting"
 
-msgid "present"
-msgstr "Present"
+#~ msgid "present"
+#~ msgstr "Present"
 
-msgid "absent"
-msgstr "Absent"
+#~ msgid "absent"
+#~ msgstr "Absent"
 
 # Dashboard Header
-msgid "Welcome, Admin 👋"
-msgstr "Welcome, Admin 👋"
+#~ msgid "Welcome, Admin 👋"
+#~ msgstr "Welcome, Admin 👋"
 
-msgid "Stokvel Admin Dashboard"
-msgstr "Stokvel Admin Dashboard"
+#~ msgid "Stokvel Admin Dashboard"
+#~ msgstr "Stokvel Admin Dashboard"
 
 # Dashboard Stats
-msgid "Total Members"
-msgstr "Total Members"
+#~ msgid "Total Members"
+#~ msgstr "Total Members"
 
-msgid "from last month"
-msgstr "from last month"
+#~ msgid "from last month"
+#~ msgstr "from last month"
 
-msgid "Active Loans"
-msgstr "Active Loans"
+#~ msgid "Active Loans"
+#~ msgstr "Active Loans"
 
-msgid "pending approval"
-msgstr "pending approval"
+#~ msgid "pending approval"
+#~ msgstr "pending approval"
 
-msgid "Total Contributions"
-msgstr "Total Contributions"
+#~ msgid "Total Contributions"
+#~ msgstr "Total Contributions"
 
-msgid "KYC Pending"
-msgstr "KYC Pending"
+#~ msgid "KYC Pending"
+#~ msgstr "KYC Pending"
 
-msgid "urgent reviews"
-msgstr "urgent reviews"
+#~ msgid "urgent reviews"
+#~ msgstr "urgent reviews"
 
 # Quick Actions
-msgid "Quick Actions"
-msgstr "Quick Actions"
+#~ msgid "Quick Actions"
+#~ msgstr "Quick Actions"
 
-msgid "Manage Users"
-msgstr "Manage Users"
-
-msgid "Loan Approvals"
-msgstr "Loan Approvals"
-
-msgid "Virtual Rewards"
-msgstr "Virtual Rewards"
-
-msgid "Generate Reports"
-msgstr "Generate Reports"
-
-# Charts
-msgid "Financial Chart"
-msgstr "Financial Chart"
-
-msgid "User Growth Chart"
-msgstr "User Growth Chart"
-
-# User Management
-msgid "User Management"
-msgstr "User Management"
-
-msgid "View, add, edit, or suspend user accounts with advanced filtering and bulk operations."
-msgstr "View, add, edit, or suspend user accounts with advanced filtering and bulk operations."
-
-msgid "Bulk Operations"
-msgstr "Bulk Operations"
-
-msgid "Review and approve loan applications with detailed financial analysis and risk assessment."
-msgstr "Review and approve loan applications with detailed financial analysis and risk assessment."
-
-msgid "Review Applications"
-msgstr "Review Applications"
-
-msgid "Approval History"
-msgstr "Approval History"
-
-# Financial Reports
-msgid "Generate comprehensive financial reports with advanced analytics and export capabilities."
-msgstr "Generate comprehensive financial reports with advanced analytics and export capabilities."
-
-msgid "Export Data"
-msgstr "Export Data"
-
-# Error Messages
-msgid "Could not load users or stokvels."
-msgstr "Could not load users or stokvels."
-
-msgid "manage_users"
-msgstr "manage_users"
-
-msgid "Here you can manage all users."
-msgstr "Here you can manage all users."
-
-msgid "search username or email"
-msgstr "search username or email"
-
-msgid "search"
-msgstr "search"
-
-msgid "add_user"
-msgstr "add_user"
-
-msgid "email"
-msgstr "email"
-
-msgid "role"
-msgstr "role"
-
-msgid "created_at"
-msgstr "created_at"
-
-msgid "stokvel"
-msgstr "stokvel"
-
-msgid "actions"
-msgstr "actions"
-
-msgid "No users found."
-msgstr "No users found."
+#~ msgid "Manage Users"
+#~ msgstr "Manage Users"
 
 # Loan Approvals
-msgid "Loan Approvals"
-msgstr "Loan Approvals"
+#~ msgid "Loan Approvals"
+#~ msgstr "Loan Approvals"
 
-msgid "Here you can approve or reject loan applications."
-msgstr "Here you can approve or reject loan applications."
+#~ msgid "Virtual Rewards"
+#~ msgstr "Virtual Rewards"
 
-msgid "Filter by status:"
-msgstr "Filter by status:"
+#~ msgid "Generate Reports"
+#~ msgstr "Generate Reports"
 
-msgid "Pending"
-msgstr "Pending"
+# Charts
+#~ msgid "Financial Chart"
+#~ msgstr "Financial Chart"
 
-msgid "ID"
-msgstr "ID"
+#~ msgid "User Growth Chart"
+#~ msgstr "User Growth Chart"
 
-msgid "Username"
-msgstr "Username"
+# User Management
+#~ msgid "User Management"
+#~ msgstr "User Management"
 
-msgid "Email"
-msgstr "Email"
+#~ msgid ""
+#~ "View, add, edit, or suspend user "
+#~ "accounts with advanced filtering and "
+#~ "bulk operations."
+#~ msgstr ""
+#~ "View, add, edit, or suspend user "
+#~ "accounts with advanced filtering and "
+#~ "bulk operations."
 
-msgid "Amount"
-msgstr "Amount"
+#~ msgid "Bulk Operations"
+#~ msgstr "Bulk Operations"
 
-msgid "Status"
-msgstr "Status"
+#~ msgid ""
+#~ "Review and approve loan applications "
+#~ "with detailed financial analysis and "
+#~ "risk assessment."
+#~ msgstr ""
+#~ "Review and approve loan applications "
+#~ "with detailed financial analysis and "
+#~ "risk assessment."
 
-msgid "Transaction Date"
-msgstr "Transaction Date"
+#~ msgid "Review Applications"
+#~ msgstr "Review Applications"
 
-msgid "Comment"
-msgstr "Comment"
-
-msgid "Actions"
-msgstr "Actions"
-
-msgid "No loans found for this status."
-msgstr "No loans found for this status."
+#~ msgid "Approval History"
+#~ msgstr "Approval History"
 
 # Financial Reports
-msgid "Generate comprehensive financial reports with advanced analytics and export options."
-msgstr "Generate comprehensive financial reports with advanced analytics and export options."
+#~ msgid ""
+#~ "Generate comprehensive financial reports with"
+#~ " advanced analytics and export "
+#~ "capabilities."
+#~ msgstr ""
+#~ "Generate comprehensive financial reports with"
+#~ " advanced analytics and export "
+#~ "capabilities."
 
-msgid "View and export detailed financial reports for your stokvel, including transactions, balances, and summaries. Use the filters below to customize your report."
-msgstr "View and export detailed financial reports for your stokvel, including transactions, balances, and summaries. Use the filters below to customize your report."
+#~ msgid "Export Data"
+#~ msgstr "Export Data"
 
-msgid "From"
-msgstr "From"
+# Error Messages
+#~ msgid "Could not load users or stokvels."
+#~ msgstr "Could not load users or stokvels."
 
-msgid "To"
-msgstr "To"
+#~ msgid "manage_users"
+#~ msgstr "manage_users"
 
-msgid "Type"
-msgstr "Type"
+#~ msgid "Here you can manage all users."
+#~ msgstr "Here you can manage all users."
 
-msgid "All"
-msgstr "All"
+#~ msgid "search username or email"
+#~ msgstr "search username or email"
 
-msgid "Deposits"
-msgstr "Deposits"
+#~ msgid "search"
+#~ msgstr "search"
 
-msgid "Payouts"
-msgstr "Payouts"
+#~ msgid "add_user"
+#~ msgstr "add_user"
 
-msgid "Fees"
-msgstr "Fees"
+#~ msgid "email"
+#~ msgstr "email"
 
-msgid "Filter"
-msgstr "Filter"
+#~ msgid "role"
+#~ msgstr "role"
+
+#~ msgid "created_at"
+#~ msgstr "created_at"
+
+#~ msgid "stokvel"
+#~ msgstr "stokvel"
+
+#~ msgid "actions"
+#~ msgstr "actions"
+
+#~ msgid "No users found."
+#~ msgstr "No users found."
+
+#~ msgid "Here you can approve or reject loan applications."
+#~ msgstr "Here you can approve or reject loan applications."
+
+#~ msgid "Filter by status:"
+#~ msgstr "Filter by status:"
+
+#~ msgid "Pending"
+#~ msgstr "Pending"
+
+#~ msgid "ID"
+#~ msgstr "ID"
+
+#~ msgid "Username"
+#~ msgstr "Username"
+
+#~ msgid "Email"
+#~ msgstr "Email"
+
+#~ msgid "Amount"
+#~ msgstr "Amount"
+
+#~ msgid "Status"
+#~ msgstr "Status"
+
+#~ msgid "Transaction Date"
+#~ msgstr "Transaction Date"
+
+#~ msgid "Comment"
+#~ msgstr "Comment"
+
+#~ msgid "Actions"
+#~ msgstr "Actions"
+
+#~ msgid "No loans found for this status."
+#~ msgstr "No loans found for this status."
+
+# Financial Reports
+#~ msgid ""
+#~ "Generate comprehensive financial reports with"
+#~ " advanced analytics and export options."
+#~ msgstr ""
+#~ "Generate comprehensive financial reports with"
+#~ " advanced analytics and export options."
+
+#~ msgid ""
+#~ "View and export detailed financial "
+#~ "reports for your stokvel, including "
+#~ "transactions, balances, and summaries. Use "
+#~ "the filters below to customize your "
+#~ "report."
+#~ msgstr ""
+#~ "View and export detailed financial "
+#~ "reports for your stokvel, including "
+#~ "transactions, balances, and summaries. Use "
+#~ "the filters below to customize your "
+#~ "report."
+
+#~ msgid "From"
+#~ msgstr "From"
+
+#~ msgid "To"
+#~ msgstr "To"
+
+#~ msgid "Type"
+#~ msgstr "Type"
+
+#~ msgid "All"
+#~ msgstr "All"
+
+#~ msgid "Deposits"
+#~ msgstr "Deposits"
+
+#~ msgid "Payouts"
+#~ msgstr "Payouts"
+
+#~ msgid "Fees"
+#~ msgstr "Fees"
+
+#~ msgid "Filter"
+#~ msgstr "Filter"
 
 # Events Management
-msgid "Events"
-msgstr "Events"
+#~ msgid "Events"
+#~ msgstr "Events"
 
-msgid "Here you can manage events."
-msgstr "Here you can manage events."
+#~ msgid "Here you can manage events."
+#~ msgstr "Here you can manage events."
 
-msgid "Select a Stokvel"
-msgstr "Select a Stokvel"
+#~ msgid "Select a Stokvel"
+#~ msgstr "Select a Stokvel"
 
-msgid "Name"
-msgstr "Name"
+#~ msgid "Name"
+#~ msgstr "Name"
 
-msgid "Target Date"
-msgstr "Target Date"
+#~ msgid "Target Date"
+#~ msgstr "Target Date"
 
-msgid "Description"
-msgstr "Description"
+#~ msgid "Description"
+#~ msgstr "Description"
 
-msgid "Send notification to all members of this stokvel"
-msgstr "Send notification to all members of this stokvel"
+#~ msgid "Send notification to all members of this stokvel"
+#~ msgstr "Send notification to all members of this stokvel"
 
-msgid "Create Event"
-msgstr "Create Event"
+#~ msgid "Create Event"
+#~ msgstr "Create Event"
 
-msgid "No events found."
-msgstr "No events found."
+#~ msgid "No events found."
+#~ msgstr "No events found."
 
 # Membership Plans
-msgid "Membership Plans"
-msgstr "Membership Plans"
+#~ msgid "Membership Plans"
+#~ msgstr "Membership Plans"
 
-msgid "Here you can manage membership plans."
-msgstr "Here you can manage membership plans."
+#~ msgid "Here you can manage membership plans."
+#~ msgstr "Here you can manage membership plans."
 
-msgid "Search by plan name"
-msgstr "Search by plan name"
+#~ msgid "Search by plan name"
+#~ msgstr "Search by plan name"
 
-msgid "Add Plan"
-msgstr "Add Plan"
+#~ msgid "Add Plan"
+#~ msgstr "Add Plan"
 
-msgid "Monthly Contribution"
-msgstr "Monthly Contribution"
+#~ msgid "Monthly Contribution"
+#~ msgstr "Monthly Contribution"
 
-msgid "Target Amount"
-msgstr "Target Amount"
+#~ msgid "Target Amount"
+#~ msgstr "Target Amount"
 
-msgid "Total Pool"
-msgstr "Total Pool"
+#~ msgid "Total Pool"
+#~ msgstr "Total Pool"
 
-msgid "No membership plans found."
-msgstr "No membership plans found."
+#~ msgid "No membership plans found."
+#~ msgstr "No membership plans found."
 
 # Admin Notifications
-msgid "send_notification"
-msgstr "send_notification"
+#~ msgid "send_notification"
+#~ msgstr "send_notification"
 
-msgid "Notification Type"
-msgstr "Notification Type"
+#~ msgid "Notification Type"
+#~ msgstr "Notification Type"
 
-msgid "Send to Stokvel Members"
-msgstr "Send to Stokvel Members"
+#~ msgid "Send to Stokvel Members"
+#~ msgstr "Send to Stokvel Members"
 
-msgid "urgent"
-msgstr "urgent"
+#~ msgid "urgent"
+#~ msgstr "urgent"
 
-msgid "message"
-msgstr "message"
+#~ msgid "message"
+#~ msgstr "message"
 
-msgid "Enter your notification message..."
-msgstr "Enter your notification message..."
+#~ msgid "Enter your notification message..."
+#~ msgstr "Enter your notification message..."
 
-msgid "type"
-msgstr "type"
+#~ msgid "type"
+#~ msgstr "type"
 
-msgid "Admin Notification"
-msgstr "Admin Notification"
+#~ msgid "Admin Notification"
+#~ msgstr "Admin Notification"
 
-msgid "Send"
-msgstr "Send"
+#~ msgid "Send"
+#~ msgstr "Send"
 
-msgid "Admin Notifications"
-msgstr "Admin Notifications"
+#~ msgid "Admin Notifications"
+#~ msgstr "Admin Notifications"
 
-msgid "Here you can send notifications to users."
-msgstr "Here you can send notifications to users."
+#~ msgid "Here you can send notifications to users."
+#~ msgstr "Here you can send notifications to users."
 
-msgid "Create Notification"
-msgstr "Create Notification"
+#~ msgid "Create Notification"
+#~ msgstr "Create Notification"
 
-msgid "User ID"
-msgstr "User ID"
+#~ msgid "User ID"
+#~ msgstr "User ID"
 
-msgid "No notifications found."
-msgstr "No notifications found."
+#~ msgid "No notifications found."
+#~ msgstr "No notifications found."
 
 # KYC Approvals
-msgid "kyc_approvals"
-msgstr "kyc_approvals"
+#~ msgid "kyc_approvals"
+#~ msgstr "kyc_approvals"
 
-msgid "Here you can approve or reject KYC submissions."
-msgstr "Here you can approve or reject KYC submissions."
+#~ msgid "Here you can approve or reject KYC submissions."
+#~ msgstr "Here you can approve or reject KYC submissions."
 
-msgid "search username or email"
-msgstr "search username or email"
+#~ msgid "id_document"
+#~ msgstr "id_document"
 
-msgid "search"
-msgstr "search"
+#~ msgid "proof_of_address"
+#~ msgstr "proof_of_address"
 
-msgid "email"
-msgstr "email"
+#~ msgid "ID Document Status"
+#~ msgstr "ID Document Status"
 
-msgid "id_document"
-msgstr "id_document"
+#~ msgid "Proof of Address Status"
+#~ msgstr "Proof of Address Status"
 
-msgid "proof_of_address"
-msgstr "proof_of_address"
+#~ msgid "view"
+#~ msgstr "view"
 
-msgid "ID Document Status"
-msgstr "ID Document Status"
+#~ msgid "approve"
+#~ msgstr "approve"
 
-msgid "Proof of Address Status"
-msgstr "Proof of Address Status"
-
-msgid "created_at"
-msgstr "created_at"
-
-msgid "actions"
-msgstr "actions"
-
-msgid "view"
-msgstr "view"
-
-msgid "approve"
-msgstr "approve"
-
-msgid "reject"
-msgstr "reject"
+#~ msgid "reject"
+#~ msgstr "reject"
 
 # Virtual Rewards Management
-msgid "Virtual Rewards Management"
-msgstr "Virtual Rewards Management"
+# Virtual Rewards
+#~ msgid "Virtual Rewards Management"
+#~ msgstr "Virtual Rewards Management"
 
-msgid "Manage reward points, view user balances, and distribute rewards to users."
-msgstr "Manage reward points, view user balances, and distribute rewards to users."
+#~ msgid ""
+#~ "Manage reward points, view user "
+#~ "balances, and distribute rewards to "
+#~ "users."
+#~ msgstr ""
+#~ "Manage reward points, view user "
+#~ "balances, and distribute rewards to "
+#~ "users."
 
-msgid "Overview"
-msgstr "Overview"
+#~ msgid "Overview"
+#~ msgstr "Overview"
 
-msgid "Analytics"
-msgstr "Analytics"
+#~ msgid "Analytics"
+#~ msgstr "Analytics"
 
-msgid "Rules"
-msgstr "Rules"
+#~ msgid "Rules"
+#~ msgstr "Rules"
 
-msgid "Users with Reward Cards"
-msgstr "Users with Reward Cards"
+#~ msgid "Users with Reward Cards"
+#~ msgstr "Users with Reward Cards"
 
-msgid "Total Reward Balance"
-msgstr "Total Reward Balance"
+#~ msgid "Total Reward Balance"
+#~ msgstr "Total Reward Balance"
 
-msgid "Total Transactions"
-msgstr "Total Transactions"
+#~ msgid "Total Transactions"
+#~ msgstr "Total Transactions"
 
-msgid "Individual Reward Distribution"
-msgstr "Individual Reward Distribution"
+#~ msgid "Individual Reward Distribution"
+#~ msgstr "Individual Reward Distribution"
 
-msgid "User Email"
-msgstr "User Email"
+#~ msgid "User Email"
+#~ msgstr "User Email"
 
-msgid "Reward Type"
-msgstr "Reward Type"
+#~ msgid "Reward Type"
+#~ msgstr "Reward Type"
 
-msgid "Points"
-msgstr "Points"
+#~ msgid "Points"
+#~ msgstr "Points"
 
-msgid "Amount"
-msgstr "Amount"
+#~ msgid "Reward description"
+#~ msgstr "Reward description"
 
-msgid "Description"
-msgstr "Description"
+#~ msgid "Distribute Reward"
+#~ msgstr "Distribute Reward"
 
-msgid "Reward description"
-msgstr "Reward description"
+#~ msgid "Bulk Reward Distribution"
+#~ msgstr "Bulk Reward Distribution"
 
-msgid "Distribute Reward"
-msgstr "Distribute Reward"
+#~ msgid "User Filter"
+#~ msgstr "User Filter"
 
-msgid "Bulk Reward Distribution"
-msgstr "Bulk Reward Distribution"
+#~ msgid "All Users"
+#~ msgstr "All Users"
 
-msgid "User Filter"
-msgstr "User Filter"
+#~ msgid "Amount per User"
+#~ msgstr "Amount per User"
 
-msgid "All Users"
-msgstr "All Users"
+#~ msgid "Bulk reward description"
+#~ msgstr "Bulk reward description"
 
-msgid "Amount per User"
-msgstr "Amount per User"
+#~ msgid "Bulk Distribute"
+#~ msgstr "Bulk Distribute"
 
-msgid "Bulk reward description"
-msgstr "Bulk reward description"
+#~ msgid "Export Transactions (CSV)"
+#~ msgstr "Export Transactions (CSV)"
 
-msgid "Bulk Distribute"
-msgstr "Bulk Distribute"
+#~ msgid "Export Transactions (Excel)"
+#~ msgstr "Export Transactions (Excel)"
 
-msgid "Export Data"
-msgstr "Export Data"
+#~ msgid "Export Balances (CSV)"
+#~ msgstr "Export Balances (CSV)"
 
-msgid "Export Transactions (CSV)"
-msgstr "Export Transactions (CSV)"
+#~ msgid "Export Balances (Excel)"
+#~ msgstr "Export Balances (Excel)"
 
-msgid "Export Transactions (Excel)"
-msgstr "Export Transactions (Excel)"
+#~ msgid "User Reward Balances"
+#~ msgstr "User Reward Balances"
 
-msgid "Export Balances (CSV)"
-msgstr "Export Balances (CSV)"
+#~ msgid "User"
+#~ msgstr "User"
 
-msgid "Export Balances (Excel)"
-msgstr "Export Balances (Excel)"
+#~ msgid "Card Number"
+#~ msgstr "Card Number"
 
-msgid "User Reward Balances"
-msgstr "User Reward Balances"
+#~ msgid "Balance"
+#~ msgstr "Balance"
 
-msgid "User"
-msgstr "User"
+#~ msgid "Recent Reward Transactions"
+#~ msgstr "Recent Reward Transactions"
 
-msgid "Card Number"
-msgstr "Card Number"
+#~ msgid "Date"
+#~ msgstr "Date"
 
-msgid "Balance"
-msgstr "Balance"
+#~ msgid "Reward Analytics"
+#~ msgstr "Reward Analytics"
 
-msgid "Recent Reward Transactions"
-msgstr "Recent Reward Transactions"
+#~ msgid "Comprehensive analytics and insights for your reward system."
+#~ msgstr "Comprehensive analytics and insights for your reward system."
 
-msgid "Date"
-msgstr "Date"
+#~ msgid "Months of Data"
+#~ msgstr "Months of Data"
 
-msgid "Type"
-msgstr "Type"
+#~ msgid "Top Earners Tracked"
+#~ msgstr "Top Earners Tracked"
 
-msgid "Reward Analytics"
-msgstr "Reward Analytics"
+#~ msgid "Reward Types"
+#~ msgstr "Reward Types"
 
-msgid "Comprehensive analytics and insights for your reward system."
-msgstr "Comprehensive analytics and insights for your reward system."
+#~ msgid "Monthly Reward Distribution"
+#~ msgstr "Monthly Reward Distribution"
 
-msgid "Months of Data"
-msgstr "Months of Data"
+#~ msgid "Top Reward Earners"
+#~ msgstr "Top Reward Earners"
 
-msgid "Top Earners Tracked"
-msgstr "Top Earners Tracked"
+#~ msgid "Rank"
+#~ msgstr "Rank"
 
-msgid "Reward Types"
-msgstr "Reward Types"
+#~ msgid "Total Earned"
+#~ msgstr "Total Earned"
 
-msgid "Monthly Reward Distribution"
-msgstr "Monthly Reward Distribution"
+#~ msgid "Reward Type Distribution"
+#~ msgstr "Reward Type Distribution"
 
-msgid "Top Reward Earners"
-msgstr "Top Reward Earners"
+#~ msgid "Reward Rules Configuration"
+#~ msgstr "Reward Rules Configuration"
 
-msgid "Rank"
-msgstr "Rank"
+#~ msgid ""
+#~ "Configure automatic reward triggers and "
+#~ "multipliers for your reward system."
+#~ msgstr ""
+#~ "Configure automatic reward triggers and "
+#~ "multipliers for your reward system."
 
-msgid "Total Earned"
-msgstr "Total Earned"
+#~ msgid "Automatic Reward Rules"
+#~ msgstr "Automatic Reward Rules"
 
-msgid "Reward Type Distribution"
-msgstr "Reward Type Distribution"
+#~ msgid "Contribution Multiplier"
+#~ msgstr "Contribution Multiplier"
 
-msgid "Reward Rules Configuration"
-msgstr "Reward Rules Configuration"
+#~ msgid "How many reward points users earn per R1 contributed to stokvels."
+#~ msgstr "How many reward points users earn per R1 contributed to stokvels."
 
-msgid "Configure automatic reward triggers and multipliers for your reward system."
-msgstr "Configure automatic reward triggers and multipliers for your reward system."
+#~ msgid "Welcome Bonus"
+#~ msgstr "Welcome Bonus"
 
-msgid "Automatic Reward Rules"
-msgstr "Automatic Reward Rules"
+#~ msgid "Reward points given to new users when they join the platform."
+#~ msgstr "Reward points given to new users when they join the platform."
 
-msgid "Contribution Multiplier"
-msgstr "Contribution Multiplier"
+#~ msgid "Referral Bonus"
+#~ msgstr "Referral Bonus"
 
-msgid "How many reward points users earn per R1 contributed to stokvels."
-msgstr "How many reward points users earn per R1 contributed to stokvels."
+#~ msgid "Reward points given when a user successfully refers another user."
+#~ msgstr "Reward points given when a user successfully refers another user."
 
-msgid "Welcome Bonus"
-msgstr "Welcome Bonus"
+#~ msgid "Monthly Bonus"
+#~ msgstr "Monthly Bonus"
 
-msgid "Reward points given to new users when they join the platform."
-msgstr "Reward points given to new users when they join the platform."
+#~ msgid "Monthly reward points given to active users who made contributions."
+#~ msgstr "Monthly reward points given to active users who made contributions."
 
-msgid "Referral Bonus"
-msgstr "Referral Bonus"
+#~ msgid "Event Attendance Bonus"
+#~ msgstr "Event Attendance Bonus"
 
-msgid "Reward points given when a user successfully refers another user."
-msgstr "Reward points given when a user successfully refers another user."
+#~ msgid "Reward points given for attending stokvel events and meetings."
+#~ msgstr "Reward points given for attending stokvel events and meetings."
 
-msgid "Monthly Bonus"
-msgstr "Monthly Bonus"
+#~ msgid "Loan Payment Bonus"
+#~ msgstr "Loan Payment Bonus"
 
-msgid "Monthly reward points given to active users who made contributions."
-msgstr "Monthly reward points given to active users who made contributions."
+#~ msgid "Reward points given for on-time loan payments."
+#~ msgstr "Reward points given for on-time loan payments."
 
-msgid "Event Attendance Bonus"
-msgstr "Event Attendance Bonus"
+#~ msgid "Save Reward Rules"
+#~ msgstr "Save Reward Rules"
 
-msgid "Reward points given for attending stokvel events and meetings."
-msgstr "Reward points given for attending stokvel events and meetings."
+#~ msgid "How Reward Rules Work"
+#~ msgstr "How Reward Rules Work"
 
-msgid "Loan Payment Bonus"
-msgstr "Loan Payment Bonus"
+#~ msgid ""
+#~ "Contribution Multiplier: Users earn this "
+#~ "many points per R1 contributed. Set "
+#~ "to 1 for 1:1 ratio."
+#~ msgstr ""
+#~ "Contribution Multiplier: Users earn this "
+#~ "many points per R1 contributed. Set "
+#~ "to 1 for 1:1 ratio."
 
-msgid "Reward points given for on-time loan payments."
-msgstr "Reward points given for on-time loan payments."
+#~ msgid "Welcome Bonus: Automatically given to new users upon registration."
+#~ msgstr "Welcome Bonus: Automatically given to new users upon registration."
 
-msgid "Save Reward Rules"
-msgstr "Save Reward Rules"
+#~ msgid ""
+#~ "Referral Bonus: Given when a user "
+#~ "successfully refers another user to the"
+#~ " platform."
+#~ msgstr ""
+#~ "Referral Bonus: Given when a user "
+#~ "successfully refers another user to the"
+#~ " platform."
 
-msgid "How Reward Rules Work"
-msgstr "How Reward Rules Work"
+#~ msgid ""
+#~ "Monthly Bonus: Given monthly to users"
+#~ " who made contributions in the "
+#~ "previous month."
+#~ msgstr ""
+#~ "Monthly Bonus: Given monthly to users"
+#~ " who made contributions in the "
+#~ "previous month."
 
-msgid "Contribution Multiplier: Users earn this many points per R1 contributed. Set to 1 for 1:1 ratio."
-msgstr "Contribution Multiplier: Users earn this many points per R1 contributed. Set to 1 for 1:1 ratio."
+#~ msgid "Event Attendance: Given for attending stokvel events and meetings."
+#~ msgstr "Event Attendance: Given for attending stokvel events and meetings."
 
-msgid "Welcome Bonus: Automatically given to new users upon registration."
-msgstr "Welcome Bonus: Automatically given to new users upon registration."
-
-msgid "Referral Bonus: Given when a user successfully refers another user to the platform."
-msgstr "Referral Bonus: Given when a user successfully refers another user to the platform."
-
-msgid "Monthly Bonus: Given monthly to users who made contributions in the previous month."
-msgstr "Monthly Bonus: Given monthly to users who made contributions in the previous month."
-
-msgid "Event Attendance: Given for attending stokvel events and meetings."
-msgstr "Event Attendance: Given for attending stokvel events and meetings."
-
-msgid "Loan Payment: Given for on-time loan payments and good financial behavior."
-msgstr "Loan Payment: Given for on-time loan payments and good financial behavior."
+#~ msgid ""
+#~ "Loan Payment: Given for on-time "
+#~ "loan payments and good financial "
+#~ "behavior."
+#~ msgstr ""
+#~ "Loan Payment: Given for on-time "
+#~ "loan payments and good financial "
+#~ "behavior."
 
 # Loan History
-msgid "Loan History for"
-msgstr "Loan History for"
+#~ msgid "Loan History for"
+#~ msgstr "Loan History for"
 
-msgid "Amount:"
-msgstr "Amount:"
+#~ msgid "Amount:"
+#~ msgstr "Amount:"
 
-msgid "on"
-msgstr "on"
+#~ msgid "on"
+#~ msgstr "on"
 
-msgid "Status:"
-msgstr "Status:"
+#~ msgid "Status:"
+#~ msgstr "Status:"
 
-msgid "No previous loan history found for this user."
-msgstr "No previous loan history found for this user."
+#~ msgid "No previous loan history found for this user."
+#~ msgstr "No previous loan history found for this user."
 
-# Virtual Rewards
-msgid "Virtual Rewards Management"
-msgstr "Virtual Rewards Management"
+#~ msgid "Bonus"
+#~ msgstr "Bonus"
 
-msgid "Manage reward points, view user balances, and distribute rewards to users."
-msgstr "Manage reward points, view user balances, and distribute rewards to users."
+#~ msgid "Admin Reward"
+#~ msgstr "Admin Reward"
 
-msgid "Overview"
-msgstr "Overview"
+#~ msgid "Promotion"
+#~ msgstr "Promotion"
 
-msgid "Analytics"
-msgstr "Analytics"
+#~ msgid "Active Users (Last 30 days)"
+#~ msgstr "Active Users (Last 30 days)"
 
-msgid "Rules"
-msgstr "Rules"
-
-msgid "Users with Reward Cards"
-msgstr "Users with Reward Cards"
-
-msgid "Total Reward Balance"
-msgstr "Total Reward Balance"
-
-msgid "Total Transactions"
-msgstr "Total Transactions"
-
-msgid "Individual Reward Distribution"
-msgstr "Individual Reward Distribution"
-
-msgid "User Email"
-msgstr "User Email"
-
-msgid "Reward Type"
-msgstr "Reward Type"
-
-msgid "Points"
-msgstr "Points"
-
-msgid "Bonus"
-msgstr "Bonus"
-
-msgid "Admin Reward"
-msgstr "Admin Reward"
-
-msgid "Promotion"
-msgstr "Promotion"
-
-msgid "Description"
-msgstr "Description"
-
-msgid "Distribute Reward"
-msgstr "Distribute Reward"
-
-msgid "Bulk Reward Distribution"
-msgstr "Bulk Reward Distribution"
-
-msgid "User Filter"
-msgstr "User Filter"
-
-msgid "All Users"
-msgstr "All Users"
-
-msgid "Active Users (Last 30 days)"
-msgstr "Active Users (Last 30 days)"
-
-msgid "New Users (Last 30 days)"
-msgstr "New Users (Last 30 days)"
+#~ msgid "New Users (Last 30 days)"
+#~ msgstr "New Users (Last 30 days)"
 
 # New admin settings terms
-msgid "data_export"
-msgstr "Data Export"
+#~ msgid "data_export"
+#~ msgstr "Data Export"
 
-msgid "download_data_help"
-msgstr "Download your data as a CSV file"
+#~ msgid "download_data_help"
+#~ msgstr "Download your data as a CSV file"
 
-msgid "CSV"
-msgstr "CSV"
+#~ msgid "CSV"
+#~ msgstr "CSV"
 
-msgid "two_factor_auth"
-msgstr "Two-Factor Authentication (2FA)"
+#~ msgid "two_factor_auth"
+#~ msgstr "Two-Factor Authentication (2FA)"
 
-msgid "enable_2fa_help"
-msgstr "Enable two-factor authentication to secure your account"
+#~ msgid "enable_2fa_help"
+#~ msgstr "Enable two-factor authentication to secure your account"
 
-msgid "require_2fa_for_admins"
-msgstr "Require 2FA for admins"
+#~ msgid "require_2fa_for_admins"
+#~ msgstr "Require 2FA for admins"
 
-msgid "data_retention"
-msgstr "Data Retention"
+#~ msgid "data_retention"
+#~ msgstr "Data Retention"
 
-msgid "configure_data_retention_help"
-msgstr "Configure how long to keep transaction history"
+#~ msgid "configure_data_retention_help"
+#~ msgstr "Configure how long to keep transaction history"
 
-msgid "keep_transaction_history_for:"
-msgstr "Keep transaction history for:"
+#~ msgid "keep_transaction_history_for:"
+#~ msgstr "Keep transaction history for:"
 

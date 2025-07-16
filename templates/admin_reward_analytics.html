@@ -1,8 +1,6 @@
 {% extends 'admin_base.html' %}
-{% block title %}Reward Analytics{% endblock %}
+{% block title %}{{ _('Reward Analytics') }}{% endblock %}
 {% block admin_content %}
-{% import 'translations.html' as translations %}
-{% set t = translations.t %}
 <style>
   .analytics-grid {
     display: grid;
@@ -34,45 +32,45 @@
 <div class="p-6">
   <!-- Header -->
   <div class="mb-8">
-    <h1 class="text-3xl font-bold text-gray-800 mb-2">{{ t('Reward Analytics') }}</h1>
-    <p class="text-gray-600">{{ t('Comprehensive analytics and insights for your reward system.') }}</p>
+    <h1 class="text-3xl font-bold text-gray-800 mb-2">{{ _('Reward Analytics') }}</h1>
+    <p class="text-gray-600">{{ _('Comprehensive analytics and insights for your reward system.') }}</p>
   </div>
 
   <!-- Quick Stats -->
   <div class="analytics-grid mb-8">
     <div class="stats-card">
       <div class="text-2xl font-bold mb-2">{{ monthly_data|length if monthly_data else 0 }}</div>
-      <div class="text-sm opacity-90">{{ t('Months of Data') }}</div>
+      <div class="text-sm opacity-90">{{ _('Months of Data') }}</div>
     </div>
     <div class="stats-card">
       <div class="text-2xl font-bold mb-2">{{ top_earners|length if top_earners else 0 }}</div>
-      <div class="text-sm opacity-90">{{ t('Top Earners Tracked') }}</div>
+      <div class="text-sm opacity-90">{{ _('Top Earners Tracked') }}</div>
     </div>
     <div class="stats-card">
       <div class="text-2xl font-bold mb-2">{{ type_distribution|length if type_distribution else 0 }}</div>
-      <div class="text-sm opacity-90">{{ t('Reward Types') }}</div>
+      <div class="text-sm opacity-90">{{ _('Reward Types') }}</div>
     </div>
   </div>
 
   <!-- Monthly Distribution Chart -->
   <div class="chart-card mb-6">
-    <h2 class="text-xl font-semibold mb-4 text-gray-800">{{ t('Monthly Reward Distribution') }}</h2>
+    <h2 class="text-xl font-semibold mb-4 text-gray-800">{{ _('Monthly Reward Distribution') }}</h2>
     <canvas id="monthlyChart" width="400" height="200"></canvas>
   </div>
 
   <!-- Top Earners Table -->
   <div class="table-card mb-6">
     <div class="px-6 py-4 bg-gray-50 border-b">
-      <h2 class="text-xl font-semibold text-gray-800">{{ t('Top Reward Earners') }}</h2>
+      <h2 class="text-xl font-semibold text-gray-800">{{ _('Top Reward Earners') }}</h2>
     </div>
     <div class="overflow-x-auto">
       <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
           <tr>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ t('Rank') }}</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ t('User') }}</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ t('Email') }}</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ t('Total Earned') }}</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ _('Rank') }}</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ _('User') }}</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ _('Email') }}</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ _('Total Earned') }}</th>
           </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
@@ -99,19 +97,22 @@
 
   <!-- Reward Type Distribution -->
   <div class="chart-card">
-    <h2 class="text-xl font-semibold mb-4 text-gray-800">{{ t('Reward Type Distribution') }}</h2>
+    <h2 class="text-xl font-semibold mb-4 text-gray-800">{{ _('Reward Type Distribution') }}</h2>
     <canvas id="typeChart" width="400" height="200"></canvas>
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+// Translated labels for JS
+const totalRewardsDistributedLabel = {{ _('Total Rewards Distributed')|tojson }};
+
 // Monthly Distribution Chart
 const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
 const monthlyData = {
-      labels: [{% for month in monthly_data %}'{{ month[0].strftime('%b %Y') if month[0] else 'Unknown' }}'{% if not loop.last %}, {% endif %}{% endfor %}],
-    datasets: [{
-      label: 'Total Rewards Distributed',
+  labels: [{% for month in monthly_data %}'{{ month[0].strftime('%b %Y') if month[0] else 'Unknown' }}'{% if not loop.last %}, {% endif %}{% endfor %}],
+  datasets: [{
+    label: totalRewardsDistributedLabel,
     data: [{% for month in monthly_data %}{{ month[1] }}{% if not loop.last %}, {% endif %}{% endfor %}],
     borderColor: '#667eea',
     backgroundColor: 'rgba(102, 126, 234, 0.1)',
