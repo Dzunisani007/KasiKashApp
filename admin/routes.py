@@ -185,7 +185,7 @@ def loan_approvals():
                  cur.execute("""
                     SELECT t.id, u.username, u.email, t.amount, t.status, t.transaction_date, t.description as comment
                     FROM transactions t
-                    LEFT JOIN users u ON t.user_id = CAST(u.id AS TEXT)
+                    LEFT JOIN users u ON t.user_id = u.firebase_uid
                     WHERE t.type = 'payout' AND t.status = %s
                     ORDER BY t.transaction_date DESC
                 """, (status,))
@@ -196,8 +196,12 @@ def loan_approvals():
     return render_template('admin_loan_approvals.html', loans=loans, current_status=status, user_language=user_language)
 
 @admin_bp.route('/loans/approve', methods=['POST'])
+@csrf.exempt
 @login_required
 def approve_loan():
+    import sys
+    print('DEBUG: Form data:', dict(request.form), file=sys.stderr)
+    print('DEBUG: Cookies:', request.cookies, file=sys.stderr)
     if session.get('role') != 'admin':
         flash('Permission denied.', 'danger')
         return redirect(url_for('admin.loan_approvals'))
@@ -216,6 +220,7 @@ def approve_loan():
     return redirect(url_for('admin.loan_approvals', status='pending'))
 
 @admin_bp.route('/loans/reject', methods=['POST'])
+@csrf.exempt
 @login_required
 def reject_loan():
     if session.get('role') != 'admin':
@@ -228,12 +233,15 @@ def reject_loan():
         with support.db_connection() as conn:
             with conn.cursor() as cur:
                 cur.execute("UPDATE transactions SET status = 'rejected', description = CONCAT(description, ' | Admin Comment: ', %s) WHERE id = %s", (comment, loan_id,))
+                if cur.rowcount == 0:
+                    flash('No loan was updated. Please check the loan ID.', 'danger')
+                else:
+                    flash('Loan rejected successfully.', 'success')
                 conn.commit()
-        flash('Loan rejected successfully.', 'success')
     except Exception as e:
         print(f"Error rejecting loan: {e}")
         flash('Failed to reject loan.', 'danger')
-    return redirect(url_for('admin.loan_approvals', status='pending'))
+    return redirect(url_for('admin.loan_approvals', status='rejected'))
 
 @admin_bp.route('/loans/undo', methods=['POST'])
 @login_required
