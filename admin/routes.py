@@ -10,6 +10,12 @@ import pandas as pd
 from io import BytesIO
 from fpdf import FPDF
 from extensions import csrf
+from translations import get_text
+
+# Add this context processor to make 't' available in all templates
+@admin_bp.app_context_processor
+def inject_t():
+    return dict(t=get_text)
 
 def get_user_language():
     return session.get('language_preference', 'en')
