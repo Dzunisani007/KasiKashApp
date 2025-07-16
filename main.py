@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, session, flash, jsonify, url_for, Response, send_file
 import os
-from datetime import timedelta, datetime
+from datetime import timedelta, datetime, date
 import pandas as pd
 import plotly
 import plotly.express as px
@@ -43,6 +43,7 @@ import re
 from decimal import Decimal, InvalidOperation
 from flask_babel import Babel
 from flask_socketio import SocketIO, join_room, emit
+from calendar import monthrange
 
 # Load environment variables
 load_dotenv()
@@ -326,8 +327,36 @@ def feedback():
 def home():
     if 'user_id' not in session:
         return redirect('/login')
-    
     try:
+        # Get month and year from query params, default to current month/year
+        month = request.args.get('month', type=int)
+        year = request.args.get('year', type=int)
+        today = date.today()
+        if not month:
+            month = today.month
+        if not year:
+            year = today.year
+
+        # Helper to generate calendar days
+        def generate_calendar_days(year, month, events=None):
+            days = []
+            num_days = monthrange(year, month)[1]
+            for d in range(1, num_days + 1):
+                day_date = date(year, month, d)
+                is_today = (day_date == today)
+                day_events = []
+                if events:
+                    # Filter events for this day (assume events is a list of dicts with 'date' key)
+                    for ev in events:
+                        try:
+                            ev_date = date.fromisoformat(ev.get('date'))
+                            if ev_date == day_date:
+                                day_events.append(ev.get('title', 'Event'))
+                        except Exception:
+                            pass
+                days.append({'date': d, 'is_today': is_today, 'events': day_events})
+            return days
+
         # Initialize default values
         username = str(session.get('username', 'User'))
         current_balance = float(0.00)
@@ -356,49 +385,56 @@ def home():
             "username": username,
             "profile_picture": None,
             "email": None,
-            # user["joined_date"] = None  # Remove or comment out this line
         }
         try:
             with support.db_connection() as conn:
                 with conn.cursor() as cur:
                     cur.execute(
-    "SELECT username, email, profile_picture FROM users WHERE firebase_uid = %s",
-    (session['user_id'],
-    ))
+                        "SELECT username, email, profile_picture FROM users WHERE firebase_uid = %s",
+                        (session['user_id'],)
+                    )
                     user_data = cur.fetchone()
                     if user_data:
                         user["username"] = user_data[0]
                         user["email"] = user_data[1]
                         user["profile_picture"] = user_data[2]
-                        # user["joined_date"] = user_data[3]  # Remove or
-                        # comment out this line
         except Exception as e:
             print(f"User info fetch error: {e}")
 
-        notification_count = get_notification_count(
-    session.get('user_id'))  # Get notification count
+        notification_count = get_notification_count(session.get('user_id'))
+
+        # Generate calendar days for the selected month/year
+        calendar_days = generate_calendar_days(year, month, calendar_events)
+        calendar_month = date(year, month, 1).strftime('%B')
+        calendar_month_num = month
+        calendar_year = year
 
         return render_template('dashboard.html',
-                            username=username,
-                            current_balance=current_balance,
-                            total_contributions=total_contributions,
-                            total_withdrawals=total_withdrawals,
-                            pending_repayments=pending_repayments,
-                            recent_contributions=recent_contributions,
-                            upcoming_contributions=upcoming_contributions,
-                            missed_contributions=missed_contributions,
-                            outstanding_loans=outstanding_loans,
-                            loan_requests=loan_requests,
-                            repayment_progress=repayment_progress,
-                            member_count=member_count,
-                            monthly_target=monthly_target,
-                            total_group_balance=total_group_balance,
-                            calendar_events=calendar_events,
-                            savings_growth_chart_data=savings_growth_chart_data,
-                            contribution_breakdown_chart_data=contribution_breakdown_chart_data,
-                            loan_trends_chart_data=loan_trends_chart_data,
-                               notification_count=notification_count,
-                               user=user)  # Pass user dictionary
+            username=username,
+            current_balance=current_balance,
+            total_contributions=total_contributions,
+            total_withdrawals=total_withdrawals,
+            pending_repayments=pending_repayments,
+            recent_contributions=recent_contributions,
+            upcoming_contributions=upcoming_contributions,
+            missed_contributions=missed_contributions,
+            outstanding_loans=outstanding_loans,
+            loan_requests=loan_requests,
+            repayment_progress=repayment_progress,
+            member_count=member_count,
+            monthly_target=monthly_target,
+            total_group_balance=total_group_balance,
+            calendar_events=calendar_events,
+            calendar_days=calendar_days,
+            calendar_month=calendar_month,
+            calendar_month_num=calendar_month_num,
+            calendar_year=calendar_year,
+            savings_growth_chart_data=savings_growth_chart_data,
+            contribution_breakdown_chart_data=contribution_breakdown_chart_data,
+            loan_trends_chart_data=loan_trends_chart_data,
+            notification_count=notification_count,
+            user=user
+        )
     except Exception as e:
         print(f"Dashboard error: {str(e)}")
         flash("Error loading dashboard. Please try again.")

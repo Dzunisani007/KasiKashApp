@@ -381,7 +381,7 @@
       </div>
       <div style="font-size:1.01rem; color:#eaf6fb;">{{ t('View, add, edit, or suspend user accounts with advanced filtering and bulk operations.') }}</div>
       <div style="display:flex;flex-direction:column;gap:0.7rem;">
-        <a href="/users" style="background:rgba(255,255,255,0.18);border-radius:8px;padding:0.7rem 0;text-align:center;color:#fff;font-weight:500;text-decoration:none;transition:background 0.2s;">{{ t('Manage Users') }}</a>
+        <a href="{{ url_for('admin.manage_users') }}" style="background:rgba(255,255,255,0.18);border-radius:8px;padding:0.7rem 0;text-align:center;color:#fff;font-weight:500;text-decoration:none;transition:background 0.2s;">{{ t('Manage Users') }}</a>
         <a href="#" style="background:rgba(255,255,255,0.18);border-radius:8px;padding:0.7rem 0;text-align:center;color:#fff;font-weight:500;text-decoration:none;transition:background 0.2s;">{{ t('Bulk Operations') }}</a>
       </div>
     </div>
