@@ -1,4 +1,4 @@
-from flask import render_template, request, redirect, session, flash, url_for, jsonify, Response
+from flask import render_template, request, redirect, session, flash, url_for, jsonify, Response, send_file
 import support
 import psycopg2
 import psycopg2.extras
@@ -10,6 +10,8 @@ import pandas as pd
 from io import BytesIO
 from fpdf import FPDF
 from extensions import csrf
+from datetime import datetime
+import os
 
 def get_user_language():
     return session.get('language_preference', 'en')
@@ -87,7 +89,7 @@ def manage_users():
                     cur.execute("""
                         SELECT u.id, u.username, u.email, u.role, u.created_at, u.last_login, s.name AS stokvel_name
                         FROM users u
-                        LEFT JOIN stokvel_members sm ON u.id = sm.user_id
+                        LEFT JOIN stokvel_members sm ON CAST(u.id AS VARCHAR) = sm.user_id
                         LEFT JOIN stokvels s ON sm.stokvel_id = s.id
                         WHERE u.username ILIKE %s OR u.email ILIKE %s
                         ORDER BY u.created_at DESC
@@ -96,7 +98,7 @@ def manage_users():
                     cur.execute("""
                         SELECT u.id, u.username, u.email, u.role, u.created_at, u.last_login, s.name AS stokvel_name
                         FROM users u
-                        LEFT JOIN stokvel_members sm ON u.id = sm.user_id
+                        LEFT JOIN stokvel_members sm ON CAST(u.id AS VARCHAR) = sm.user_id
                         LEFT JOIN stokvels s ON sm.stokvel_id = s.id
                         ORDER BY u.created_at DESC
                     """)
@@ -911,11 +913,211 @@ def admin_set_language():
 @admin_bp.route('/financial-reports')
 @login_required
 def financial_reports():
-    if session.get('role') != 'admin':
-        flash('Permission denied.', 'danger')
-        return redirect(url_for('home'))
-    # Placeholder: In the future, fetch and filter report data here
-    return render_template('admin_financial_reports.html')
+    user_language = get_user_language()
+    financial_data = {}
+    try:
+        with support.db_connection() as conn:
+            with conn.cursor() as cur:
+                # Total contributions
+                cur.execute("SELECT COALESCE(SUM(amount), 0) FROM transactions WHERE LOWER(type) = 'contribution'")
+                total_contributions = cur.fetchone()[0]
+                # Total withdrawals
+                cur.execute("SELECT COALESCE(SUM(amount), 0) FROM transactions WHERE LOWER(type) = 'payout'")
+                total_withdrawals = cur.fetchone()[0]
+                # Current balance
+                cur.execute("""
+                    SELECT COALESCE(SUM(
+                        CASE 
+                            WHEN LOWER(type) = 'contribution' THEN amount
+                            WHEN LOWER(type) = 'payout' THEN -amount
+                            ELSE 0
+                        END
+                    ), 0) FROM transactions
+                """)
+                current_balance = cur.fetchone()[0]
+                # Breakdown by stokvel
+                cur.execute("""
+                    SELECT s.name, 
+                        COALESCE(SUM(
+                            CASE 
+                                WHEN LOWER(t.type) = 'contribution' THEN t.amount
+                                WHEN LOWER(t.type) = 'payout' THEN -t.amount
+                                ELSE 0
+                            END
+                        ), 0) as balance
+                    FROM stokvels s
+                    LEFT JOIN transactions t ON s.id = t.stokvel_id
+                    GROUP BY s.name
+                    ORDER BY s.name
+                """)
+                stokvel_balances = cur.fetchall()
+                # Fetch latest 100 transactions for the report table (fix type mismatch)
+                cur.execute("""
+                    SELECT t.transaction_date, t.type, t.amount, u.username, t.status
+                    FROM transactions t
+                    LEFT JOIN users u ON t.user_id = CAST(u.id AS VARCHAR)
+                    ORDER BY t.transaction_date DESC
+                    LIMIT 100
+                """)
+                transactions = cur.fetchall()
+                financial_data['transactions'] = transactions
+                # Monthly contributions and payouts for the last 6 months
+                cur.execute("""
+                    SELECT 
+                        TO_CHAR(DATE_TRUNC('month', transaction_date), 'YYYY-MM') AS month,
+                        SUM(CASE WHEN LOWER(type) = 'contribution' THEN amount ELSE 0 END) AS contributions,
+                        SUM(CASE WHEN LOWER(type) = 'payout' THEN amount ELSE 0 END) AS payouts
+                    FROM transactions
+                    GROUP BY month
+                    ORDER BY month
+                    LIMIT 6
+                """)
+                monthly_data = []
+                for row in cur.fetchall():
+                    month = row[0] if row[0] is not None else ""
+                    contrib = row[1] if row[1] is not None else 0
+                    payout = row[2] if row[2] is not None else 0
+                    monthly_data.append([month, contrib, payout])
+                financial_data['monthly_data'] = monthly_data
+                # Cumulative balance over time (by month)
+                cur.execute("""
+                    SELECT 
+                        TO_CHAR(DATE_TRUNC('month', transaction_date), 'YYYY-MM') AS month,
+                        SUM(CASE WHEN LOWER(type) = 'contribution' THEN amount ELSE -amount END) AS net
+                    FROM transactions
+                    GROUP BY month
+                    ORDER BY month
+                """)
+                rows = cur.fetchall()
+                cumulative = []
+                total = 0
+                for row in rows:
+                    month = row[0] if row[0] is not None else ""
+                    net = row[1] if row[1] is not None else 0
+                    total += net
+                    cumulative.append({'month': month, 'balance': total})
+                financial_data['cumulative'] = cumulative
+        financial_data = {
+            'total_contributions': total_contributions,
+            'total_withdrawals': total_withdrawals,
+            'current_balance': current_balance,
+            'stokvel_balances': stokvel_balances
+        }
+        # Guarantee chart data is always present and serializable
+        if 'monthly_data' not in financial_data or not financial_data['monthly_data']:
+            financial_data['monthly_data'] = []
+        if 'cumulative' not in financial_data or not financial_data['cumulative']:
+            financial_data['cumulative'] = []
+    except Exception as e:
+        print(f"Error fetching financial report data: {e}")
+        flash('Could not load financial report data.', 'danger')
+    return render_template('admin_financial_reports.html', financial_data=financial_data, user_language=user_language)
+
+class PDF(FPDF):
+    def header(self):
+        logo_path = os.path.join('static', 'logo.png.png')
+        if os.path.exists(logo_path):
+            self.image(logo_path, 10, 8, 25)
+        self.set_font('Arial', 'B', 16)
+        self.cell(0, 10, 'KasiKash Financial Report', ln=True, align='C')
+        self.set_draw_color(34, 211, 238)
+        self.set_line_width(1)
+        self.line(40, 25, 200, 25)
+        self.ln(10)
+    def footer(self):
+        self.set_y(-15)
+        self.set_font('Arial', 'I', 8)
+        self.set_text_color(128)
+        self.cell(0, 10, f'Page {self.page_no()} | Powered by KasiKash', 0, 0, 'C')
+
+@admin_bp.route('/financial-reports/export/pdf')
+@login_required
+def export_financial_report_pdf():
+    try:
+        with support.db_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT COALESCE(SUM(amount), 0) FROM transactions WHERE LOWER(type) = 'contribution'")
+                total_contributions = cur.fetchone()[0]
+                cur.execute("SELECT COALESCE(SUM(amount), 0) FROM transactions WHERE LOWER(type) = 'payout'")
+                total_withdrawals = cur.fetchone()[0]
+                cur.execute("""
+                    SELECT COALESCE(SUM(
+                        CASE 
+                            WHEN LOWER(type) = 'contribution' THEN amount
+                            WHEN LOWER(type) = 'payout' THEN -amount
+                            ELSE 0
+                        END
+                    ), 0) FROM transactions
+                """)
+                current_balance = cur.fetchone()[0]
+                cur.execute("""
+                    SELECT s.name, 
+                        COALESCE(SUM(
+                            CASE 
+                                WHEN LOWER(t.type) = 'contribution' THEN t.amount
+                                WHEN LOWER(t.type) = 'payout' THEN -t.amount
+                                ELSE 0
+                            END
+                        ), 0) as balance
+                    FROM stokvels s
+                    LEFT JOIN transactions t ON s.id = t.stokvel_id
+                    GROUP BY s.name
+                    ORDER BY s.name
+                """)
+                stokvel_balances = cur.fetchall()
+    except Exception as e:
+        flash('Could not generate PDF.', 'danger')
+        return redirect(url_for('admin.financial_reports'))
+
+    pdf = PDF()
+    pdf.add_page()
+
+    # Timestamp and generated by
+    pdf.set_font("Arial", '', 10)
+    pdf.set_text_color(100)
+    pdf.cell(0, 8, f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} by KasiKash", ln=True, align='R')
+    pdf.ln(5)
+
+    # Summary Table
+    pdf.set_text_color(0)
+    pdf.set_font("Arial", 'B', 12)
+    pdf.cell(0, 10, "Summary", ln=True)
+    pdf.set_font("Arial", '', 12)
+    pdf.set_fill_color(240, 248, 255)
+    pdf.cell(60, 10, "Total Contributions", 1, 0, 'L', True)
+    pdf.cell(60, 10, "Total Payouts", 1, 0, 'L', True)
+    pdf.cell(60, 10, "Current Balance", 1, 1, 'L', True)
+    pdf.set_font("Arial", 'B', 12)
+    pdf.set_fill_color(255, 255, 255)
+    pdf.cell(60, 10, f"R {total_contributions:,.2f}", 1, 0, 'L', True)
+    pdf.cell(60, 10, f"R {total_withdrawals:,.2f}", 1, 0, 'L', True)
+    pdf.cell(60, 10, f"R {current_balance:,.2f}", 1, 1, 'L', True)
+    pdf.ln(10)
+
+    # Stokvel Balances Table
+    pdf.set_font("Arial", 'B', 12)
+    pdf.cell(0, 10, "Stokvel Balances", ln=True)
+    pdf.set_font("Arial", 'B', 11)
+    pdf.set_fill_color(34, 211, 238)
+    pdf.set_text_color(255)
+    pdf.cell(90, 8, "Stokvel", 1, 0, 'C', True)
+    pdf.cell(90, 8, "Balance", 1, 1, 'C', True)
+    pdf.set_font("Arial", '', 11)
+    pdf.set_text_color(0)
+    fill = False
+    for stokvel in stokvel_balances:
+        if fill:
+            pdf.set_fill_color(240, 248, 255)
+        else:
+            pdf.set_fill_color(255, 255, 255)
+        pdf.cell(90, 8, str(stokvel[0]), 1, 0, 'L', True)
+        pdf.cell(90, 8, f"R {stokvel[1]:,.2f}", 1, 1, 'R', True)
+        fill = not fill
+
+    pdf_bytes = pdf.output(dest='S').encode('latin1')
+    pdf_output = BytesIO(pdf_bytes)
+    pdf_output.seek(0)
+    return send_file(pdf_output, as_attachment=True, download_name='financial_report.pdf', mimetype='application/pdf')
 
 @admin_bp.route('/virtual-rewards')
 @login_required

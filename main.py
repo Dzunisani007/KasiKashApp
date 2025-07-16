@@ -21,8 +21,8 @@ from firebase_admin import credentials, auth
 from io import BytesIO
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
-from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from flask_session import Session
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
@@ -41,6 +41,7 @@ from email.mime.multipart import MIMEMultipart
 from werkzeug.utils import secure_filename
 import re
 from decimal import Decimal, InvalidOperation
+from reportlab.lib.enums import TA_CENTER, TA_RIGHT
 
 # Load environment variables
 load_dotenv()
@@ -2887,37 +2888,90 @@ def download_stokvel_statement_pdf(stokvel_id):
     styles = getSampleStyleSheet()
     elements = []
     # Add logo
-    from reportlab.platypus import Image
+    from reportlab.platypus import Image, Table, TableStyle, Paragraph, Spacer, PageBreak
+    from reportlab.lib import colors
+    from reportlab.graphics.shapes import Drawing, Line
+    from reportlab.lib.styles import ParagraphStyle
+    from reportlab.lib.enums import TA_CENTER, TA_RIGHT
     logo_path = os.path.join('static', 'kasikash-logo.png')
+    if not os.path.exists(logo_path):
+        logo_path = os.path.join('static', 'logo.png.png')
+    logo_img = None
     if os.path.exists(logo_path):
         try:
-            elements.append(Image(logo_path, width=120, height=60))
+            logo_img = Image(logo_path, width=65, height=65)
+            logo_img.hAlign = 'LEFT'
         except Exception as e:
             print(f"Error adding logo: {e}")
-    # Add address
-    address = "KasiKash, 123 Main Street, Johannesburg, South Africa"
-    elements.append(Paragraph(address, styles['Normal']))
-    elements.append(Spacer(1, 12))
-    elements.append(Paragraph(f"{stokvel_name} - Statement", styles['Title']))
-    elements.append(Spacer(1, 12))
-    # Table header
+    # Custom styles
+    title_style = ParagraphStyle('TitleStyle', parent=styles['Title'], fontSize=22, alignment=TA_CENTER, spaceAfter=6)
+    timestamp_style = ParagraphStyle('TimestampStyle', parent=styles['Normal'], fontSize=10, alignment=TA_RIGHT, textColor=colors.HexColor('#666'))
+    statement_title_style = ParagraphStyle('StatementTitle', parent=styles['Title'], fontSize=18, alignment=TA_CENTER, spaceAfter=8)
+    # Title and timestamp
+    from datetime import datetime
+    generated_str = f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} by KasiKash"
+    main_title = f"KasiKash {stokvel_name} Statement"
+    title = Paragraph(f'<b>{main_title}</b>', title_style)
+    timestamp = Paragraph(generated_str, timestamp_style)
+    # Header table: logo | title | timestamp
+    header_data = [[logo_img, title, timestamp]]
+    header_table = Table(header_data, colWidths=[70, 350, 140])
+    header_table.setStyle(TableStyle([
+        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+        ('ALIGN', (1,0), (1,0), 'CENTER'),
+        ('ALIGN', (2,0), (2,0), 'RIGHT'),
+        ('LEFTPADDING', (0,0), (-1,-1), 0),
+        ('RIGHTPADDING', (0,0), (-1,-1), 0),
+        ('TOPPADDING', (0,0), (-1,-1), 6),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 6),
+    ]))
+    elements.append(header_table)
+    # Cyan horizontal line
+    line = Drawing(560, 2)
+    line.add(Line(0, 0, 540, 0, strokeColor=colors.HexColor('#22d3ee'), strokeWidth=3))
+    elements.append(line)
+    elements.append(Spacer(1, 16))
+    # Table header and data
     data = [["Date", "Type", "Description", "Amount", "Member Email"]]
     for row in transactions:
         date_str = row[0].strftime('%Y-%m-%d') if row[0] else ''
         data.append([date_str, row[1], row[2], f"R{row[3]:.2f}", row[4] or ''])
-    table = Table(data, repeatRows=1)
-    table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1,0), colors.HexColor('#2453c7')),
-        ('TEXTCOLOR', (0, 0), (-1,0), colors.white),
-        ('ALIGN', (0, 0), (-1,-1), 'LEFT'),
-        ('FONTNAME', (0, 0), (-1,0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1,0), 12),
-        ('BOTTOMPADDING', (0, 0), (-1,0), 8),
-        ('BACKGROUND', (0, 1), (-1,-1), colors.whitesmoke),
-        ('GRID', (0, 0), (-1,-1), 0.5, colors.grey),
-    ]))
+    table = Table(data, repeatRows=1, hAlign='LEFT', colWidths=[75, 65, 160, 80, 170])
+    # Table style
+    table_style = TableStyle([
+        ('BOX', (0,0), (-1,-1), 1.2, colors.HexColor('#2453c7')),
+        ('INNERGRID', (0,0), (-1,-1), 0.5, colors.HexColor('#2453c7')),
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#2453c7')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+        ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 13),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
+        ('TOPPADDING', (0, 0), (-1, 0), 10),
+        ('ALIGN', (0, 1), (-1, -1), 'LEFT'),
+        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 1), (-1, -1), 11),
+        ('LEFTPADDING', (0, 0), (-1, -1), 8),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 8),
+        ('TOPPADDING', (0, 1), (-1, -1), 6),
+        ('BOTTOMPADDING', (0, 1), (-1, -1), 6),
+    ])
+    # Alternating row colors (stronger contrast)
+    for i in range(1, len(data)):
+        if i % 2 == 0:
+            table_style.add('BACKGROUND', (0, i), (-1, i), colors.HexColor('#e3f2fd'))
+        else:
+            table_style.add('BACKGROUND', (0, i), (-1, i), colors.whitesmoke)
+    table.setStyle(table_style)
     elements.append(table)
-    doc.build(elements)
+    # Footer with page number
+    def add_page_number(canvas, doc):
+        canvas.saveState()
+        canvas.setFont('Helvetica', 9)
+        canvas.setFillColor(colors.HexColor('#888'))
+        canvas.drawRightString(550, 15, f"Page {doc.page}")
+        canvas.restoreState()
+    doc.build(elements, onFirstPage=add_page_number, onLaterPages=add_page_number)
     buffer.seek(0)
     return send_file(
     buffer,
@@ -2949,6 +3003,16 @@ for rule in app.url_map.iter_rules():
 app.register_blueprint(advisor_bp)
 
 # ... rest of the code ...
+
+# Inject _ into Jinja2 context for translations
+try:
+    from flask_babel import _
+except ImportError:
+    def _(s): return s
+
+@app.context_processor
+def inject_global():
+    return dict(_=_)
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5001))
