@@ -187,8 +187,8 @@
             </a>
         </div>
         <!-- Navigation -->
-        <nav class="mt-8">
-          <ul class="space-y-2">
+        <nav class="mt-8" style="flex: 1 1 auto; min-height: 0;">
+          <ul class="space-y-2" style="overflow-y: auto; max-height: calc(100vh - 180px);">
             <li>
               <a href="/home" class="flex items-center px-4 py-2 text-gray-200 hover:bg-gray-800 rounded transition">
                 <i class="fas fa-home mr-3"></i> Home
@@ -237,9 +237,8 @@
             </li>
             {% endif %}
             <li>
-              <a href="{{ url_for('advisor.dashboard') }}" class="flex items-center px-4 py-2 hover:bg-gray-100">
-                <svg class="h-5 w-5 text-indigo-500 mr-2" ...> <!-- icon here --> </svg>
-                Financial Advisor
+              <a href="{{ url_for('advisor.dashboard') }}" class="flex items-center px-4 py-2 text-gray-200 hover:bg-gray-800 rounded transition">
+                <i class="fas fa-user-tie mr-3"></i> Financial Advisor
               </a>
             </li>
           </ul>
@@ -306,6 +305,7 @@
     {% include 'chatbot.html' %}
     <script src="{{ url_for('static', filename='js/chatbot.js') }}"></script>
     {% block extra_js %}{% endblock %}
-    <div id="myDiv"></div>
+    
+    <!-- Removed <div id="myDiv"></div> which was used for the demo graph -->
 </body>
 </html>
