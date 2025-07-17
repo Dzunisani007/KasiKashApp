@@ -162,15 +162,31 @@
             border: 2px solid #7B61FF;
             box-shadow: 0 0 15px rgba(123, 97, 255, 0.2);
         }
+        
+        /* Bell shake animation for new notifications */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
+            20%, 40%, 60%, 80% { transform: translateX(2px); }
+        }
+        
+        .shake {
+            animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both;
+        }
     </style>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
 </head>
 <body class="bg-gray-50">
     <!-- Sidebar -->
-    <div class="h-screen w-64 bg-gray-900 flex flex-col justify-between fixed inset-y-0 left-0">
-      <div>
-        <div class="p-6">
-          <span class="text-2xl font-bold text-white">KasiKash</span>
+    <div class="fixed inset-y-0 left-0 w-64 sidebar">
+        <!-- Logo -->
+        <div class="flex items-center justify-center h-16 logo-section">
+            <a href="/" class="flex items-center space-x-3">
+                <img src="{{ url_for('static', filename='logo_admin.png') }}" alt="KasiKash Logo" style="height:48px;width:48px;border-radius:50%;box-shadow:0 0 16px #60efff;">
+                <span class="text-2xl logo-text">KasiKash</span>
+            </a>
         </div>
+        <!-- Navigation -->
         <nav class="mt-8">
           <ul class="space-y-2">
             <li>
@@ -204,6 +220,11 @@
               </a>
             </li>
             <li>
+              <a href="{{ url_for('rewards.rewards_card_page') }}" class="flex items-center px-4 py-2 text-gray-200 hover:bg-gray-800 rounded transition">
+                <i class="fas fa-gift mr-3"></i> My Rewards Card
+              </a>
+            </li>
+            <li>
               <a href="/settings" class="flex items-center px-4 py-2 text-gray-200 hover:bg-gray-800 rounded transition">
                 <i class="fas fa-cog mr-3"></i> Settings
               </a>
@@ -223,13 +244,22 @@
             </li>
           </ul>
         </nav>
-      </div>
-      <div class="p-6 border-t border-gray-800">
-        <a href="/logout" class="flex items-center text-gray-200 hover:text-white">
-          <span class="bg-blue-600 rounded-full w-8 h-8 flex items-center justify-center text-white font-bold mr-3">{{ session.user_initials if session.user_initials else 'BN' }}</span>
-          Logout
-        </a>
-      </div>
+        <!-- User Section -->
+        <div class="absolute bottom-0 w-full p-4 user-section">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-10 h-10 rounded-xl user-avatar flex items-center justify-center text-white font-bold text-base">
+                        {% set name = username if username else 'User' %}
+                        {% set name_parts = name.split() %}
+                        {% set initials = (name_parts[0][0] ~ (name_parts[1][0] if name_parts|length > 1 else '')) | upper %}
+                        {{ initials }}
+                    </div>
+                </div>
+                <div class="ml-3">
+                    <a href="/logout" class="text-sm logout-link">{{ 'Logout' }}</a>
+                </div>
+            </div>
+        </div>
     </div>
     <div class="ml-64">
         <!-- Top Bar with Profile and Notifications -->
@@ -237,7 +267,7 @@
             <div class="flex items-center justify-between w-full px-6 py-4">
                 <h2 class="text-xl page-title">{% block page_title %}{% endblock %}</h2>
                 <div class="flex items-center space-x-6">
-                    <a href="/notifications" id="notification-icon" class="notification-icon relative">
+                    <a href="{{ url_for('notifications') }}" id="notification-icon" class="notification-icon relative">
                         <i class="fa-solid fa-bell w-6 h-6 text-xl"></i>
                         <span id="notification-badge"
                               class="notification-badge absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full text-xs font-bold text-white{% if not (notification_count and notification_count > 0) %} hidden{% endif %}">
@@ -268,12 +298,14 @@
             {% block content %}{% endblock %}
         </main>
     </div>
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js"></script>
-    {% include 'chatbot.html' %}
+    <!-- Scripts at the end of body, in correct order -->
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.1/js/bootstrap-select.min.js"></script>
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    {% include 'chatbot.html' %}
     <script src="{{ url_for('static', filename='js/chatbot.js') }}"></script>
     {% block extra_js %}{% endblock %}
+    <div id="myDiv"></div>
 </body>
 </html>

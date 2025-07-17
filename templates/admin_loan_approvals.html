@@ -103,9 +103,9 @@ function showUserHistory(email) {
 function closeUserHistory() {
   document.getElementById('userHistoryModal').classList.add('hidden');
 }
-// Add comment prompt for approve/reject
-function addCommentAndSubmit(form, action) {
-  var comment = prompt('Enter a comment for this decision (optional):');
+  // Add comment prompt for approve/reject
+  function addCommentAndSubmit(form, action) {
+    var comment = prompt('Enter a comment for this decision (optional):');
   if (comment !== null) {
     var input = document.createElement('input');
     input.type = 'hidden';
