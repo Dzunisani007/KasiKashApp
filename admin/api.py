@@ -272,10 +272,11 @@ def dashboard_notifications():
     try:
         with support.db_connection() as conn:
             with conn.cursor() as cur:
-                # Get recent notifications
+                # Get recent admin notifications only
                 cur.execute("""
                     SELECT message, created_at, is_read
                     FROM notifications
+                    WHERE type = 'admin_notification'
                     ORDER BY created_at DESC
                     LIMIT 10
                 """)
