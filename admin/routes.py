@@ -612,7 +612,7 @@ def approve_kyc(user_id):
         return redirect(url_for('admin.kyc_approvals'))
     try:
         with support.db_connection() as conn:
-            with conn.cursor() as cur:
+            with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
                 # Get email from the provided user_id to ensure we update the correct, active user
                 cur.execute("SELECT email, firebase_uid FROM users WHERE id = %s", (user_id,))
                 user_data = cur.fetchone()
@@ -652,7 +652,7 @@ def reject_kyc(user_id):
     rejection_reason = request.form.get('reason', 'Your documents could not be verified. Please re-upload clear and valid documents.')
     try:
         with support.db_connection() as conn:
-            with conn.cursor() as cur:
+            with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
                 # Get email from the provided user_id to ensure we update the correct, active user
                 cur.execute("SELECT email, firebase_uid FROM users WHERE id = %s", (user_id,))
                 user_data = cur.fetchone()
@@ -802,10 +802,15 @@ def settings():
                         ))
                 conn.commit()
             session['language_preference'] = language  # Ensure session is updated for immediate effect
-            flash('Settings updated successfully!', 'success')
+            if '_settings_updated' not in session:
+                flash('Settings updated successfully!', 'success')
+                session['_settings_updated'] = True
         except Exception as e:
             flash(f'Error saving settings: {e}', 'danger')
         return redirect(url_for('admin.settings'))
+
+    # Remove the flag after redirect
+    session.pop('_settings_updated', None)
 
     # Load settings for display
     default_settings = {
