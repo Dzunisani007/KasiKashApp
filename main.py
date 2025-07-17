@@ -54,6 +54,8 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your-secret-key-here')
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
 
+babel = Babel(app)
+
 UPLOAD_FOLDER = 'static/profile_pics'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -644,6 +646,18 @@ def login_validation():
                     # This error is not critical enough to prevent login, but
                     # should be logged.
 
+                # Update stokvel_members for pending invites
+                try:
+                    with support.db_connection() as conn:
+                        with conn.cursor() as cur:
+                            cur.execute(
+                                "UPDATE stokvel_members SET user_id = %s WHERE email = %s AND user_id IS NULL",
+                                (user_record.uid, email)
+                            )
+                            conn.commit()
+                except Exception as e:
+                    print(f"Error updating stokvel_members for pending invites: {e}")
+
                 if not user_record.email_verified:
                     print("User email not verified")  # Debug log
                     flash("Please verify your email address before logging in.")
@@ -956,6 +970,11 @@ def registration():
                             (user.uid, username, email)
                         )
                         local_user_id = cur.fetchone()[0]
+                        # Update stokvel_members for pending invites
+                        cur.execute(
+                            "UPDATE stokvel_members SET user_id = %s WHERE email = %s AND user_id IS NULL",
+                            (user.uid, email)
+                        )
                         conn.commit()
 
                         if local_user_id:
@@ -2148,29 +2167,28 @@ def add_payment_method():
         card_holder_name = request.form.get('card_holder_name')
         card_number = request.form.get('card_number')
         expiry_date = request.form.get('expiry_date')
-        # Note: Storing CVV is not PCI compliant. This is for demonstration.
         cvv = request.form.get('cvv')
         if not all([card_holder_name, card_number, expiry_date, cvv]):
             flash("All card fields are required.", "danger")
             return redirect(url_for('payment_methods'))
-            details_dict = {
-                "card_holder_name": card_holder_name,
-                "card_number": card_number,
-                "expiry_date": expiry_date,
-                # "cvv": cvv 
-            }
-        elif payment_type == 'bank_account':
-            account_holder_name = request.form.get('account_holder_name')
-            account_number = request.form.get('account_number')
-            bank_name = request.form.get('bank_name')
-            if not all([account_holder_name, account_number, bank_name]):
-                flash("All bank account fields are required.", "danger")
-                return redirect(url_for('payment_methods'))
-            details_dict = {
-                "account_holder_name": account_holder_name,
-                "account_number": account_number,
-                "bank_name": bank_name
-            }
+        details_dict = {
+            "card_holder_name": card_holder_name,
+            "card_number": card_number,
+            "expiry_date": expiry_date,
+            # "cvv": cvv
+        }
+    elif payment_type == 'bank_account':
+        account_holder_name = request.form.get('account_holder_name')
+        account_number = request.form.get('account_number')
+        bank_name = request.form.get('bank_name')
+        if not all([account_holder_name, account_number, bank_name]):
+            flash("All bank account fields are required.", "danger")
+            return redirect(url_for('payment_methods'))
+        details_dict = {
+            "account_holder_name": account_holder_name,
+            "account_number": account_number,
+            "bank_name": bank_name
+        }
     else:
         flash("Invalid payment type selected.", "danger")
         return redirect(url_for('payment_methods'))
@@ -3148,6 +3166,28 @@ def add_stokvel_member(stokvel_id):
                     (stokvel_id, email, 'member')
                 )
                 conn.commit()
+        # Send invitation email
+        from flask import url_for
+        stokvel_name = None
+        with support.db_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT name FROM stokvels WHERE id = %s", (stokvel_id,))
+                row = cur.fetchone()
+                if row:
+                    stokvel_name = row[0]
+        invite_link = url_for('register', _external=True)
+        subject = f"You've been invited to join the stokvel '{stokvel_name}' on KasiKash!"
+        html_content = f"""
+        <html><body>
+        <p>Hello,</p>
+        <p>You have been invited to join the stokvel <b>{stokvel_name}</b> on KasiKash.</p>
+        <p>If you already have an account, simply log in with this email address. If not, click below to register:</p>
+        <p><a href='{invite_link}'>Join KasiKash</a></p>
+        <p>Once you register or log in, you'll see your stokvel automatically.</p>
+        <p>Thanks,<br>The KasiKash Team</p>
+        </body></html>
+        """
+        send_email(email, subject, html_content)
         flash("Member invitation sent!", "success")
     except Exception as e:
         print(f"Error adding member: {e}")
