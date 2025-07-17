@@ -10,8 +10,14 @@ import pandas as pd
 from io import BytesIO
 from fpdf import FPDF
 from extensions import csrf
+from translations import get_text
 from datetime import datetime
 import os
+
+# Add this context processor to make 't' available in all templates
+@admin_bp.app_context_processor
+def inject_t():
+    return dict(t=get_text)
 
 def get_user_language():
     return session.get('language_preference', 'en')
@@ -23,7 +29,6 @@ def dashboard():
     if session.get('role') != 'admin':
         flash('Permission denied.', 'danger')
         return redirect(url_for('home'))
-    
     firebase_uid = session.get('user_id')
     stokvels = []
     try:
@@ -182,7 +187,7 @@ def loan_approvals():
                  cur.execute("""
                     SELECT t.id, u.username, u.email, t.amount, t.status, t.transaction_date, t.description as comment
                     FROM transactions t
-                    LEFT JOIN users u ON t.user_id = u.id
+                    LEFT JOIN users u ON t.user_id = u.firebase_uid
                     WHERE t.type = 'payout' AND t.status = %s
                     ORDER BY t.transaction_date DESC
                 """, (status,))
@@ -193,8 +198,12 @@ def loan_approvals():
     return render_template('admin_loan_approvals.html', loans=loans, current_status=status, user_language=user_language)
 
 @admin_bp.route('/loans/approve', methods=['POST'])
+@csrf.exempt
 @login_required
 def approve_loan():
+    import sys
+    print('DEBUG: Form data:', dict(request.form), file=sys.stderr)
+    print('DEBUG: Cookies:', request.cookies, file=sys.stderr)
     if session.get('role') != 'admin':
         flash('Permission denied.', 'danger')
         return redirect(url_for('admin.loan_approvals'))
@@ -213,6 +222,7 @@ def approve_loan():
     return redirect(url_for('admin.loan_approvals', status='pending'))
 
 @admin_bp.route('/loans/reject', methods=['POST'])
+@csrf.exempt
 @login_required
 def reject_loan():
     if session.get('role') != 'admin':
@@ -225,12 +235,15 @@ def reject_loan():
         with support.db_connection() as conn:
             with conn.cursor() as cur:
                 cur.execute("UPDATE transactions SET status = 'rejected', description = CONCAT(description, ' | Admin Comment: ', %s) WHERE id = %s", (comment, loan_id,))
+                if cur.rowcount == 0:
+                    flash('No loan was updated. Please check the loan ID.', 'danger')
+                else:
+                    flash('Loan rejected successfully.', 'success')
                 conn.commit()
-        flash('Loan rejected successfully.', 'success')
     except Exception as e:
         print(f"Error rejecting loan: {e}")
         flash('Failed to reject loan.', 'danger')
-    return redirect(url_for('admin.loan_approvals', status='pending'))
+    return redirect(url_for('admin.loan_approvals', status='rejected'))
 
 @admin_bp.route('/loans/undo', methods=['POST'])
 @login_required
@@ -310,28 +323,49 @@ def events():
 
     if request.method == 'POST':
         stokvel_id = request.form.get('stokvel')
-        event_type = request.form.get('event_type')
+        name = request.form.get('name')
         description = request.form.get('description')
         target_date = request.form.get('target_date')
         send_notification = 'send_notification' in request.form
         try:
             with support.db_connection() as conn:
                 with conn.cursor() as cur:
+                    # Insert event
                     cur.execute(
-                        "INSERT INTO events (stokvel_id, event_type, description, target_date) VALUES (%s, %s, %s, %s)",
-                        (stokvel_id, event_type, description, target_date)
+                        "INSERT INTO events (stokvel_id, name, description, target_date) VALUES (%s, %s, %s, %s) RETURNING id",
+                        (stokvel_id, name, description, target_date)
                     )
+                    event_id = cur.fetchone()[0]
                     conn.commit()
+                    # Fetch all members of the stokvel
+                    cur.execute("SELECT user_id FROM stokvel_members WHERE stokvel_id = %s", (stokvel_id,))
+                    members = cur.fetchall()
+                    # Add event to each member's diary (placeholder logic)
+                    for member in members:
+                        user_id = member[0]
+                        if user_id:
+                            # Example: insert into diary table if exists
+                            try:
+                                cur.execute("INSERT INTO diary (user_id, event_id, event_name, event_date, description) VALUES (%s, %s, %s, %s, %s)",
+                                    (user_id, event_id, name, target_date, description))
+                            except Exception as diary_e:
+                                print(f"Could not add to diary for user {user_id}: {diary_e}")
+                    conn.commit()
+                    # Notify all members and the creator
                     if send_notification:
-                        cur.execute("SELECT user_id FROM stokvel_members WHERE stokvel_id = %s", (stokvel_id,))
-                        members = cur.fetchall()
                         for member in members:
                             user_id = member[0]
                             if user_id:
-                                message = f"New event of type '{event_type}' has been scheduled for your stokvel."
+                                message = f"New event of type '{name}' has been scheduled for your stokvel."
                                 link = url_for('home')
                                 create_notification(user_id, message, link_url=link, notification_type='event')
-            flash('Event created successfully!', 'success')
+                        # Also notify the creator (admin)
+                        creator_id = session.get('user_id')
+                        if creator_id:
+                            message = f"You have created a new event '{name}' for your stokvel."
+                            link = url_for('admin.events')
+                            create_notification(creator_id, message, link_url=link, notification_type='event')
+            flash('Event created and notifications sent!', 'success')
         except Exception as e:
             print(f"Error creating event: {e}")
             flash('Failed to create event.', 'danger')
@@ -524,7 +558,7 @@ def kyc_approvals():
             with conn.cursor() as cur:
                 if search_query:
                     cur.execute("""
-                        SELECT id, email, id_document, proof_of_address, created_at
+                        SELECT id, email, id_document, proof_of_address, created_at, kyc_approved_at
                         FROM users
                         WHERE (id_document IS NOT NULL AND id_document != '')
                           AND (proof_of_address IS NOT NULL AND proof_of_address != '')
@@ -533,7 +567,7 @@ def kyc_approvals():
                     """, (f'%{search_query}%',))
                 else:
                     cur.execute("""
-                        SELECT id, email, id_document, proof_of_address, created_at
+                        SELECT id, email, id_document, proof_of_address, created_at, kyc_approved_at
                         FROM users
                         WHERE (id_document IS NOT NULL AND id_document != '')
                           AND (proof_of_address IS NOT NULL AND proof_of_address != '')
@@ -555,7 +589,7 @@ def approve_kyc(user_id):
         return redirect(url_for('admin.kyc_approvals'))
     try:
         with support.db_connection() as conn:
-            with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            with conn.cursor() as cur:
                 # Get email from the provided user_id to ensure we update the correct, active user
                 cur.execute("SELECT email, firebase_uid FROM users WHERE id = %s", (user_id,))
                 user_data = cur.fetchone()
@@ -595,7 +629,7 @@ def reject_kyc(user_id):
     rejection_reason = request.form.get('reason', 'Your documents could not be verified. Please re-upload clear and valid documents.')
     try:
         with support.db_connection() as conn:
-            with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            with conn.cursor() as cur:
                 # Get email from the provided user_id to ensure we update the correct, active user
                 cur.execute("SELECT email, firebase_uid FROM users WHERE id = %s", (user_id,))
                 user_data = cur.fetchone()
@@ -654,15 +688,22 @@ def settings():
                         meeting_reminders BOOLEAN,
                         data_retention VARCHAR(10),
                         enable_2fa BOOLEAN,
-                        meeting_day VARCHAR(10)
+                        meeting_day VARCHAR(10),
+                        enable_dual_approval BOOLEAN,
+                        withdrawal_threshold INTEGER,
+                        enable_attendance_tracking BOOLEAN,
+                        absence_penalty INTEGER,
+                        missed_meetings_threshold INTEGER
                     )
                 ''')
                 # Ensure at least one row exists
                 cur.execute('SELECT COUNT(*) FROM admin_settings')
                 if cur.fetchone()[0] == 0:
                     cur.execute('''
-                        INSERT INTO admin_settings (contribution_amount, late_penalty, grace_period, max_loan_percent, interest_rate, repayment_period, language, role_management, loan_approval_roles, meeting_frequency, meeting_time, meeting_reminders, data_retention, enable_2fa, meeting_day)
-                        VALUES (100, 10, 7, 50, 5, 6, 'en', '', '', 'monthly', '14:00', FALSE, '5', FALSE, 'Monday')
+                        INSERT INTO admin_settings (
+                            contribution_amount, late_penalty, grace_period, max_loan_percent, interest_rate, repayment_period, language, role_management, loan_approval_roles, meeting_frequency, meeting_time, meeting_reminders, data_retention, enable_2fa, meeting_day, enable_dual_approval, withdrawal_threshold, enable_attendance_tracking, absence_penalty, missed_meetings_threshold
+                        )
+                        VALUES (100, 10, 7, 50, 5, 6, 'en', '', '', 'monthly', '14:00', FALSE, '5', FALSE, 'Monday', FALSE, 1000, FALSE, 50, 3)
                     ''')
                     conn.commit()
     except Exception as e:
@@ -684,6 +725,11 @@ def settings():
         data_retention = request.form.get('data_retention')
         enable_2fa = request.form.get('enable_2fa') == 'on'
         meeting_day = request.form.get('meeting_day')
+        enable_dual_approval = request.form.get('enable_dual_approval') == 'on'
+        withdrawal_threshold = request.form.get('withdrawal_threshold', type=int)
+        enable_attendance_tracking = request.form.get('enable_attendance_tracking') == 'on'
+        absence_penalty = request.form.get('absence_penalty', type=int)
+        missed_meetings_threshold = request.form.get('missed_meetings_threshold', type=int)
 
         try:
             with support.db_connection() as conn:
@@ -707,24 +753,29 @@ def settings():
                                 meeting_reminders=%s,
                                 data_retention=%s,
                                 enable_2fa=%s,
-                                meeting_day=%s
+                                meeting_day=%s,
+                                enable_dual_approval=%s,
+                                withdrawal_threshold=%s,
+                                enable_attendance_tracking=%s,
+                                absence_penalty=%s,
+                                missed_meetings_threshold=%s
                             WHERE id=%s
                         ''', (
                             contribution_amount, late_penalty, grace_period, max_loan_percent, interest_rate, repayment_period,
                             language, role_management, loan_approval_roles, meeting_frequency, meeting_time, meeting_reminders,
-                            data_retention, enable_2fa, meeting_day, row[0]
+                            data_retention, enable_2fa, meeting_day, enable_dual_approval, withdrawal_threshold, enable_attendance_tracking, absence_penalty, missed_meetings_threshold, row[0]
                         ))
                     else:
                         cur.execute('''
                             INSERT INTO admin_settings (
                                 contribution_amount, late_penalty, grace_period, max_loan_percent, interest_rate, repayment_period,
                                 language, role_management, loan_approval_roles, meeting_frequency, meeting_time, meeting_reminders,
-                                data_retention, enable_2fa, meeting_day
-                            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                                data_retention, enable_2fa, meeting_day, enable_dual_approval, withdrawal_threshold, enable_attendance_tracking, absence_penalty, missed_meetings_threshold
+                            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                         ''', (
                             contribution_amount, late_penalty, grace_period, max_loan_percent, interest_rate, repayment_period,
                             language, role_management, loan_approval_roles, meeting_frequency, meeting_time, meeting_reminders,
-                            data_retention, enable_2fa, meeting_day
+                            data_retention, enable_2fa, meeting_day, enable_dual_approval, withdrawal_threshold, enable_attendance_tracking, absence_penalty, missed_meetings_threshold
                         ))
                 conn.commit()
             session['language_preference'] = language  # Ensure session is updated for immediate effect
@@ -749,7 +800,12 @@ def settings():
         'meeting_reminders': False,
         'data_retention': '5',
         'enable_2fa': False,
-        'meeting_day': 'Monday'
+        'meeting_day': 'Monday',
+        'enable_dual_approval': False,
+        'withdrawal_threshold': 1000,
+        'enable_attendance_tracking': False,
+        'absence_penalty': 50,
+        'missed_meetings_threshold': 3
     }
     try:
         with support.db_connection() as conn:
@@ -788,11 +844,29 @@ def settings():
     except Exception as e:
         print(f"Error fetching audit logs: {e}")
 
+    # Fetch meeting attendance data
+    attendance_data = []
+    try:
+        with support.db_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT meeting_name, meeting_date, present_count, absent_count FROM meeting_attendance ORDER BY meeting_date DESC LIMIT 20")
+                attendance_data = [
+                    {
+                        'meeting': row[0],
+                        'date': row[1].strftime('%Y-%m-%d') if row[1] else '',
+                        'present': row[2],
+                        'absent': row[3]
+                    }
+                    for row in cur.fetchall()
+                ]
+    except Exception as e:
+        print(f'Error fetching attendance data: {e}')
+
     return render_template(
         'admin_settings.html',
         default_settings=default_settings,
         audit_logs=audit_logs,
-        user_language=user_language
+        attendance_data=attendance_data
     )
 
 @admin_bp.route('/export/members')
@@ -880,6 +954,72 @@ def export_transactions():
     else:
         flash('Unsupported export format.', 'danger')
         return redirect(url_for('admin.settings'))
+
+@admin_bp.route('/admin/add_attendance', methods=['POST'])
+@login_required
+def add_attendance():
+    print('add_attendance route called')
+    if 'user_id' not in session or session.get('role') != 'admin':
+        flash('You do not have permission to perform this action.', 'danger')
+        return redirect(url_for('admin.settings'))
+    meeting_name = request.form.get('meeting_name')
+    meeting_date = request.form.get('meeting_date')
+    present_count = request.form.get('present_count', type=int)
+    absent_count = request.form.get('absent_count', type=int)
+    try:
+        with support.db_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute('''
+                    INSERT INTO meeting_attendance (meeting_name, meeting_date, present_count, absent_count)
+                    VALUES (%s, %s, %s, %s)
+                ''', (meeting_name, meeting_date, present_count, absent_count))
+            conn.commit()
+        flash('Attendance record added.', 'success')
+    except Exception as e:
+        flash(f'Error adding attendance record: {e}', 'danger')
+    return redirect(url_for('admin.settings'))
+
+@admin_bp.route('/admin/edit_attendance/<int:attendance_id>', methods=['POST'])
+@login_required
+def edit_attendance(attendance_id):
+    print(f'edit_attendance route called for id={attendance_id}')
+    if 'user_id' not in session or session.get('role') != 'admin':
+        flash('You do not have permission to perform this action.', 'danger')
+        return redirect(url_for('admin.settings'))
+    meeting_name = request.form.get('meeting_name')
+    meeting_date = request.form.get('meeting_date')
+    present_count = request.form.get('present_count', type=int)
+    absent_count = request.form.get('absent_count', type=int)
+    try:
+        with support.db_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute('''
+                    UPDATE meeting_attendance
+                    SET meeting_name=%s, meeting_date=%s, present_count=%s, absent_count=%s
+                    WHERE id=%s
+                ''', (meeting_name, meeting_date, present_count, absent_count, attendance_id))
+            conn.commit()
+        flash('Attendance record updated.', 'success')
+    except Exception as e:
+        print(f"Error updating attendance record: {e}")
+        flash(f'Error updating attendance record: {e}', 'danger')
+    return redirect(url_for('admin.settings'))
+
+@admin_bp.route('/admin/delete_attendance/<int:attendance_id>', methods=['POST'])
+@login_required
+def delete_attendance(attendance_id):
+    if 'user_id' not in session or session.get('role') != 'admin':
+        flash('You do not have permission to perform this action.', 'danger')
+        return redirect(url_for('admin.settings'))
+    try:
+        with support.db_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute('DELETE FROM meeting_attendance WHERE id=%s', (attendance_id,))
+            conn.commit()
+        flash('Attendance record deleted.', 'success')
+    except Exception as e:
+        flash(f'Error deleting attendance record: {e}', 'danger')
+    return redirect(url_for('admin.settings'))
 
 @admin_bp.route('/set-language', methods=['POST'])
 def set_language():
@@ -1292,198 +1432,5 @@ def reward_analytics():
     if session.get('role') != 'admin':
         flash('Permission denied.', 'danger')
         return redirect(url_for('admin.virtual_rewards'))
-    
-    try:
-        with support.db_connection() as conn:
-            with conn.cursor() as cur:
-                # Monthly reward distribution
-                cur.execute("""
-                    SELECT 
-                        DATE_TRUNC('month', created_at) as month,
-                        SUM(amount) as total_amount,
-                        COUNT(*) as transaction_count
-                    FROM reward_transactions
-                    WHERE amount > 0
-                    GROUP BY DATE_TRUNC('month', created_at)
-                    ORDER BY month DESC
-                    LIMIT 12
-                """)
-                monthly_data = cur.fetchall()
-                
-                # Top reward earners
-                cur.execute("""
-                    SELECT u.username, u.email, SUM(rt.amount) as total_earned
-                    FROM reward_transactions rt
-                    JOIN users u ON rt.user_id = u.id
-                    WHERE rt.amount > 0
-                    GROUP BY u.id, u.username, u.email
-                    ORDER BY total_earned DESC
-                    LIMIT 10
-                """)
-                top_earners = cur.fetchall()
-                
-                # Reward type distribution
-                cur.execute("""
-                    SELECT transaction_type, COUNT(*) as count, SUM(amount) as total
-                    FROM reward_transactions
-                    GROUP BY transaction_type
-                    ORDER BY total DESC
-                """)
-                type_distribution = cur.fetchall()
-                
-    except Exception as e:
-        print(f"Error fetching reward analytics: {e}")
-        monthly_data = []
-        top_earners = []
-        type_distribution = []
-    
-    return render_template('admin_reward_analytics.html', 
-                         monthly_data=monthly_data,
-                         top_earners=top_earners,
-                         type_distribution=type_distribution)
-
-@admin_bp.route('/virtual-rewards/export')
-@login_required
-def export_reward_data():
-    if session.get('role') != 'admin':
-        flash('Permission denied.', 'danger')
-        return redirect(url_for('admin.virtual_rewards'))
-    
-    export_type = request.args.get('type', 'transactions')
-    export_format = request.args.get('format', 'csv')
-    
-    try:
-        with support.db_connection() as conn:
-            with conn.cursor() as cur:
-                if export_type == 'transactions':
-                    cur.execute("""
-                        SELECT rt.created_at, u.username, u.email, rt.transaction_type, 
-                               rt.description, rt.amount
-                        FROM reward_transactions rt
-                        JOIN users u ON rt.user_id = u.id
-                        ORDER BY rt.created_at DESC
-                    """)
-                    data = cur.fetchall()
-                    columns = ['Date', 'Username', 'Email', 'Type', 'Description', 'Amount']
-                    filename = 'reward_transactions'
-                elif export_type == 'balances':
-                    cur.execute("""
-                        SELECT u.username, u.email, vrc.balance, vrc.card_number
-                        FROM users u
-                        LEFT JOIN virtual_reward_cards vrc ON u.id = vrc.user_id
-                        ORDER BY vrc.balance DESC
-                    """)
-                    data = cur.fetchall()
-                    columns = ['Username', 'Email', 'Balance', 'Card Number']
-                    filename = 'user_balances'
-                else:
-                    flash('Invalid export type.', 'danger')
-                    return redirect(url_for('admin.virtual_rewards'))
-        
-        if export_format == 'csv':
-            def generate():
-                yield ','.join(columns) + '\n'
-                for row in data:
-                    yield ','.join([str(item) if item else '' for item in row]) + '\n'
-            
-            return Response(generate(), mimetype='text/csv',
-                          headers={"Content-Disposition": f"attachment;filename={filename}.csv"})
-        
-        elif export_format == 'excel':
-            df = pd.DataFrame(data, columns=columns)
-            output = BytesIO()
-            df.to_excel(output, index=False, engine='openpyxl')
-            output.seek(0)
-            return Response(output.getvalue(), 
-                          mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                          headers={"Content-Disposition": f"attachment;filename={filename}.xlsx"})
-        
-        else:
-            flash('Unsupported export format.', 'danger')
-            
-    except Exception as e:
-        print(f"Error exporting reward data: {e}")
-        flash('Could not export reward data.', 'danger')
-    
-    return redirect(url_for('admin.virtual_rewards'))
-
-@admin_bp.route('/virtual-rewards/rules', methods=['GET', 'POST'])
-@login_required
-def reward_rules():
-    if session.get('role') != 'admin':
-        flash('Permission denied.', 'danger')
-        return redirect(url_for('admin.virtual_rewards'))
-    
-    if request.method == 'POST':
-        # Save reward rules
-        try:
-            with support.db_connection() as conn:
-                with conn.cursor() as cur:
-                    # Check if table exists, create if not
-                    cur.execute("""
-                        CREATE TABLE IF NOT EXISTS reward_rules (
-                            id SERIAL PRIMARY KEY,
-                            rule_name VARCHAR(100) NOT NULL UNIQUE,
-                            rule_value VARCHAR(255) NOT NULL,
-                            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                            updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-                        )
-                    """)
-                    
-                    # Clear existing rules
-                    cur.execute("DELETE FROM reward_rules")
-                    
-                    # Insert new rules
-                    rules = [
-                        ('contribution_multiplier', request.form.get('contribution_multiplier', '1')),
-                        ('welcome_bonus', request.form.get('welcome_bonus', '0')),
-                        ('referral_bonus', request.form.get('referral_bonus', '0')),
-                        ('monthly_bonus', request.form.get('monthly_bonus', '0')),
-                        ('event_attendance_bonus', request.form.get('event_attendance_bonus', '0')),
-                        ('loan_payment_bonus', request.form.get('loan_payment_bonus', '0')),
-                    ]
-                    
-                    for rule_name, rule_value in rules:
-                        cur.execute("""
-                            INSERT INTO reward_rules (rule_name, rule_value, created_at)
-                            VALUES (%s, %s, CURRENT_TIMESTAMP)
-                        """, (rule_name, rule_value))
-                    
-            conn.commit()
-            flash('Reward rules updated successfully!', 'success')
-        
-        except Exception as e:
-            print(f"Error updating reward rules: {e}")
-            flash('Could not update reward rules.', 'danger')
-    
-    # Load current rules
-    try:
-        with support.db_connection() as conn:
-            with conn.cursor() as cur:
-                # Check if table exists first
-                cur.execute("""
-                    SELECT EXISTS (
-                        SELECT FROM information_schema.tables 
-                        WHERE table_name = 'reward_rules'
-                    );
-                """)
-                table_exists = cur.fetchone()[0]
-                
-                if table_exists:
-                    cur.execute("SELECT rule_name, rule_value FROM reward_rules")
-                    rules = dict(cur.fetchall())
-                else:
-                    rules = {}
-    except Exception as e:
-        print(f"Error loading reward rules: {e}")
-        rules = {}
-    
-    return render_template('admin_reward_rules.html', rules=rules)
-
-@admin_bp.route('/member-rewards')
-@login_required
-def member_rewards():
-    if session.get('role') != 'admin':
-        flash('Permission denied.', 'danger')
-        return redirect(url_for('home'))
-    return render_template('admin_member_rewards.html')
+    # TODO: Add analytics logic here if needed
+    return render_template('admin_reward_analytics.html')

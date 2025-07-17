@@ -100,7 +100,7 @@
          class="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-md font-medium border border-cyan-400">{{ t('Overview') }}</a>
       <a href="{{ url_for('admin.reward_analytics') }}" 
          class="px-4 py-2 bg-gray-700 text-gray-300 rounded-md font-medium hover:bg-gray-600 border border-gray-600">{{ t('Analytics') }}</a>
-      <a href="{{ url_for('admin.reward_rules') }}" 
+      <a href="{{ url_for('admin.reward_analytics') }}" 
          class="px-4 py-2 bg-gray-700 text-gray-300 rounded-md font-medium hover:bg-gray-600 border border-gray-600">{{ t('Rules') }}</a>
     </div>
   </div>
@@ -215,22 +215,21 @@
   <div class="export-section mb-6">
     <h3 class="text-lg font-semibold page-header mb-3">Export Data</h3>
     <div class="flex flex-wrap gap-2">
-      <a href="{{ url_for('admin.export_reward_data', type='transactions', format='csv') }}" 
-         class="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white px-4 py-2 rounded-md text-sm border border-cyan-400">
+      {#
+      <a href="#" class="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white px-4 py-2 rounded-md text-sm border border-cyan-400">
         Export Transactions (CSV)
       </a>
-      <a href="{{ url_for('admin.export_reward_data', type='transactions', format='excel') }}" 
-         class="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-4 py-2 rounded-md text-sm border border-green-400">
+      <a href="#" class="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-4 py-2 rounded-md text-sm border border-green-400">
         Export Transactions (Excel)
       </a>
-      <a href="{{ url_for('admin.export_reward_data', type='balances', format='csv') }}" 
-         class="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white px-4 py-2 rounded-md text-sm border border-purple-400">
+      <a href="#" class="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white px-4 py-2 rounded-md text-sm border border-purple-400">
         Export Balances (CSV)
       </a>
-      <a href="{{ url_for('admin.export_reward_data', type='balances', format='excel') }}" 
-         class="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white px-4 py-2 rounded-md text-sm border border-orange-400">
+      <a href="#" class="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white px-4 py-2 rounded-md text-sm border border-orange-400">
         Export Balances (Excel)
       </a>
+      #}
+      <!-- TODO: Implement export_reward_data endpoint for reward transactions and balances -->
     </div>
   </div>
 

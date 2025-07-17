@@ -629,6 +629,18 @@ form.contFrm {
     margin-top: 20px;
 }
 
+select, .filter-select, .dropdown {
+    color: #222;
+    font-weight: 500;
+}
+
+/* Make dropdowns and autocomplete menus readable */
+select, .dropdown, .filter-select, .dropdown-menu, .autocomplete-menu, input[type='text'] {
+    background: #fff !important;
+    color: #111 !important;
+    font-weight: 500;
+}
+
 /* Light mode support for user interface */
 body.light-mode {
     background: var(--sb-lightblue) !important;

@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, session, flash, jsonify, url_for, Response, send_file
 import os
-from datetime import timedelta, datetime
+from datetime import timedelta, datetime, date
 import pandas as pd
 import plotly
 import plotly.express as px
@@ -12,7 +12,7 @@ import psycopg2
 import psycopg2.extras
 from dotenv import load_dotenv
 import openai
-from flask_wtf.csrf import CSRFProtect, generate_csrf
+from extensions import csrf
 import firebase_admin
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField
@@ -41,6 +41,9 @@ from email.mime.multipart import MIMEMultipart
 from werkzeug.utils import secure_filename
 import re
 from decimal import Decimal, InvalidOperation
+from flask_babel import Babel
+from flask_socketio import SocketIO, join_room, emit
+from calendar import monthrange
 from reportlab.lib.enums import TA_CENTER, TA_RIGHT
 
 # Load environment variables
@@ -59,6 +62,7 @@ KYC_UPLOAD_FOLDER = 'static/kyc_docs'
 ALLOWED_KYC_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'pdf'}
 app.config['KYC_UPLOAD_FOLDER'] = KYC_UPLOAD_FOLDER
 
+csrf.init_app(app)  # Initialize CSRF protection
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit(
@@ -154,7 +158,6 @@ print(
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 app.secret_key = os.getenv('SECRET_KEY')
-csrf = CSRFProtect(app)  # Initialize CSRF protection
 app.config['SESSION_TYPE'] = 'filesystem'
 app.config['SESSION_PERMANENT'] = False
 app.config['SESSION_FILE_DIR'] = os.path.join(
@@ -314,8 +317,36 @@ def feedback():
 def home():
     if 'user_id' not in session:
         return redirect('/login')
-    
     try:
+        # Get month and year from query params, default to current month/year
+        month = request.args.get('month', type=int)
+        year = request.args.get('year', type=int)
+        today = date.today()
+        if not month:
+            month = today.month
+        if not year:
+            year = today.year
+
+        # Helper to generate calendar days
+        def generate_calendar_days(year, month, events=None):
+            days = []
+            num_days = monthrange(year, month)[1]
+            for d in range(1, num_days + 1):
+                day_date = date(year, month, d)
+                is_today = (day_date == today)
+                day_events = []
+                if events:
+                    # Filter events for this day (assume events is a list of dicts with 'date' key)
+                    for ev in events:
+                        try:
+                            ev_date = date.fromisoformat(ev.get('date'))
+                            if ev_date == day_date:
+                                day_events.append(ev.get('title', 'Event'))
+                        except Exception:
+                            pass
+                days.append({'date': d, 'is_today': is_today, 'events': day_events})
+            return days
+
         # Initialize default values
         username = str(session.get('username', 'User'))
         current_balance = float(0.00)
@@ -344,49 +375,56 @@ def home():
             "username": username,
             "profile_picture": None,
             "email": None,
-            # user["joined_date"] = None  # Remove or comment out this line
         }
         try:
             with support.db_connection() as conn:
                 with conn.cursor() as cur:
                     cur.execute(
-    "SELECT username, email, profile_picture FROM users WHERE firebase_uid = %s",
-    (session['user_id'],
-    ))
+                        "SELECT username, email, profile_picture FROM users WHERE firebase_uid = %s",
+                        (session['user_id'],)
+                    )
                     user_data = cur.fetchone()
                     if user_data:
                         user["username"] = user_data[0]
                         user["email"] = user_data[1]
                         user["profile_picture"] = user_data[2]
-                        # user["joined_date"] = user_data[3]  # Remove or
-                        # comment out this line
         except Exception as e:
             print(f"User info fetch error: {e}")
 
-        notification_count = get_notification_count(
-    session.get('user_id'))  # Get notification count
+        notification_count = get_notification_count(session.get('user_id'))
+
+        # Generate calendar days for the selected month/year
+        calendar_days = generate_calendar_days(year, month, calendar_events)
+        calendar_month = date(year, month, 1).strftime('%B')
+        calendar_month_num = month
+        calendar_year = year
 
         return render_template('dashboard.html',
-                            username=username,
-                            current_balance=current_balance,
-                            total_contributions=total_contributions,
-                            total_withdrawals=total_withdrawals,
-                            pending_repayments=pending_repayments,
-                            recent_contributions=recent_contributions,
-                            upcoming_contributions=upcoming_contributions,
-                            missed_contributions=missed_contributions,
-                            outstanding_loans=outstanding_loans,
-                            loan_requests=loan_requests,
-                            repayment_progress=repayment_progress,
-                            member_count=member_count,
-                            monthly_target=monthly_target,
-                            total_group_balance=total_group_balance,
-                            calendar_events=calendar_events,
-                            savings_growth_chart_data=savings_growth_chart_data,
-                            contribution_breakdown_chart_data=contribution_breakdown_chart_data,
-                            loan_trends_chart_data=loan_trends_chart_data,
-                               notification_count=notification_count,
-                               user=user)  # Pass user dictionary
+            username=username,
+            current_balance=current_balance,
+            total_contributions=total_contributions,
+            total_withdrawals=total_withdrawals,
+            pending_repayments=pending_repayments,
+            recent_contributions=recent_contributions,
+            upcoming_contributions=upcoming_contributions,
+            missed_contributions=missed_contributions,
+            outstanding_loans=outstanding_loans,
+            loan_requests=loan_requests,
+            repayment_progress=repayment_progress,
+            member_count=member_count,
+            monthly_target=monthly_target,
+            total_group_balance=total_group_balance,
+            calendar_events=calendar_events,
+            calendar_days=calendar_days,
+            calendar_month=calendar_month,
+            calendar_month_num=calendar_month_num,
+            calendar_year=calendar_year,
+            savings_growth_chart_data=savings_growth_chart_data,
+            contribution_breakdown_chart_data=contribution_breakdown_chart_data,
+            loan_trends_chart_data=loan_trends_chart_data,
+            notification_count=notification_count,
+            user=user
+        )
     except Exception as e:
         print(f"Dashboard error: {str(e)}")
         flash("Error loading dashboard. Please try again.")
@@ -519,6 +557,7 @@ def login_validation():
                                     # firebase_uid *before* updating users
                                     # table
                                     update_queries = [
+
                                         ("UPDATE stokvels SET created_by = %s WHERE created_by = %s",
                                          (new_firebase_uid, old_firebase_uid)),
                                         # Assuming stokvel_members uses
@@ -541,6 +580,14 @@ def login_validation():
                                          (new_firebase_uid, old_firebase_uid)),
                                         ("UPDATE savings_goals SET user_id = %s WHERE user_id = %s",
                                          (new_firebase_uid, old_firebase_uid)),
+                                        ("UPDATE stokvels SET created_by = %s WHERE created_by = %s", (new_firebase_uid, old_firebase_uid)),
+                                        ("UPDATE stokvel_members SET user_id = %s WHERE user_id = %s", (new_firebase_uid, old_firebase_uid)),
+                                        ("UPDATE transactions SET user_id = %s WHERE user_id = %s", (internal_user_id, internal_user_id)),
+                                        ("UPDATE chat_history SET user_id = %s WHERE user_id = %s", (new_firebase_uid, old_firebase_uid)),
+                                        ("UPDATE chatbot_preferences SET user_id = %s WHERE user_id = %s", (new_firebase_uid, old_firebase_uid)),
+                                        ("UPDATE payment_methods SET user_id = %s WHERE user_id = %s", (new_firebase_uid, old_firebase_uid)),
+                                        ("UPDATE payouts SET user_id = %s WHERE user_id = %s", (new_firebase_uid, old_firebase_uid)),
+                                        ("UPDATE savings_goals SET user_id = %s WHERE user_id = %s", (new_firebase_uid, old_firebase_uid)),
                                     ]
 
                                     for query, params in update_queries:
@@ -705,8 +752,8 @@ def forgot_password():
                                     # Update stokvel_members table
                                     cur.execute("""
                                         UPDATE stokvel_members 
-                                        SET firebase_uid = %s 
-                                        WHERE firebase_uid = %s
+                                        SET user_id = %s 
+                                        WHERE user_id = %s
                                     """, (new_firebase_uid, old_firebase_uid))
                                     # Update contributions table
                                     cur.execute("""
@@ -891,17 +938,22 @@ def registration():
                     email=email,
                     password=passwd,
                     display_name=username,
-                    email_verified=True  # Set to True since we're using email/password auth
+                    email_verified=False  # Set to False so user must verify
                 )
                 print(f"Created Firebase user: {user.uid}")
 
                 # Store Firebase UID and username/email in your PostgreSQL
                 # database
+                # Generate email verification link and send email
+                verification_link = auth.generate_email_verification_link(email)
+                send_email_verification(email, verification_link)
+
+                # Store Firebase UID and username/email in your PostgreSQL database
                 with support.db_connection() as conn:
                     with conn.cursor() as cur:
                         cur.execute(
-                            "INSERT INTO users (firebase_uid, username, email, password) VALUES (%s, %s, %s, %s) RETURNING id",
-                            (user.uid, username, email, passwd)
+                            "INSERT INTO users (firebase_uid, username, email) VALUES (%s, %s, %s) RETURNING id",
+                            (user.uid, username, email)
                         )
                         local_user_id = cur.fetchone()[0]
                         conn.commit()
@@ -1055,7 +1107,18 @@ def create_stokvel():
     (stokvel_id,
     user_id,
      'admin'))
-        
+        # Add the creator as the first member or update their role to admin if already a member
+        existing = support.execute_query("search", "SELECT id FROM stokvel_members WHERE stokvel_id = %s AND user_id = %s", (stokvel_id, user_id))
+        if existing:
+            support.execute_query("update", "UPDATE stokvel_members SET role = %s WHERE stokvel_id = %s AND user_id = %s", ('admin', stokvel_id, user_id))
+        else:
+            support.execute_query("insert", "INSERT INTO stokvel_members (stokvel_id, user_id, role) VALUES (%s, %s, %s)", (stokvel_id, user_id, 'admin'))
+        # Make the user a global admin and update session
+        with support.db_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("UPDATE users SET role = 'admin' WHERE firebase_uid = %s", (user_id,))
+                conn.commit()
+        session['role'] = 'admin'
         # Create a notification for the creator
         message = f"You successfully created the stokvel '{name}'!"
         link = url_for('view_stokvel_members', stokvel_id=stokvel_id)
@@ -1117,17 +1180,17 @@ def contributions():
                             details = json.loads(details)
                         except json.JSONDecodeError:
                             details = {}
-                    
+                    # Ensure details is a dict
+                    if not isinstance(details, dict):
+                        details = {}
                     if method_type in ['credit_card', 'debit_card', 'card']:
                         card_number = details.get('card_number', '')
-                        last4 = card_number[-4:] if len(
-                            card_number) >= 4 else card_number
+                        last4 = card_number[-4:] if len(card_number) >= 4 else card_number
                         payment_info_text = f"Using card ending in {last4}"
                     elif method_type == 'bank_account':
                         bank_name = details.get('bank_name', 'bank')
                         account_number = details.get('account_number', '')
-                        last4 = account_number[-4:] if len(
-                            account_number) >= 4 else account_number
+                        last4 = account_number[-4:] if len(account_number) >= 4 else account_number
                         payment_info_text = f"Using {bank_name} account ending in {last4}"
 
         # Process and render as before
@@ -1478,7 +1541,8 @@ def savings_goals():
                             details = json.loads(details)
                         except json.JSONDecodeError:
                             details = {}
-            
+                    if not isinstance(details, dict):
+                        details = {}
                     if method_type in ['credit_card', 'debit_card', 'card']:
                         card_number = details.get('card_number', '')
                         last4 = card_number[-4:] if len(card_number) >= 4 else card_number
@@ -3003,6 +3067,112 @@ for rule in app.url_map.iter_rules():
 app.register_blueprint(advisor_bp)
 
 # ... rest of the code ...
+
+# Initialize Flask-SocketIO
+socketio = SocketIO(app, cors_allowed_origins="*")
+
+# --- Real-time Stokvel Chat Events ---
+@socketio.on('join_stokvel_room')
+def handle_join_stokvel_room(data):
+    stokvel_id = data.get('stokvel_id')
+    user_id = session.get('user_id')
+    if stokvel_id and user_id:
+        join_room(f'stokvel_{stokvel_id}')
+        emit('status', {'msg': f'User joined stokvel chat.'}, room=f'stokvel_{stokvel_id}')
+
+@socketio.on('send_message')
+def handle_send_message(data):
+    stokvel_id = data.get('stokvel_id')
+    message = data.get('message')
+    user_id = session.get('user_id')
+    username = None
+    if not (stokvel_id and message and user_id):
+        return
+    # Save message to DB
+    with support.db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute("INSERT INTO stokvel_chat_messages (stokvel_id, user_id, message) VALUES (%s, %s, %s) RETURNING timestamp", (stokvel_id, user_id, message))
+            timestamp = cur.fetchone()[0]
+            conn.commit()
+            # Get username for display
+            cur.execute("SELECT username FROM users WHERE firebase_uid = %s", (user_id,))
+            user_row = cur.fetchone()
+            if user_row:
+                username = user_row[0]
+    emit('receive_message', {
+        'stokvel_id': stokvel_id,
+        'user_id': user_id,
+        'username': username,
+        'message': message,
+        'timestamp': str(timestamp)
+    }, room=f'stokvel_{stokvel_id}')
+
+@socketio.on('fetch_messages')
+def handle_fetch_messages(data):
+    stokvel_id = data.get('stokvel_id')
+    if not stokvel_id:
+        return
+    messages = []
+    with support.db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT m.user_id, u.username, m.message, m.timestamp
+                FROM stokvel_chat_messages m
+                JOIN users u ON m.user_id = u.firebase_uid
+                WHERE m.stokvel_id = %s
+                ORDER BY m.timestamp ASC
+            """, (stokvel_id,))
+            for row in cur.fetchall():
+                messages.append({
+                    'user_id': row[0],
+                    'username': row[1],
+                    'message': row[2],
+                    'timestamp': str(row[3])
+                })
+    emit('chat_history', {'messages': messages})
+
+@app.route('/stokvel/<int:stokvel_id>/add_member', methods=['POST'])
+@login_required
+def add_stokvel_member(stokvel_id):
+    email = request.form.get('email')
+    if not email:
+        flash("Email is required to add a member.", "danger")
+        return redirect(url_for('view_stokvel_members', stokvel_id=stokvel_id))
+
+    try:
+        with support.db_connection() as conn:
+            with conn.cursor() as cur:
+                # Add a pending member with just an email (user_id is NULL)
+                cur.execute(
+                    "INSERT INTO stokvel_members (stokvel_id, email, role) VALUES (%s, %s, %s)",
+                    (stokvel_id, email, 'member')
+                )
+                conn.commit()
+        flash("Member invitation sent!", "success")
+    except Exception as e:
+        print(f"Error adding member: {e}")
+        flash("Failed to add member. Please try again.", "danger")
+    return redirect(url_for('view_stokvel_members', stokvel_id=stokvel_id))
+
+@app.route('/stokvel/<int:stokvel_id>/remove_member/<int:member_id>', methods=['POST'])
+@login_required
+def remove_stokvel_member(stokvel_id, member_id):
+    try:
+        with support.db_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "DELETE FROM stokvel_members WHERE id = %s AND stokvel_id = %s",
+                    (member_id, stokvel_id)
+                )
+                conn.commit()
+        flash("Member removed successfully.", "success")
+    except Exception as e:
+        flash(f"Failed to remove member: {e}", "danger")
+    return redirect(url_for('view_stokvel_members', stokvel_id=stokvel_id))
+
+# --- Replace app.run with socketio.run ---
+if __name__ == "__main__":
+    socketio.run(app, host="127.0.0.1", port=5001, debug=True)
 
 # Inject _ into Jinja2 context for translations
 try:

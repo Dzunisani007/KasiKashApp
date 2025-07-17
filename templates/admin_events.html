@@ -5,6 +5,7 @@
 <!-- Event creation form -->
 <div class="flex flex-wrap items-center gap-4 mb-6 bg-[#101c2c] rounded-xl shadow-lg p-4">
   <form id="createEventForm" method="POST" action="{{ url_for('admin.events') }}" class="flex flex-col gap-3 flex-1 min-w-[250px]">
+    {{ csrf_token() }}
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <div class="flex flex-wrap gap-3">
       <div class="flex-1 min-w-[180px]">
@@ -34,8 +35,8 @@
       </div>
     </div>
     <div>
-      <label class="block font-semibold mb-1" style="color:#60efff;">Description</label>
-      <textarea name="description" class="w-full border border-[#22304a] rounded-lg px-4 py-2 text-black focus:outline-none focus:ring-2 focus:ring-[#60efff]" rows="2" required></textarea>
+      <label class="block font-semibold mb-1" style="color:#60efff;">{{ t('Description') }}</label>
+      <textarea name="description" class="w-full border border-[#22304a] rounded-lg px-4 py-2" style="color:#eaf6fb; background:#232347;" rows="2" required></textarea>
     </div>
     <div class="mb-2 flex items-center">
       <input type="checkbox" id="sendNotification" name="send_notification" class="mr-2">
