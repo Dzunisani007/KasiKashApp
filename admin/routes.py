@@ -213,7 +213,18 @@ def approve_loan():
     try:
         with support.db_connection() as conn:
             with conn.cursor() as cur:
+                # Update loan status
                 cur.execute("UPDATE transactions SET status = 'approved', description = CONCAT(description, ' | Admin Comment: ', %s) WHERE id = %s", (comment, loan_id,))
+                # Fetch user firebase_uid for notification
+                cur.execute("SELECT user_id FROM transactions WHERE id = %s", (loan_id,))
+                user_id_row = cur.fetchone()
+                if user_id_row and user_id_row[0]:
+                    cur.execute("SELECT firebase_uid FROM users WHERE firebase_uid = %s", (user_id_row[0],))
+                    firebase_row = cur.fetchone()
+                    if firebase_row and firebase_row[0]:
+                        message = "Your loan request has been approved."
+                        link = url_for('profile')
+                        create_notification(firebase_row[0], message, link_url=link, notification_type='loan_approved')
                 conn.commit()
         flash('Loan approved successfully.', 'success')
     except Exception as e:
@@ -234,7 +245,18 @@ def reject_loan():
     try:
         with support.db_connection() as conn:
             with conn.cursor() as cur:
+                # Update loan status
                 cur.execute("UPDATE transactions SET status = 'rejected', description = CONCAT(description, ' | Admin Comment: ', %s) WHERE id = %s", (comment, loan_id,))
+                # Fetch user firebase_uid for notification
+                cur.execute("SELECT user_id FROM transactions WHERE id = %s", (loan_id,))
+                user_id_row = cur.fetchone()
+                if user_id_row and user_id_row[0]:
+                    cur.execute("SELECT firebase_uid FROM users WHERE firebase_uid = %s", (user_id_row[0],))
+                    firebase_row = cur.fetchone()
+                    if firebase_row and firebase_row[0]:
+                        message = "Your loan request has been rejected."
+                        link = url_for('profile')
+                        create_notification(firebase_row[0], message, link_url=link, notification_type='loan_rejected')
                 if cur.rowcount == 0:
                     flash('No loan was updated. Please check the loan ID.', 'danger')
                 else:
@@ -325,6 +347,7 @@ def events():
         stokvel_id = request.form.get('stokvel')
         name = request.form.get('name')
         description = request.form.get('description')
+        event_type = request.form.get('event_type')
         target_date = request.form.get('target_date')
         send_notification = 'send_notification' in request.form
         try:
@@ -332,22 +355,22 @@ def events():
                 with conn.cursor() as cur:
                     # Insert event
                     cur.execute(
-                        "INSERT INTO events (stokvel_id, name, description, target_date) VALUES (%s, %s, %s, %s) RETURNING id",
-                        (stokvel_id, name, description, target_date)
+                        "INSERT INTO events (stokvel_id, name, description, event_type, target_date) VALUES (%s, %s, %s, %s, %s) RETURNING id",
+                        (stokvel_id, name, description, event_type, target_date)
                     )
                     event_id = cur.fetchone()[0]
-                    conn.commit()
                     # Fetch all members of the stokvel
                     cur.execute("SELECT user_id FROM stokvel_members WHERE stokvel_id = %s", (stokvel_id,))
                     members = cur.fetchall()
-                    # Add event to each member's diary (placeholder logic)
+                    # Add event to each member's diary (calendar)
+                    if not members:
+                        print(f"No members found for stokvel {stokvel_id}, event {event_id}")
                     for member in members:
                         user_id = member[0]
                         if user_id:
-                            # Example: insert into diary table if exists
                             try:
                                 cur.execute("INSERT INTO diary (user_id, event_id, event_name, event_date, description) VALUES (%s, %s, %s, %s, %s)",
-                                    (user_id, event_id, name, target_date, description))
+                                    (user_id, event_id, event_type, target_date, description))
                             except Exception as diary_e:
                                 print(f"Could not add to diary for user {user_id}: {diary_e}")
                     conn.commit()
@@ -356,13 +379,13 @@ def events():
                         for member in members:
                             user_id = member[0]
                             if user_id:
-                                message = f"New event of type '{name}' has been scheduled for your stokvel."
+                                message = f"New event of type '{event_type}' has been scheduled for your stokvel."
                                 link = url_for('home')
                                 create_notification(user_id, message, link_url=link, notification_type='event')
                         # Also notify the creator (admin)
                         creator_id = session.get('user_id')
                         if creator_id:
-                            message = f"You have created a new event '{name}' for your stokvel."
+                            message = f"You have created a new event '{event_type}' for your stokvel."
                             link = url_for('admin.events')
                             create_notification(creator_id, message, link_url=link, notification_type='event')
             flash('Event created and notifications sent!', 'success')

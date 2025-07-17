@@ -573,12 +573,12 @@ body {
     </div>
     <div class="calendar">
       {% for day in calendar_days %}
-        <div class="calendar-day {% if day.is_today %}today{% endif %}">
+        <div class="calendar-day {% if day.is_today %}today{% endif %}" data-date="{{ day.full_date }}">
           <div>{{ day.date }}</div>
           {% if day.events %}
             <ul style="margin-top: 0.25rem; font-size: 0.75rem;">
               {% for event in day.events %}
-                <li><i class="fas fa-calendar-alt" style="color: #bfdbfe; margin-right: 0.25rem;"></i>{{ event }}</li>
+                <li><i class="fas fa-calendar-alt" style="color: #bfdbfe; margin-right: 0.25rem;"></i>{{ event.event_name or event.name }}</li>
               {% endfor %}
             </ul>
           {% endif %}
@@ -630,4 +630,38 @@ document.querySelectorAll('.day-bar').forEach(function(bar) {
   if (h) bar.style.height = h + 'px';
 });
 </script>
+
+<!-- Highlight calendar days with events -->
+<script>
+document.addEventListener('DOMContentLoaded', async function() {
+  // Fetch diary events from the API
+  const response = await fetch('/admin/api/diary/events');
+  const data = await response.json();
+  const events = data.events || [];
+
+  // Highlight days with events
+  events.forEach(event => {
+    const dayDiv = document.querySelector(`.calendar-day[data-date='${event.date}']`);
+    if (dayDiv) {
+      dayDiv.classList.add('has-event');
+      // Optionally, add a dot or badge
+      let badge = document.createElement('span');
+      badge.className = 'event-dot';
+      badge.title = event.name || '';
+      badge.style = 'display:inline-block;width:8px;height:8px;background:#38f9d7;border-radius:50%;margin-left:4px;vertical-align:middle;';
+      const dayNumberDiv = dayDiv.querySelector('div');
+      if (dayNumberDiv) {
+        dayNumberDiv.appendChild(badge);
+      }
+    }
+  });
+});
+</script>
+<style>
+/* Optional: style for days with events */
+.calendar-day.has-event {
+  border: 2px solid #38f9d7;
+  background: #e0f7fa;
+}
+</style>
 {% endblock %}
