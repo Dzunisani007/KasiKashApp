@@ -258,8 +258,8 @@
     <div class="admin-wrapper">
         <nav class="sidebar" id="adminSidebar">
             <div class="sidebar-header">
-                <img src="{{ url_for('static', filename='kasikash-logo.svg') }}" alt="Logo">
-                <span style="font-weight: bold; font-size: 1.2rem;">Admin</span>
+                <img src="{{ url_for('static', filename='logo_admin.png') }}" alt="KasiKash Admin Logo" style="height:48px;width:48px;border-radius:50%;box-shadow:0 0 16px #60efff;">
+                <span style="font-size:1.5rem;font-weight:bold;background:linear-gradient(90deg,#60efff,#00ff87);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 8px #60efff;margin-left:8px;">KasiKash</span>
             </div>
             <div class="nav flex-column">
                 <a href="{{ url_for('admin.dashboard') }}" class="{% if request.endpoint == 'admin.dashboard' %}active{% endif %}"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
