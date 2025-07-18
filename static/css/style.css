@@ -758,3 +758,8 @@ body.light-mode {
 .dark-mode input[type="time"] {
     color-scheme: dark;
 }
+
+.glass-card {
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
