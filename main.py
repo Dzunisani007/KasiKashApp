@@ -25,7 +25,6 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, 
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from flask_session import Session
 from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail
 from dateutil import parser as date_parser
 from translations import get_text
 from admin import admin_bp  # Import the blueprint
@@ -45,6 +44,8 @@ from flask_babel import Babel
 from flask_socketio import SocketIO, join_room, emit
 from calendar import monthrange
 from reportlab.lib.enums import TA_CENTER, TA_RIGHT
+from flask_mail import Mail, Message
+from flask_wtf.csrf import generate_csrf
 
 # Load environment variables
 load_dotenv()
@@ -73,6 +74,17 @@ def allowed_kyc_file(filename):
     return '.' in filename and filename.rsplit(
     '.', 1)[1].lower() in ALLOWED_KYC_EXTENSIONS
 
+# Initialize Mail
+app = Flask(__name__)
+
+# Mail config and initialization (now using environment variables)
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
+app.config['MAIL_DEFAULT_SENDER'] = ('KasiKash App', os.getenv('MAIL_USERNAME'))
+mail = Mail(app)
 
 # Initialize Firebase Admin SDK
 if not firebase_admin._apps:
@@ -3170,9 +3182,40 @@ def remove_stokvel_member(stokvel_id, member_id):
         flash(f"Failed to remove member: {e}", "danger")
     return redirect(url_for('view_stokvel_members', stokvel_id=stokvel_id))
 
+@app.route('/referral', methods=['GET', 'POST'])
+def referral():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        inviter_name = request.form.get('inviter_name')
+        stokvel_name = request.form.get('stokvel_name')
+        if email and inviter_name and stokvel_name:
+            try:
+                msg = Message(
+                    subject=f"You've been invited to join {stokvel_name}!",
+                    recipients=[email],
+                    body=f"Hi! {inviter_name} has invited you to join {stokvel_name}. Click here to register: https://your-app-url/register"
+                )
+                mail.send(msg)
+                flash(f'Referral email sent to {email}!', 'success')
+            except Exception as e:
+                print(f"Error sending email: {e}")
+                flash('Failed to send referral email. Please try again later.', 'danger')
+        else:
+            flash('Please enter all required fields.', 'danger')
+        return redirect(url_for('referral'))
+    return render_template('referral.html')
+
+@app.context_processor
+def inject_globals():
+    return dict(csrf_token=generate_csrf)
+
+@app.route('/test_csrf')
+def test_csrf():
+    return render_template('test_csrf.html')
+
 # --- Replace app.run with socketio.run ---
 if __name__ == "__main__":
-    socketio.run(app, host="127.0.0.1", port=5001, debug=True)
+    socketio.run(app, host="0.0.0.0", port=5001, debug=True)
 
 # Inject _ into Jinja2 context for translations
 try:
@@ -3180,10 +3223,4 @@ try:
 except ImportError:
     def _(s): return s
 
-@app.context_processor
-def inject_global():
-    return dict(_=_)
 
-if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5001))
-    app.run(host='0.0.0.0', port=port, debug=True)
