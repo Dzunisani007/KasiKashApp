@@ -3224,6 +3224,33 @@ except ImportError:
 def inject_global():
     return dict(_=_)
 
-if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5001))
-    app.run(host='0.0.0.0', port=port, debug=True)
+# ... other code ...
+
+@app.route('/referral', methods=['GET', 'POST'])
+@login_required
+def referral():
+    referral_link = f"https://kasikash.com/register?ref={session.get('user_id')}"
+    message = None
+    selected_stokvel_id = None
+    stokvels = []
+    try:
+        with support.db_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT id, name FROM stokvels WHERE created_by = %s OR id IN (SELECT stokvel_id FROM stokvel_members WHERE user_id = %s)", (session['user_id'], session['user_id']))
+                stokvels = cur.fetchall()
+    except Exception as e:
+        print(f"Error fetching stokvels for referral: {e}")
+        stokvels = []
+
+if __name__ == "__main__":
+    socketio.run(app, host="127.0.0.1", port=5001, debug=True)   
+
+# Inject _ into Jinja2 context for translations
+try:
+    from flask_babel import _
+except ImportError:
+    def _(s): return s
+
+@app.context_processor
+def inject_global():
+    return dict(_=_)
