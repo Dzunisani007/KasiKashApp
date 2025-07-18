@@ -9,6 +9,7 @@ from pdf2image import convert_from_bytes
 import PyPDF2
 from openai import OpenAI
 from support import db_connection, save_statement_analysis, get_latest_analysis, save_advisor_chat
+import re
 
 # Delete old financial advisor data on app startup
 try:
@@ -111,43 +112,213 @@ def upload_statement():
         user_id = user_id.strip()
     else:
         user_id = ''
-    print(f"[DEBUG] /upload user_id: {user_id}", flush=True)
     file = request.files.get('file')
-
-    # Debug prints
-    print("request.form:", request.form, flush=True)
-    print("request.files:", request.files, flush=True)
-    print("user_id:", user_id, flush=True)
-    print("file:", file, flush=True)
-
     if not user_id:
-        print("Missing user_id in form data", flush=True)
         return jsonify({'error': 'Missing user_id'}), 400
-
     if not file or file.filename == '':
-        print("No file uploaded or filename is empty", flush=True)
         return jsonify({'error': 'No file uploaded'}), 400
-
     filename = file.filename.lower()
-    text = ""
     if filename.endswith('.pdf'):
-        # Try to extract text directly
+        from werkzeug.utils import secure_filename
+        import os
+        save_dir = os.path.join('static', 'statements')
+        os.makedirs(save_dir, exist_ok=True)
+        safe_name = secure_filename(file.filename)
+        save_path = os.path.join(save_dir, safe_name)
+        file.seek(0)
+        file.save(save_path)
+        pdf_url = '/static/statements/' + safe_name
+        # Extract text from PDF for analysis
+        import PyPDF2
+        text = ""
         try:
-            file.seek(0)
-            reader = PyPDF2.PdfReader(file)
+            file_for_text = open(save_path, 'rb')
+            reader = PyPDF2.PdfReader(file_for_text)
             for page in reader.pages:
                 page_text = page.extract_text()
                 if page_text:
                     text += page_text + "\n"
-        except Exception:
-            # If direct extraction fails, use OCR on images
-            file.seek(0)
-            images = convert_from_bytes(file.read())
-            for img in images:
-                text += pytesseract.image_to_string(img)
-    else:
-        img = Image.open(io.BytesIO(file.read()))
-        text = pytesseract.image_to_string(img)
+            file_for_text.close()
+            print(f"[PDF Extraction] Extracted text length: {len(text)}")
+            print(f"[PDF Extraction] Sample: {text[:500]}")
+        except Exception as e:
+            print(f"[PDF Extraction] Exception: {e}")
+            text = ""
+        # If text extraction is empty or too short, try OCR on each page
+        if not text.strip() or len(text.strip()) < 50:
+            try:
+                from pdf2image import convert_from_bytes
+                import pytesseract
+                with open(save_path, 'rb') as f:
+                    pdf_bytes = f.read()
+                images = convert_from_bytes(pdf_bytes)
+                ocr_text = ""
+                for img in images:
+                    ocr_text += pytesseract.image_to_string(img) + "\n"
+                if ocr_text.strip():
+                    text += "\n[OCR]\n" + ocr_text
+                print(f"[OCR Extraction] Extracted OCR text length: {len(ocr_text)}")
+                print(f"[OCR Extraction] Sample: {ocr_text[:500]}")
+            except Exception as ocr_e:
+                print(f"[OCR Extraction] Exception: {ocr_e}")
+                pass
+        print(f"[Final Extraction] Total text length sent to AI: {len(text)}")
+        print(f"[Final Extraction] Sample: {text[:500]}")
+        # Always run AI analysis on the full extracted text, even if parsing fails
+        ai_analysis = None
+        ai_budget_plan = None
+        prompt = (
+            "Below is a bank statement. Please analyze the user's financial situation, "
+            "summarize key spending and savings patterns, and provide professional, actionable financial advice.\n"
+            "Statement:\n"
+            f"{text}"
+        )
+        print(f"[AI Prompt] Length: {len(prompt)}")
+        print(f"[AI Prompt] Sample: {prompt[:500]}")
+        api_key = current_app.config.get('OPENROUTER_API_KEY') or os.getenv("OPENROUTER_API_KEY")
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+        }
+        try:
+            response = requests.post(
+                "https://openrouter.ai/api/v1/chat/completions",
+                headers=headers,
+                json={
+                    "model": "google/gemma-2-9b-it",
+                    "messages": [
+                        {"role": "user", "content": prompt}
+                    ]
+                }
+            )
+            response.raise_for_status()
+            result = response.json()
+            print(f"[AI Response] {result}")
+            if 'choices' in result and result['choices']:
+                ai_analysis = result['choices'][0]['message']['content']
+            else:
+                print(f"[AI Error] No choices in result: {result}")
+                ai_analysis = "No analysis available. (AI returned no choices)"
+            # Now, request a structured budget plan
+            budget_prompt = (
+                "Based on the following bank statement and your previous analysis, create a structured, detailed budget plan as a clear, readable text.\n"
+                f"Statement:\n{text}\n\nPrevious Analysis:\n{ai_analysis}"
+            )
+            budget_response = requests.post(
+                "https://openrouter.ai/api/v1/chat/completions",
+                headers=headers,
+                json={
+                    "model": "google/gemma-2-9b-it",
+                    "messages": [
+                        {"role": "user", "content": budget_prompt}
+                    ]
+                }
+            )
+            budget_response.raise_for_status()
+            budget_result = budget_response.json()
+            print(f"[AI Budget Response] {budget_result}")
+            if 'choices' in budget_result and budget_result['choices']:
+                ai_budget_plan = budget_result['choices'][0]['message']['content']
+        except Exception as e:
+            print(f"[AI Exception] {e}")
+            ai_analysis = None
+            ai_budget_plan = None
+        # Save analysis to database so chat assistant can find it
+        from support import db_connection, save_statement_analysis
+        with db_connection() as conn:
+            if not ai_analysis:
+                ai_analysis = "No analysis available."
+            if not ai_budget_plan:
+                ai_budget_plan = ""
+            analysis_id = save_statement_analysis(
+                conn, user_id, text, ai_analysis, [], file.filename, ai_budget_plan
+            )
+        # Attempt to parse transactions, but do not block AI analysis if parsing fails
+        def parse_statement(text):
+            import re
+            lines = [l.strip() for l in text.splitlines() if l.strip()]
+            meta = {'bank': '', 'account_holder': '', 'account': '', 'branch': '', 'period': ''}
+            transactions = []
+            # Extract metadata from the first 10 lines
+            for i in range(min(10, len(lines))):
+                l = lines[i]
+                if 'statement' in l.lower() and 'account' in l.lower():
+                    meta['bank'] = l
+                if 'account holder' in l.lower():
+                    meta['account_holder'] = l.split(':',1)[-1].strip()
+                if 'account:' in l.lower() and not meta['account']:
+                    meta['account'] = l.split(':',1)[-1].strip()
+                if 'branch:' in l.lower():
+                    meta['branch'] = l.split(':',1)[-1].strip()
+                if 'statement period' in l.lower():
+                    meta['period'] = l.split(':',1)[-1].strip()
+            # Find table header
+            header_idx = -1
+            headers = []
+            for i, l in enumerate(lines):
+                if ('date' in l.lower() and 'description' in l.lower() and
+                    ('debit' in l.lower() or 'credit' in l.lower() or 'amount' in l.lower() or 'balance' in l.lower())):
+                    header_idx = i
+                    if '|' in l:
+                        headers = [h.strip() for h in l.split('|') if h.strip()]
+                    else:
+                        headers = [h.strip() for h in re.split(r'\s{2,}', l) if h.strip()]
+                    break
+            def is_date(s):
+                return bool(re.match(r'^(\d{2}[/-]\d{2}[/-]\d{4}|\d{4}[/-]\d{2}[/-]\d{2})$', s))
+            if header_idx != -1 and headers:
+                data_lines = lines[header_idx+1:]
+                i = 0
+                while i < len(data_lines):
+                    l = data_lines[i]
+                    if not l or set(l) <= set('-| '):
+                        i += 1
+                        continue
+                    # Try to parse row
+                    row = re.split(r'\s{2,}|\|', l)
+                    row = [x.strip() for x in row if x.strip()]
+                    if len(row) >= len(headers):
+                        txn = dict(zip(headers, row))
+                        transactions.append(txn)
+                    i += 1
+            return transactions
+        transactions = parse_statement(text)
+        def normalize_transaction_keys(txn):
+            key_map = {
+                'date': 'Date', 'Date': 'Date',
+                'description': 'Description', 'desc': 'Description', 'Desc': 'Description',
+                'amount': 'Amount', 'amt': 'Amount', 'Amount': 'Amount',
+                'debit': 'Debit (R)', 'Debit': 'Debit (R)', 'Debit (R)': 'Debit (R)',
+                'credit': 'Credit (R)', 'Credit': 'Credit (R)', 'Credit (R)': 'Credit (R)',
+                'category': 'Category', 'Category': 'Category'
+            }
+            norm = {}
+            for k, v in txn.items():
+                std_key = key_map.get(k.strip(), k.strip())
+                norm[std_key] = v
+            return norm
+        transactions = [normalize_transaction_keys(txn) for txn in transactions]
+        if not transactions and ai_analysis:
+            import re
+            def extract_transactions_from_analysis(analysis):
+                pattern = re.compile(r'([A-Za-z &]+):\s*R?([\d,]+(?:\.\d{1,2})?)')
+                txns = []
+                for match in pattern.finditer(analysis):
+                    category = match.group(1).strip()
+                    amount = match.group(2).replace(',', '')
+                    try:
+                        amount = float(amount)
+                    except:
+                        continue
+                    txns.append({
+                        'Date': '',
+                        'Description': category,
+                        'Amount': amount
+                    })
+                return txns
+            transactions = extract_transactions_from_analysis(ai_analysis)
+        session['advisor_transactions'] = transactions
+        return jsonify(success=True, pdf_url=pdf_url, analysis=ai_analysis, budget_plan=ai_budget_plan, transactions=transactions, statement_text=text)
 
     # Prompt for Google Gemma 2 9B model (analysis)
     prompt = (
@@ -223,12 +394,148 @@ def upload_statement():
         desc = ' '.join(desc_parts)
         transactions.append({'date': date_str, 'description': desc, 'amount': amount})
     alerts = []
-    alerts.append("⚠️ You've exceeded your food budget this month.")
     # Save analysis to database and store analysis_id in session
+    # Clean up excessive asterisks in AI output
+    def clean_and_format_ai_output(text):
+        if not text:
+            return ''
+        # Replace Markdown headers (##, ###) with <h3>, <h4>
+        text = re.sub(r'^## (.+)$', r'<h3>\1</h3>', text, flags=re.MULTILINE)
+        text = re.sub(r'^### (.+)$', r'<h4>\1</h4>', text, flags=re.MULTILINE)
+        # Replace *word* or **word** with <strong>word</strong>
+        text = re.sub(r'\*\*([^*]+)\*\*', r'<strong>\1</strong>', text)
+        text = re.sub(r'\*([^*]+)\*', r'<strong>\1</strong>', text)
+        # Replace Markdown bullet points with <ul><li>
+        lines = text.splitlines()
+        in_list = False
+        html_lines = []
+        for line in lines:
+            if re.match(r'^\s*\* ', line):
+                if not in_list:
+                    html_lines.append('<ul>')
+                    in_list = True
+                html_lines.append('<li>' + line.lstrip(' *') + '</li>')
+            else:
+                if in_list:
+                    html_lines.append('</ul>')
+                    in_list = False
+                html_lines.append(line)
+        if in_list:
+            html_lines.append('</ul>')
+        return '\n'.join(html_lines)
+
+    ai_analysis = clean_and_format_ai_output(ai_analysis)
+    ai_budget_plan = clean_and_format_ai_output(ai_budget_plan)
+    # --- Robust Statement Parser ---
+    def parse_statement(text):
+        import re
+        lines = [l.strip() for l in text.splitlines() if l.strip()]
+        meta = {'bank': '', 'account_holder': '', 'account': '', 'branch': '', 'period': ''}
+        transactions = []
+        notes = ''
+        # Extract metadata from the first 10 lines
+        for i in range(min(10, len(lines))):
+            l = lines[i]
+            if 'statement' in l.lower() and 'account' in l.lower():
+                meta['bank'] = l
+            if 'account holder' in l.lower():
+                meta['account_holder'] = l.split(':',1)[-1].strip()
+            if 'account:' in l.lower() and not meta['account']:
+                meta['account'] = l.split(':',1)[-1].strip()
+            if 'branch:' in l.lower():
+                meta['branch'] = l.split(':',1)[-1].strip()
+            if 'statement period' in l.lower():
+                meta['period'] = l.split(':',1)[-1].strip()
+        # Find table header
+        header_idx = -1
+        headers = []
+        for i, l in enumerate(lines):
+            if ('date' in l.lower() and 'description' in l.lower() and
+                ('debit' in l.lower() or 'credit' in l.lower() or 'amount' in l.lower() or 'balance' in l.lower())):
+                header_idx = i
+                if '|' in l:
+                    headers = [h.strip() for h in l.split('|') if h.strip()]
+                else:
+                    headers = [h.strip() for h in re.split(r'\s{2,}', l) if h.strip()]
+                break
+        def is_date(s):
+            return bool(re.match(r'^(\d{2}[/-]\d{2}[/-]\d{4}|\d{4}[/-]\d{2}[/-]\d{2})$', s))
+        if header_idx != -1 and headers:
+            data_lines = lines[header_idx+1:]
+            i = 0
+            while i < len(data_lines):
+                l = data_lines[i]
+                if not l or set(l) <= set('-| '):
+                    i += 1
+                    continue
+                # Collect lines between vertical bars as a single row
+                if l.startswith('|'):
+                    row_buffer = [l]
+                    i += 1
+                    while i < len(data_lines) and data_lines[i].startswith('|') and set(data_lines[i]) > set('-| '):
+                        row_buffer.append(data_lines[i])
+                        i += 1
+                    row_str = ' '.join(row_buffer)
+                    cols = [c.strip() for c in row_str.split('|') if c.strip()]
+                    # --- NEW: If only one cell, try to split by other delimiters ---
+                    if len(cols) == 1 and len(headers) > 1:
+                        alt_cols = re.split(r'\s{2,}|\t|\s\|\s', cols[0])
+                        if len(alt_cols) == len(headers):
+                            cols = [c.strip() for c in alt_cols]
+                    if len(cols) == len(headers):
+                        transactions.append(dict(zip(headers, cols)))
+                    continue
+                # Try to split as a complete row first
+                if '|' in l:
+                    cols = [c.strip() for c in l.split('|') if c.strip()]
+                else:
+                    cols = [c.strip() for c in re.split(r'\s{2,}', l) if c.strip()]
+                # --- NEW: If only one cell, try to split by other delimiters ---
+                if len(cols) == 1 and len(headers) > 1:
+                    alt_cols = re.split(r'\s{2,}|\t|\s\|\s', cols[0])
+                    if len(alt_cols) == len(headers):
+                        cols = [c.strip() for c in alt_cols]
+                if len(cols) == len(headers):
+                    transactions.append(dict(zip(headers, cols)))
+                    i += 1
+                    continue
+                # Otherwise, try to group as broken row (date + N fields)
+                tokens = [t for t in re.split(r'\s*\|\s*', l) if t.strip()]
+                if tokens and is_date(tokens[0]):
+                    row_fields = [l]
+                    for j in range(1, len(headers)):
+                        if i + j < len(data_lines):
+                            row_fields.append(data_lines[i + j])
+                    row_str = ' | '.join(row_fields)
+                    cols = [c.strip() for c in row_str.split('|') if c.strip()]
+                    # --- NEW: If only one cell, try to split by other delimiters ---
+                    if len(cols) == 1 and len(headers) > 1:
+                        alt_cols = re.split(r'\s{2,}|\t|\s\|\s', cols[0])
+                        if len(alt_cols) == len(headers):
+                            cols = [c.strip() for c in alt_cols]
+                    if len(cols) == len(headers):
+                        transactions.append(dict(zip(headers, cols)))
+                    i += len(headers)
+                else:
+                    i += 1
+            last_row_end = header_idx + 1 + i
+            if last_row_end < len(lines):
+                notes = '\n'.join(lines[last_row_end:])
+        else:
+            notes = '\n'.join(lines)
+        return meta, transactions, notes
+
+    # --- Use the parser ---
+    meta, structured_transactions, notes = parse_statement(text)
     with db_connection() as conn:
+        # Ensure ai_analysis and ai_budget_plan are not None or empty before saving
+        if not ai_analysis:
+            ai_analysis = "No analysis available."
+        if not ai_budget_plan:
+            ai_budget_plan = ""
         analysis_id = save_statement_analysis(
             conn, user_id, text, ai_analysis, transactions, file.filename, ai_budget_plan
         )
     print(f"[DEBUG] /upload saved analysis_id: {analysis_id} for user_id: {user_id}", flush=True)
     session['advisor_analysis_id'] = analysis_id
-    return jsonify(success=True, transactions=transactions, alerts=alerts, analysis=ai_analysis, budget_plan=ai_budget_plan) 
+    return jsonify(success=True, transactions=transactions, alerts=alerts, analysis=ai_analysis, budget_plan=ai_budget_plan, statement_text=text, statement_meta=meta, statement_table=structured_transactions, statement_notes=notes) 

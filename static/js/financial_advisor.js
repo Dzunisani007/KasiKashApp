@@ -131,4 +131,4 @@ function getCSRFToken() {
 window.addEventListener('DOMContentLoaded', function() {
   initChat();
   initUpload();
-}); 
+});
