@@ -5,66 +5,67 @@
 {% block content %}
 <div class="container mx-auto px-4 py-8">
     <div class="max-w-4xl mx-auto">
-        <h1 class="text-3xl font-bold text-gray-800 mb-8">{{ t('settings', user_language) }}</h1>
+        <h1 class="text-3xl font-bold mb-8" style="color: #60efff; font-weight: 600;">{{ t('settings', user_language) }}</h1>
         
         <!-- Account Security -->
-        <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+        <div class="shadow-md rounded-lg p-6 mb-6" style="background: linear-gradient(135deg, #1e3357 0%, #22304a 100%); color: #60efff; border: 1px solid #22304a;">
             <h2 class="text-xl font-semibold text-gray-800 mb-4">{{ t('account_security', user_language) }}</h2>
             <form action="/settings/update" method="POST">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <input type="hidden" name="form_section" value="security">
                 <div class="mb-4">
-                    <label class="flex items-center">
+                    <label class="flex items-center" style="color: #60efff;">
                         <input type="checkbox" name="two_factor_enabled" value="on" 
-                               class="form-checkbox h-4 w-4 text-blue-600"
+                               class="form-checkbox h-4 w-4"
+                               style="accent-color: #60efff; background: #22304a; border: 1px solid #60efff;"
                                {% if user.two_factor_enabled %}checked{% endif %}>
-                        <span class="ml-2 text-gray-700">Enable Two-Factor Authentication</span>
+                        <span class="ml-2" style="color: #60efff;">Enable Two-Factor Authentication</span>
                     </label>
-                    <p class="text-sm text-gray-500 mt-1">Add an extra layer of security to your account</p>
+                    <p class="text-sm mt-1" style="color: #60efff;">Add an extra layer of security to your account</p>
                 </div>
-                <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                <button type="submit" style="background: linear-gradient(90deg, #60efff, #00ff87); color: #22304a; border: none; border-radius: 0.75rem; padding: 0.75rem 2rem; font-weight: bold; transition: background 0.3s;">
                     {{ t('save', user_language) }} Security Settings
                 </button>
             </form>
         </div>
 
         <!-- Notifications -->
-        <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+        <div class="shadow-md rounded-lg p-6 mb-6" style="background: linear-gradient(135deg, #1e3357 0%, #22304a 100%); color: #60efff; border: 1px solid #22304a;">
             <h2 class="text-xl font-semibold text-gray-800 mb-4">{{ t('notifications', user_language) }}</h2>
             <form action="/settings/update" method="POST">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <input type="hidden" name="form_section" value="notifications">
                 <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="notification_preferences">
+                    <label class="block text-sm font-bold mb-2" for="notification_preferences" style="color: #60efff;">
                         Notification Preferences
                     </label>
                     <select name="notification_preferences" id="notification_preferences"
-                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                            class="shadow appearance-none border rounded w-full py-2 px-3" style="background: #22304a; color: #60efff; border: 1px solid #60efff;">
                         <option value="email" {% if user.notification_preferences == 'email' %}selected{% endif %}>Email Only</option>
                         <option value="sms" {% if user.notification_preferences == 'sms' %}selected{% endif %}>SMS Only</option>
                         <option value="both" {% if user.notification_preferences == 'both' %}selected{% endif %}>Email and SMS</option>
                         <option value="none" {% if user.notification_preferences == 'none' %}selected{% endif %}>No Notifications</option>
                     </select>
-                    <p class="text-sm text-gray-500 mt-1">Choose how you want to receive notifications</p>
+                    <p class="text-sm mt-1" style="color: #60efff;">Choose how you want to receive notifications</p>
                 </div>
-                <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                <button type="submit" style="background: linear-gradient(90deg, #60efff, #00ff87); color: #22304a; border: none; border-radius: 0.75rem; padding: 0.75rem 2rem; font-weight: bold; transition: background 0.3s;">
                     {{ t('save', user_language) }} Notification Settings
                 </button>
             </form>
         </div>
 
         <!-- Language Preferences -->
-        <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+        <div class="shadow-md rounded-lg p-6 mb-6" style="background: linear-gradient(135deg, #1e3357 0%, #22304a 100%); color: #60efff; border: 1px solid #22304a;">
             <h2 class="text-xl font-semibold text-gray-800 mb-4">{{ t('language_preferences', user_language) }}</h2>
             <form action="/settings/update" method="POST">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <input type="hidden" name="form_section" value="language_preference">
                 <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="language_preference">
+                    <label class="block text-sm font-bold mb-2" for="language_preference" style="color: #60efff;">
                         {{ t('preferred_language', user_language) }}
                     </label>
                     <select name="language_preference" id="language_preference"
-                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                            class="shadow appearance-none border rounded w-full py-2 px-3" style="background: #22304a; color: #60efff; border: 1px solid #60efff;">
                         <option value="en" {% if user.language_preference == 'en' %}selected{% endif %}>English</option>
                         <option value="af" {% if user.language_preference == 'af' %}selected{% endif %}>Afrikaans</option>
                         <option value="zu" {% if user.language_preference == 'zu' %}selected{% endif %}>isiZulu</option>
@@ -76,75 +77,75 @@
                         <option value="ts" {% if user.language_preference == 'ts' %}selected{% endif %}>Xitsonga</option>
                         <option value="nr" {% if user.language_preference == 'nr' %}selected{% endif %}>isiNdebele</option>
                     </select>
-                    <p class="text-sm text-gray-500 mt-1">{{ t('choose_language', user_language) }}</p>
+                    <p class="text-sm mt-1" style="color: #60efff;">{{ t('choose_language', user_language) }}</p>
                 </div>
-                <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                <button type="submit" style="background: linear-gradient(90deg, #60efff, #00ff87); color: #22304a; border: none; border-radius: 0.75rem; padding: 0.75rem 2rem; font-weight: bold; transition: background 0.3s;">
                     {{ t('save_language_settings', user_language) }}
                 </button>
             </form>
         </div>
 
         <!-- App Preferences -->
-        <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+        <div class="shadow-md rounded-lg p-6 mb-6" style="background: linear-gradient(135deg, #1e3357 0%, #22304a 100%); color: #60efff; border: 1px solid #22304a;">
             <h2 class="text-xl font-semibold text-gray-800 mb-4">App Preferences</h2>
             <form action="/settings/update" method="POST">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <input type="hidden" name="form_section" value="app_preferences">
                 <div class="space-y-4">
                     <!-- Email Notifications Toggle -->
-                    <label for="email_notifications" class="flex items-center justify-between cursor-pointer">
+                    <label for="email_notifications" class="flex items-center justify-between cursor-pointer" style="color: #60efff;">
                         <div>
-                            <span class="text-gray-800 font-medium">Email Notifications</span>
-                            <p class="text-sm text-gray-500">Receive updates and alerts via email</p>
+                            <span class="font-medium" style="color: #60efff;">Email Notifications</span>
+                            <p class="text-sm" style="color: #60efff;">Receive updates and alerts via email</p>
                         </div>
                         <div class="relative">
                             <input type="checkbox" id="email_notifications" name="email_notifications" class="sr-only" {% if user.email_notifications %}checked{% endif %}>
-                            <div class="block bg-gray-200 w-14 h-8 rounded-full"></div>
-                            <div class="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition"></div>
+                            <div class="block" style="background: #22304a; border: 1px solid #60efff; width: 3.5rem; height: 2rem; border-radius: 2rem;"></div>
+                            <div class="dot absolute left-1 top-1" style="background: #60efff; width: 1.5rem; height: 1.5rem; border-radius: 50%; transition: transform 0.3s;"></div>
                         </div>
                     </label>
 
                     <!-- SMS Notifications Toggle -->
-                    <label for="sms_notifications" class="flex items-center justify-between cursor-pointer">
+                    <label for="sms_notifications" class="flex items-center justify-between cursor-pointer" style="color: #60efff;">
                         <div>
-                            <span class="text-gray-800 font-medium">SMS Notifications</span>
-                            <p class="text-sm text-gray-500">Get important updates via SMS</p>
+                            <span class="font-medium" style="color: #60efff;">SMS Notifications</span>
+                            <p class="text-sm" style="color: #60efff;">Get important updates via SMS</p>
                         </div>
                         <div class="relative">
                             <input type="checkbox" id="sms_notifications" name="sms_notifications" class="sr-only" {% if user.sms_notifications %}checked{% endif %}>
-                            <div class="block bg-gray-200 w-14 h-8 rounded-full"></div>
-                            <div class="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition"></div>
+                            <div class="block" style="background: #22304a; border: 1px solid #60efff; width: 3.5rem; height: 2rem; border-radius: 2rem;"></div>
+                            <div class="dot absolute left-1 top-1" style="background: #60efff; width: 1.5rem; height: 1.5rem; border-radius: 50%; transition: transform 0.3s;"></div>
                         </div>
                     </label>
 
                     <!-- Weekly Summary Toggle -->
-                    <label for="weekly_summary" class="flex items-center justify-between cursor-pointer">
+                    <label for="weekly_summary" class="flex items-center justify-between cursor-pointer" style="color: #60efff;">
                         <div>
-                            <span class="text-gray-800 font-medium">Weekly Summary</span>
-                            <p class="text-sm text-gray-500">Get a weekly overview of your stokvel activities</p>
+                            <span class="font-medium" style="color: #60efff;">Weekly Summary</span>
+                            <p class="text-sm" style="color: #60efff;">Get a weekly overview of your stokvel activities</p>
                         </div>
                         <div class="relative">
                             <input type="checkbox" id="weekly_summary" name="weekly_summary" class="sr-only" {% if user.weekly_summary %}checked{% endif %}>
-                            <div class="block bg-gray-200 w-14 h-8 rounded-full"></div>
-                            <div class="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition"></div>
+                            <div class="block" style="background: #22304a; border: 1px solid #60efff; width: 3.5rem; height: 2rem; border-radius: 2rem;"></div>
+                            <div class="dot absolute left-1 top-1" style="background: #60efff; width: 1.5rem; height: 1.5rem; border-radius: 50%; transition: transform 0.3s;"></div>
                         </div>
                     </label>
 
                     <!-- Contribution Reminders Toggle -->
-                    <label for="reminders_enabled" class="flex items-center justify-between cursor-pointer">
+                    <label for="reminders_enabled" class="flex items-center justify-between cursor-pointer" style="color: #60efff;">
                         <div>
-                            <span class="text-gray-800 font-medium">Contribution Reminders</span>
-                            <p class="text-sm text-gray-500">Get notified before your contribution is due</p>
+                            <span class="font-medium" style="color: #60efff;">Contribution Reminders</span>
+                            <p class="text-sm" style="color: #60efff;">Get notified before your contribution is due</p>
                         </div>
                         <div class="relative">
                             <input type="checkbox" id="reminders_enabled" name="reminders_enabled" class="sr-only" {% if user.reminders_enabled %}checked{% endif %}>
-                            <div class="block bg-gray-200 w-14 h-8 rounded-full"></div>
-                            <div class="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition"></div>
+                            <div class="block" style="background: #22304a; border: 1px solid #60efff; width: 3.5rem; height: 2rem; border-radius: 2rem;"></div>
+                            <div class="dot absolute left-1 top-1" style="background: #60efff; width: 1.5rem; height: 1.5rem; border-radius: 50%; transition: transform 0.3s;"></div>
                         </div>
                     </label>
                 </div>
                 <div class="mt-6">
-                    <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                    <button type="submit" style="background: linear-gradient(90deg, #60efff, #00ff87); color: #22304a; border: none; border-radius: 0.75rem; padding: 0.75rem 2rem; font-weight: bold; transition: background 0.3s;">
                         Save App Preferences
                     </button>
                 </div>
@@ -152,7 +153,7 @@
         </div>
         
         <!-- Quick Actions -->
-        <div class="bg-white shadow-md rounded-lg p-6">
+        <div class="shadow-md rounded-lg p-6" style="background: linear-gradient(135deg, #1e3357 0%, #22304a 100%); color: #60efff; border: 1px solid #22304a;">
             <h2 class="text-xl font-semibold text-gray-800 mb-4">{{ t('quick_actions', user_language) }}</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <a href="/payment_methods" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded text-center">
