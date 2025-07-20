@@ -4,6 +4,14 @@
 
 {% block extra_css %}
 <style>
+    html, body {
+        background: #101c2c !important;
+    }
+    .container, .max-w-4xl, .shadow-md, .rounded-lg, .p-6, .mb-4 {
+        background: #22304a !important;
+        color: #60efff !important;
+        border: 1px solid #60efff !important;
+    }
     .notification-list-item {
         background: #22304a !important;
         color: #60efff !important;
@@ -31,50 +39,64 @@
 {% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-4 py-8">
-    <div class="max-w-4xl mx-auto">
-        <div class="flex justify-between items-center mb-8">
-            <h1 class="text-3xl font-bold" style="color: #60efff;">Notifications</h1>
-            {% if notifications %}
-            <form action="{{ url_for('clear_notifications') }}" method="POST">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <button type="submit" style="color: #60efff; background: #22304a; border: 1px solid #60efff; border-radius: 0.5rem; padding: 0.25rem 1rem;">Mark all as read</button>
-            </form>
-            {% endif %}
+<div class="container mx-auto px-4 py-8" style="background: #101c2c; min-height: 100vh;">
+    <div class="max-w-3xl mx-auto">
+        <div class="mb-10">
+            <h1 class="text-4xl font-extrabold mb-2" style="color: #60efff; letter-spacing: -1px;">Notifications</h1>
+            <p class="text-lg" style="color: #b6c2e2;">Stay updated with your latest notifications and messages.</p>
         </div>
-
-        <div class="shadow-md rounded-lg p-6 mb-4" style="background: #22304a !important; color: #60efff !important; border: 1px solid #60efff !important;">
-            <ul class="divide-y divide-gray-200">
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <button type="button" style="color: #60efff; background: none; border: none; font-weight: 600; margin-right: 1.5rem; cursor: pointer;">Mark All as Read</button>
+                <button type="button" style="color: #60efff; background: none; border: none; font-weight: 600; cursor: pointer;">Mark All as Unread</button>
+            </div>
+            <div class="flex gap-2">
+                <select style="background: #22304a; color: #60efff; border: 1px solid #60efff; border-radius: 0.5rem; padding: 0.4rem 1rem;">
+                    <option>All Types</option>
+                </select>
+                <select style="background: #22304a; color: #60efff; border: 1px solid #60efff; border-radius: 0.5rem; padding: 0.4rem 1rem;">
+                    <option>All Status</option>
+                </select>
+            </div>
+        </div>
+        <div class="shadow-lg rounded-2xl p-0 mb-4" style="background: #18243a; border: 1.5px solid #22304a;">
+            <div class="px-8 py-5 border-b border-[#22304a]">
+                <h2 class="text-2xl font-bold" style="color: #60efff;">Your Notifications</h2>
+            </div>
+            <ul class="divide-y divide-[#22304a]">
                 {% if notifications %}
                     {% for notification in notifications %}
-                    <li class="p-4 transition notification-list-item {% if not notification.is_read %}notification-unread{% endif %}" style="background: #22304a !important; color: #60efff !important; border-left: 4px solid #60efff !important; border-radius: 0.75rem;">
-                        <a href="{{ notification.link_url or '#' }}" class="block">
-                            <div class="flex items-start space-x-4">
-                                <div class="flex-shrink-0">
-                                    <span class="h-10 w-10 rounded-full flex items-center justify-center" style="background: #60efff; color: #22304a;">
-                                        <i class="fas fa-bell"></i>
-                                    </span>
+                    <li class="flex items-center justify-between gap-4 px-8 py-6" style="background: #22304a; color: #60efff; border-left: 4px solid #60efff; border-radius: 0.75rem; margin: 1.2rem 0; box-shadow: 0 2px 12px #60efff11;">
+                        <div class="flex items-start gap-4 flex-1">
+                            <span class="h-12 w-12 rounded-full flex items-center justify-center" style="background: #60efff; color: #22304a; font-size: 1.5rem; min-width: 48px;">
+                                <i class="fas fa-bell"></i>
+                            </span>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex gap-3 mb-1">
+                                    {% if notification.type %}
+                                    <span style="font-size: 0.95rem; font-weight: 700; color: #60efff; background: #18243a; border-radius: 0.5rem; padding: 0.2rem 0.8rem;">{{ notification.type|title }}</span>
+                                    {% endif %}
+                                    {% if not notification.is_read %}
+                                    <span style="font-size: 0.85rem; font-weight: 600; color: #fff; background: #00ff87; border-radius: 0.5rem; padding: 0.2rem 0.7rem;">New</span>
+                                    {% endif %}
                                 </div>
-                                <div class="flex-1 min-w-0">
-                                    <p class="text-sm" style="color: #60efff;">{{ notification.message }}</p>
-                                    <p class="text-xs mt-1" style="color: #60efff;">
-                                        <i class="far fa-clock mr-1"></i>
-                                        {% if notification.created_at %}
-                                            {{ notification.created_at.strftime('%B %d, %Y at %I:%M %p') }}
-                                        {% endif %}
-                                    </p>
+                                <p class="text-base mb-1" style="color: #60efff; font-weight: 500;">{{ notification.message }}</p>
+                                <div class="flex items-center gap-4 text-xs" style="color: #b6c2e2;">
+                                    <span><i class="far fa-clock mr-1"></i>{% if notification.created_at %}{{ notification.created_at.strftime('%Y-%m-%d %H:%M') }}{% endif %}</span>
+                                    <a href="{{ notification.link_url or '#' }}" style="color: #60efff; text-decoration: underline; font-weight: 600;">View Details</a>
                                 </div>
-                                {% if not notification.is_read %}
-                                <div class="flex-shrink-0 self-center">
-                                    <div class="w-2 h-2" style="background: #60efff; border-radius: 50%;"></div>
-                                </div>
-                                {% endif %}
                             </div>
-                        </a>
+                        </div>
+                        <div class="flex flex-col items-end gap-2">
+                            <a href="#" title="Mark as Read" style="color: #60efff; font-size: 1rem; font-weight: 600; text-decoration: underline; margin-bottom: 0.5rem;">Mark as Read</a>
+                            <button type="button" title="Delete" style="background: none; border: none; cursor: pointer;">
+                                <i class="fas fa-trash" style="color: #ff4e50; font-size: 1.3rem; transition: color 0.2s;"></i>
+                            </button>
+                        </div>
                     </li>
                     {% endfor %}
                 {% else %}
-                    <li class="p-8 text-center" style="background: #22304a !important; color: #60efff !important; border-radius: 0.75rem;">
+                    <li class="p-8 text-center" style="background: #22304a; color: #60efff; border-radius: 0.75rem;">
                         <div class="mb-4">
                              <i class="fas fa-envelope-open-text fa-3x" style="color: #60efff;"></i>
                         </div>

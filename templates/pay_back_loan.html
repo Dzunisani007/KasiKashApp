@@ -27,9 +27,9 @@
 
     <!-- Loan Repayment Form -->
     <div class="max-w-4xl mx-auto">
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-8">
-            <h2 class="text-2xl font-semibold mb-6 text-gray-800 dark:text-white">
-                <i class="fas fa-credit-card mr-2 text-blue-500"></i>
+        <div class="rounded-xl shadow-lg p-6 mb-8" style="background: #22304a; color: #60efff; border: 1px solid #22304a;">
+            <h2 class="text-2xl font-semibold mb-6 flex items-center" style="color: #60efff;">
+                <i class="fas fa-credit-card mr-2" style="color: #60efff;"></i>
                 Repay Your Loan
             </h2>
 
@@ -39,11 +39,12 @@
                     
                     <!-- Loan Selection -->
                     <div class="form-group">
-                        <label for="loan_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <label for="loan_id" class="block text-sm font-medium mb-2" style="color: #60efff;">
                             Select Loan to Repay
                         </label>
                         <select name="loan_id" id="loan_id" required 
-                                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                                class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#60efff] focus:border-transparent"
+                                style="background: #1e3357 !important; color: #60efff !important; border: 1px solid #60efff;">
                             <option value="">Choose a loan...</option>
                             {% for loan in loans %}
                                 <option value="{{ loan[0] }}" data-amount="{{ loan[1] }}">
@@ -55,27 +56,28 @@
 
                     <!-- Repayment Amount -->
                     <div class="form-group">
-                        <label for="repayment_amount" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <label for="repayment_amount" class="block text-sm font-medium mb-2" style="color: #60efff;">
                             Repayment Amount (R)
                         </label>
                         <div class="relative">
-                            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">R</span>
+                            <span class="absolute left-3 top-1/2 transform -translate-y-1/2" style="color: #b6c2e2;">R</span>
                             <input type="number" name="repayment_amount" id="repayment_amount" 
                                    step="0.01" min="0.01" required
-                                   class="w-full pl-8 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                                   class="w-full pl-8 pr-4 py-3 border rounded-lg bg-[#1e3357] text-[#eaf6fb] focus:ring-2 focus:ring-[#60efff] focus:border-transparent" style="border: 1px solid #60efff;"
                                    placeholder="0.00">
                         </div>
-                        <p class="text-sm text-gray-500 mt-1">Enter the amount you want to repay</p>
+                        <p class="text-sm mt-1" style="color: #b6c2e2;">Enter the amount you want to repay</p>
                     </div>
 
                     <!-- Payment Method -->
                     <div class="form-group">
-                        <label for="payment_method_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <label for="payment_method_id" class="block text-sm font-medium mb-2" style="color: #60efff;">
                             Payment Method
                         </label>
                         {% if payment_methods %}
                             <select name="payment_method_id" id="payment_method_id" required 
-                                    class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                                    class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#60efff] focus:border-transparent"
+                                    style="background: #1e3357 !important; color: #60efff !important; border: 1px solid #60efff;">
                                 <option value="">Select payment method...</option>
                                 {% for method in payment_methods %}
                                     <option value="{{ method.id }}">
@@ -105,7 +107,7 @@
                     <!-- Submit Button -->
                     <div class="form-group">
                         <button type="submit" 
-                                class="w-full bg-gradient-to-r from-blue-500 to-green-500 hover:from-blue-600 hover:to-green-600 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-lg"
+                                style="width: 100%; background: linear-gradient(90deg, #60efff, #00ff87); color: #22304a; font-weight: bold; padding: 0.75rem 2rem; border-radius: 0.75rem; box-shadow: 0 2px 12px rgba(67, 233, 123, 0.06); transition: background 0.3s;"
                                 {% if not payment_methods %}disabled{% endif %}>
                             <i class="fas fa-check mr-2"></i>
                             Process Repayment
@@ -134,37 +136,37 @@
 
         <!-- Loan History Section -->
         {% if loans %}
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-                <h3 class="text-xl font-semibold mb-4 text-gray-800 dark:text-white">
-                    <i class="fas fa-history mr-2 text-green-500"></i>
+            <div class="rounded-xl shadow-lg p-6 mt-8" style="background: #22304a; color: #60efff; border: 1px solid #22304a;">
+                <h3 class="text-xl font-semibold mb-4 flex items-center" style="color: #60efff;">
+                    <i class="fas fa-history mr-2" style="color: #60efff;"></i>
                     Your Approved Loans
                 </h3>
                 
                 <div class="overflow-x-auto">
-                    <table class="w-full text-sm">
+                    <table class="w-full text-sm" style="background: #1e3357; color: #eaf6fb; border-radius: 0.75rem;">
                         <thead>
-                            <tr class="border-b border-gray-200 dark:border-gray-700">
-                                <th class="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Stokvel</th>
-                                <th class="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Amount</th>
-                                <th class="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Date</th>
-                                <th class="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Description</th>
+                            <tr style="background: #22304a; color: #60efff;">
+                                <th class="text-left py-3 px-4 font-semibold">Stokvel</th>
+                                <th class="text-left py-3 px-4 font-semibold">Amount</th>
+                                <th class="text-left py-3 px-4 font-semibold">Date</th>
+                                <th class="text-left py-3 px-4 font-semibold">Description</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for loan in loans %}
-                                <tr class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
-                                    <td class="py-3 px-4 text-gray-800 dark:text-gray-200">
+                                <tr style="border-bottom: 1px solid #22304a;">
+                                    <td class="py-3 px-4">
                                         <span class="font-medium">{{ loan[4] or 'N/A' }}</span>
                                     </td>
-                                    <td class="py-3 px-4 text-gray-800 dark:text-gray-200">
-                                        <span class="font-semibold text-green-600 dark:text-green-400">
+                                    <td class="py-3 px-4">
+                                        <span class="font-semibold" style="color: #00ff87;">
                                             R{{ "%.2f"|format(loan[1]) }}
                                         </span>
                                     </td>
-                                    <td class="py-3 px-4 text-gray-600 dark:text-gray-400">
+                                    <td class="py-3 px-4" style="color: #b6c2e2;">
                                         {{ loan[3].strftime('%Y-%m-%d') if loan[3] else 'N/A' }}
                                     </td>
-                                    <td class="py-3 px-4 text-gray-600 dark:text-gray-400">
+                                    <td class="py-3 px-4" style="color: #b6c2e2;">
                                         {{ loan[2] or 'No description' }}
                                     </td>
                                 </tr>

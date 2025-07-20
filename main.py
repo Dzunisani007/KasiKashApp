@@ -513,12 +513,11 @@ def login_validation():
                 print(f"User found: {user_record.uid}")  # Debug log
 
                 session.clear()  # Clear any existing session data
-                session['user_id'] = str(
-    user_record.uid)  # Ensure it's a string
-                session['username'] = str(
-    user_record.display_name or email)  # Ensure it's a string
-                session['is_verified'] = bool(
-    user_record.email_verified)  # Ensure it's a boolean
+                session['user_id'] = str(user_record.uid)  # Ensure it's a string
+                session['username'] = str(user_record.display_name or email)  # Ensure it's a string
+                session['email'] = user_record.email
+                session['profile_picture'] = getattr(user_record, 'photo_url', None)
+                session['is_verified'] = bool(user_record.email_verified)  # Ensure it's a boolean
                 session.permanent = bool(remember)  # Ensure it's a boolean
                 # Fetch and set user role in session
                 try:

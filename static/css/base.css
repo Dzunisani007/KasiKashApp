@@ -435,3 +435,21 @@ body.light-mode .card, body.light-mode .main-content .card, body.light-mode .das
 .notifications-section, .notification-list-item, .notification-unread {
   box-shadow: none !important;
 } 
+
+/* Remove any remaining white backgrounds globally */
+* {
+  background-color: transparent !important;
+}
+
+html, body {
+  background: #101c2c !important;
+  color: #60efff !important;
+}
+main, .container, .max-w-4xl, .shadow-md, .rounded-lg, .p-6, .mb-4 {
+  background: #22304a !important;
+  color: #60efff !important;
+  border-color: #60efff !important;
+}
+main *, .container *, .max-w-4xl *, .shadow-md *, .rounded-lg *, .p-6 *, .mb-4 * {
+  color: #60efff !important;
+} 

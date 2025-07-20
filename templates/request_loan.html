@@ -7,7 +7,7 @@
         <h1 class="text-4xl font-bold mb-4" style="background: linear-gradient(135deg, #60efff 0%, #00ff87 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
             Request a Loan
         </h1>
-        <p class="text-lg text-gray-600 dark:text-gray-300">
+        <p class="text-lg" style="color: #b6c2e2;">
             Apply for a loan from your stokvel
         </p>
     </div>
@@ -17,7 +17,7 @@
         {% if messages %}
             <div class="mb-6">
                 {% for category, message in messages %}
-                    <div class="alert alert-{{ 'success' if category == 'success' else 'danger' }} mb-4 p-4 rounded-lg shadow-md">
+                    <div class="mb-4 p-4 rounded-lg shadow-md" style="background: #22304a; color: #60efff; border: 1px solid #60efff;">
                         {{ message }}
                     </div>
                 {% endfor %}
@@ -27,23 +27,23 @@
 
     <!-- Loan Request Form -->
     <div class="max-w-4xl mx-auto">
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-8">
-            <h2 class="text-2xl font-semibold mb-6 text-gray-800 dark:text-white">
-                <i class="fas fa-hand-holding-usd mr-2 text-green-500"></i>
+        <div class="rounded-xl shadow-lg p-6 mb-8" style="background: #22304a; color: #60efff; border: 1px solid #22304a;">
+            <h2 class="text-2xl font-semibold mb-6 flex items-center" style="color: #60efff;">
+                <i class="fas fa-hand-holding-usd mr-2" style="color: #00ff87;"></i>
                 Apply for a Loan
             </h2>
 
             {% if stokvel_options %}
                 <form method="POST" class="space-y-6">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    
                     <!-- Stokvel Selection -->
                     <div class="form-group">
-                        <label for="stokvel_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <label for="stokvel_id" class="block text-sm font-medium mb-2" style="color: #60efff;">
                             Select Stokvel
                         </label>
                         <select name="stokvel_id" id="stokvel_id" required 
-                                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                                class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#60efff] focus:border-transparent"
+                                style="background: #1e3357 !important; color: #60efff !important; border: 1px solid #60efff;">
                             <option value="">Choose a stokvel...</option>
                             {% for stokvel in stokvel_options %}
                                 <option value="{{ stokvel[0] }}" data-monthly="{{ stokvel[3] }}" data-target="{{ stokvel[2] }}">
@@ -55,34 +55,34 @@
 
                     <!-- Loan Amount -->
                     <div class="form-group">
-                        <label for="amount" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <label for="amount" class="block text-sm font-medium mb-2" style="color: #60efff;">
                             Loan Amount (R)
                         </label>
                         <div class="relative">
-                            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">R</span>
+                            <span class="absolute left-3 top-1/2 transform -translate-y-1/2" style="color: #b6c2e2;">R</span>
                             <input type="number" name="amount" id="amount" 
                                    step="0.01" min="0.01" required
-                                   class="w-full pl-8 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                                   class="w-full pl-8 pr-4 py-3 border rounded-lg bg-[#1e3357] text-[#eaf6fb] focus:ring-2 focus:ring-[#60efff] focus:border-transparent" style="border: 1px solid #60efff;"
                                    placeholder="0.00">
                         </div>
-                        <p class="text-sm text-gray-500 mt-1">Enter the amount you need to borrow</p>
+                        <p class="text-sm mt-1" style="color: #b6c2e2;">Enter the amount you need to borrow</p>
                     </div>
 
                     <!-- Loan Description -->
                     <div class="form-group">
-                        <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <label for="description" class="block text-sm font-medium mb-2" style="color: #60efff;">
                             Purpose of Loan
                         </label>
                         <textarea name="description" id="description" rows="4" required
-                                  class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                                  class="w-full px-4 py-3 border rounded-lg bg-[#1e3357] text-[#eaf6fb] focus:ring-2 focus:ring-[#60efff] focus:border-transparent" style="border: 1px solid #60efff;"
                                   placeholder="Please describe why you need this loan (e.g., emergency expenses, home repairs, education, etc.)"></textarea>
-                        <p class="text-sm text-gray-500 mt-1">Be specific about how you plan to use the loan</p>
+                        <p class="text-sm mt-1" style="color: #b6c2e2;">Be specific about how you plan to use the loan</p>
                     </div>
 
                     <!-- Submit Button -->
                     <div class="form-group">
                         <button type="submit" 
-                                class="w-full bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-lg">
+                                style="width: 100%; background: linear-gradient(90deg, #60efff, #00ff87); color: #22304a; font-weight: bold; padding: 0.75rem 2rem; border-radius: 0.75rem; box-shadow: 0 2px 12px rgba(67, 233, 123, 0.06); transition: background 0.3s;">
                             <i class="fas fa-paper-plane mr-2"></i>
                             Submit Loan Request
                         </button>
@@ -92,15 +92,15 @@
                 <!-- No Stokvels Available -->
                 <div class="text-center py-12">
                     <div class="mb-4">
-                        <i class="fas fa-users text-6xl text-gray-400"></i>
+                        <i class="fas fa-users text-6xl" style="color: #60efff;"></i>
                     </div>
-                    <h3 class="text-xl font-semibold text-gray-600 dark:text-gray-400 mb-2">
+                    <h3 class="text-xl font-semibold mb-2" style="color: #60efff;">
                         No Stokvels Available
                     </h3>
-                    <p class="text-gray-500 dark:text-gray-500 mb-6">
+                    <p class="mb-6" style="color: #b6c2e2;">
                         You need to be a member of a stokvel to request a loan.
                     </p>
-                    <a href="{{ url_for('stokvels') }}" class="inline-block px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+                    <a href="{{ url_for('stokvels') }}" style="background: linear-gradient(90deg, #60efff, #00ff87); color: #22304a; font-weight: bold; padding: 0.75rem 2rem; border-radius: 0.75rem; box-shadow: 0 2px 12px rgba(67, 233, 123, 0.06); transition: background 0.3s;">
                         <i class="fas fa-arrow-left mr-2"></i>
                         Join a Stokvel
                     </a>
@@ -110,57 +110,48 @@
 
         <!-- Loan History Section -->
         {% if loan_requests %}
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-                <h3 class="text-xl font-semibold mb-4 text-gray-800 dark:text-white">
-                    <i class="fas fa-history mr-2 text-blue-500"></i>
+            <div class="rounded-xl shadow-lg p-6 mt-8" style="background: #22304a; color: #60efff; border: 1px solid #22304a;">
+                <h3 class="text-xl font-semibold mb-4 flex items-center" style="color: #60efff;">
+                    <i class="fas fa-history mr-2" style="color: #60efff;"></i>
                     Your Loan History
                 </h3>
-                
                 <div class="overflow-x-auto">
-                    <table class="w-full text-sm">
+                    <table class="w-full text-sm" style="background: #1e3357; color: #eaf6fb; border-radius: 0.75rem;">
                         <thead>
-                            <tr class="border-b border-gray-200 dark:border-gray-700">
-                                <th class="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Stokvel</th>
-                                <th class="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Amount</th>
-                                <th class="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Date</th>
-                                <th class="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Status</th>
-                                <th class="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Description</th>
+                            <tr style="background: #22304a; color: #60efff;">
+                                <th class="text-left py-3 px-4 font-semibold">Stokvel</th>
+                                <th class="text-left py-3 px-4 font-semibold">Amount</th>
+                                <th class="text-left py-3 px-4 font-semibold">Date</th>
+                                <th class="text-left py-3 px-4 font-semibold">Status</th>
+                                <th class="text-left py-3 px-4 font-semibold">Description</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for loan in loan_requests %}
-                                <tr class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
-                                    <td class="py-3 px-4 text-gray-800 dark:text-gray-200">
+                                <tr style="border-bottom: 1px solid #22304a;">
+                                    <td class="py-3 px-4">
                                         <span class="font-medium">{{ loan[5] or 'N/A' }}</span>
                                     </td>
-                                    <td class="py-3 px-4 text-gray-800 dark:text-gray-200">
-                                        <span class="font-semibold text-green-600 dark:text-green-400">
+                                    <td class="py-3 px-4">
+                                        <span class="font-semibold" style="color: #00ff87;">
                                             R{{ "%.2f"|format(loan[1]) }}
                                         </span>
                                     </td>
-                                    <td class="py-3 px-4 text-gray-600 dark:text-gray-400">
+                                    <td class="py-3 px-4" style="color: #b6c2e2;">
                                         {{ loan[3].strftime('%Y-%m-%d') if loan[3] else 'N/A' }}
                                     </td>
                                     <td class="py-3 px-4">
                                         {% if loan[4] == 'pending' %}
-                                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
-                                                Pending
-                                            </span>
+                                            <span class="px-2 py-1 text-xs font-semibold rounded-full" style="background: #f9d423; color: #22304a;">Pending</span>
                                         {% elif loan[4] == 'approved' %}
-                                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                                                Approved
-                                            </span>
+                                            <span class="px-2 py-1 text-xs font-semibold rounded-full" style="background: #00ff87; color: #22304a;">Approved</span>
                                         {% elif loan[4] == 'rejected' %}
-                                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
-                                                Rejected
-                                            </span>
+                                            <span class="px-2 py-1 text-xs font-semibold rounded-full" style="background: #ff4e50; color: #fff;">Rejected</span>
                                         {% else %}
-                                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200">
-                                                {{ loan[4]|title }}
-                                            </span>
+                                            <span class="px-2 py-1 text-xs font-semibold rounded-full" style="background: #22304a; color: #60efff;">{{ loan[4]|title }}</span>
                                         {% endif %}
                                     </td>
-                                    <td class="py-3 px-4 text-gray-600 dark:text-gray-400">
+                                    <td class="py-3 px-4" style="color: #b6c2e2;">
                                         {{ loan[2] or 'No description' }}
                                     </td>
                                 </tr>
