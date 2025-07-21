@@ -163,7 +163,7 @@
     </div>
 
     <!-- Payment Confirmation Modal for Goal Contribution -->
-    <div id="goalPaymentConfirmModal" class="hidden fixed inset-0" style="background: rgba(30,51,87,0.85); display: flex; align-items: center; justify-content: center; z-index: 50;">
+    <div id="goalPaymentConfirmModal" class="hidden fixed inset-0" style="display:none; background: rgba(30,51,87,0.85); align-items: center; justify-content: center; z-index: 50;">
         <div class="rounded-lg shadow-lg p-8 max-w-sm w-full relative" style="background: linear-gradient(135deg, #1e3357 0%, #22304a 100%); color: #60efff; border: 1px solid #22304a;">
             <h3 class="text-xl font-bold mb-4 text-gray-800">Confirm Payment</h3>
             <div class="mb-4">
@@ -201,36 +201,81 @@ const contributeGoalForm = document.getElementById('contributeGoalForm');
 const goalNameSpan = document.getElementById('goalName');
 const contributionAmountInput = document.getElementById('contribution_amount');
 
+// Override show/hide for Confirm Payment modal
+function showGoalConfirmModal() {
+    var modal = document.getElementById('goalPaymentConfirmModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        modal.classList.remove('hidden');
+    }
+}
+function closeGoalConfirmModal() {
+    var modal = document.getElementById('goalPaymentConfirmModal');
+    if (modal) {
+        modal.style.display = 'none';
+        modal.classList.add('hidden');
+    }
+}
+
 showGoalConfirmModalBtn.addEventListener('click', function() {
     const goalName = goalNameSpan.textContent;
     const amount = contributionAmountInput.value;
-    if (!goalName || !amount) {
-        alert('Please fill in all fields.');
+    if (!goalName || !amount || isNaN(parseFloat(amount)) || parseFloat(amount) <= 0) {
+        alert('Please enter a valid contribution amount.');
         return;
     }
     confirmGoalName.textContent = goalName;
     confirmGoalAmount.textContent = amount;
-    goalConfirmModal.classList.remove('hidden');
+    showGoalConfirmModal();
 });
-
-function closeGoalConfirmModal() {
-    goalConfirmModal.classList.add('hidden');
-}
 
 function submitGoalContributionForm() {
     contributeGoalForm.submit();
 }
 
-// Close modals when clicking outside
-window.onclick = function(event) {
-    var createModal = document.getElementById('createGoalModal');
-    var contributeModal = document.getElementById('contributeModal');
-    if (event.target == createModal) {
-        closeModal('createGoalModal');
-    }
-    if (event.target == contributeModal) {
-        closeModal('contributeModal');
-    }
+// Enhanced modal close logic
+function setupModalBackgroundClose(modalId, contentSelector) {
+    const modal = document.getElementById(modalId);
+    if (!modal) return;
+    modal.addEventListener('mousedown', function(event) {
+        // Only close if clicking directly on the modal background, not the content
+        if (event.target === modal) {
+            closeModal(modalId);
+        }
+    });
 }
+
+// Setup for both modals
+setupModalBackgroundClose('createGoalModal');
+setupModalBackgroundClose('contributeModal');
+</script>
+<script>
+  // Ensure DOM is loaded before attaching listeners
+  document.addEventListener('DOMContentLoaded', function() {
+    // Cancel button for Create Goal modal
+    var createGoalCancelBtn = document.querySelector('#createGoalModal button[type="button"]');
+    if (createGoalCancelBtn) {
+      createGoalCancelBtn.addEventListener('click', function() {
+        closeModal('createGoalModal');
+      });
+    }
+    // Cancel button for Contribute modal
+    var contributeCancelBtn = document.querySelector('#contributeModal button[type="button"]');
+    if (contributeCancelBtn) {
+      contributeCancelBtn.addEventListener('click', function() {
+        closeModal('contributeModal');
+      });
+    }
+    // Create Goal form submit
+    var createGoalForm = document.querySelector('#createGoalModal form');
+    if (createGoalForm) {
+      createGoalForm.addEventListener('submit', function(e) {
+        // Optionally, add validation here
+        // Close modal after submit (let backend handle redirect)
+        closeModal('createGoalModal');
+      });
+    }
+  });
+  console.log('Savings Goals JS loaded');
 </script>
 {% endblock %} 

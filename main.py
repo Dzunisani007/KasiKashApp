@@ -519,20 +519,23 @@ def login_validation():
                 session['profile_picture'] = getattr(user_record, 'photo_url', None)
                 session['is_verified'] = bool(user_record.email_verified)  # Ensure it's a boolean
                 session.permanent = bool(remember)  # Ensure it's a boolean
-                # Fetch and set user role in session
+                # Fetch and set user role and profile_picture in session
                 try:
                     with support.db_connection() as conn:
                         with conn.cursor() as cur:
                             cur.execute(
-    "SELECT role FROM users WHERE firebase_uid = %s", (user_record.uid,))
+    "SELECT role, profile_picture FROM users WHERE firebase_uid = %s", (user_record.uid,))
                             role_data = cur.fetchone()
-                            if role_data and role_data[0]:
-                                session['role'] = role_data[0]
+                            if role_data:
+                                session['role'] = role_data[0] if role_data[0] else 'user'
+                                # Prefer DB profile_picture if present
+                                if role_data[1]:
+                                    session['profile_picture'] = role_data[1]
                             else:
                                 # Default role if not set
                                 session['role'] = 'user'
                 except Exception as role_e:
-                    print(f"Error fetching user role: {role_e}")
+                    print(f"Error fetching user role/profile_picture: {role_e}")
                     session['role'] = 'user'
 
                 # Update local database with firebase_uid if not already
@@ -1295,78 +1298,13 @@ def make_contribution():
                         VALUES (%s, %s, %s, 'contribution', %s, CURRENT_DATE, 'completed')
                     """, (firebase_uid, stokvel_id, amount, description))
                     conn.commit()
-                    
-                    # Update the stokvel's total pool
-                    cur.execute(
-    "UPDATE stokvels SET total_pool = COALESCE(total_pool, 0) + %s WHERE id = %s",
-    (amount,
-     stokvel_id))
-                    conn.commit()
-                    
-                    # Create notification for stokvel admin
-                    if stokvel_info and admin_user_id:
-                        message = f"{user_name} made a contribution of R{amount:.2f} to '{stokvel_name}' stokvel."
-                        link = url_for('contributions')
-                        create_notification(
-    admin_user_id,
-    message,
-    link_url=link,
-     notification_type='contribution_made')
-
-                    # Create notification for the contributing user
-                    user_message = f"Your contribution of R{amount:.2f} to '{stokvel_name}' has been recorded successfully! You earned {int(amount)} reward points."
-                    create_notification(
-    firebase_uid,
-    user_message,
-    link_url=link,
-     notification_type='contribution_confirmed')
-
-                    # Add reward points for contribution
-                    try:
-                        from rewards import add_reward
-                        # Calculate reward points: 1 point per R1 contributed
-                        reward_points = int(amount)
-                        if reward_points > 0:
-                            add_reward(
-    firebase_uid,
-    reward_points,
-    'contribution',
-     f'Contribution to {stokvel_name}')
-                    except Exception as e:
-                        print(f"Error adding reward points: {e}")
-                        # Don't fail the contribution if reward points fail
-
-                    # Get default payment method for flash message
-                    cur.execute(
-    "SELECT type, details FROM payment_methods WHERE user_id = %s AND is_default = TRUE",
-    (firebase_uid,
-    ))
-                    payment_method = cur.fetchone()
-                    payment_info = ""
-                    if payment_method:
-                        method_type, details = payment_method
-                        if isinstance(details, str):
-                            details = json.loads(details)
-                        if method_type in [
-    'credit_card', 'debit_card', 'card']:
-                            last4 = details.get('card_number', '')[-4:]
-                            payment_info = f" from your card ending in {last4}"
-                        elif method_type == 'bank_account':
-                            payment_info = f" from your {details.get('bank_name', 'bank')} account"
-                        
-            flash(f"Contribution of R{amount:.2f} recorded successfully{payment_info}! You earned {int(amount)} reward points!")
-            return redirect(url_for('contributions'))
-        except ValueError:
-            flash("Amount must be a number.")
-            return redirect(url_for('contributions'))
+            flash("Contribution successful!", "success")
         except Exception as e:
             print(f"Error making contribution: {e}")
-            flash(
-                "An error occurred while recording your contribution. Please try again.")
-            return redirect(url_for('contributions'))
-    # For GET requests, just show the contributions page with the modal
-    return redirect(url_for('contributions'))
-
+            flash("An error occurred while making your contribution.", "danger")
+        return redirect(url_for('contributions'))
+    # GET request fallback
+    # ... existing code ...
 
 @app.route('/payouts')
 @login_required
