@@ -18,7 +18,7 @@ from flask_babel import _
 # Add this context processor to make 't' available in all templates
 @admin_bp.app_context_processor
 def inject_t():
-    return dict(t=get_text)
+    return dict(t=get_text, _=get_text)
 
 @admin_bp.app_context_processor
 def inject_admin_globals():
@@ -462,19 +462,32 @@ def notifications():
         flash('An error occurred.', 'danger')
         return redirect(url_for('home'))
     
-    # Fetch all notifications
+    notif_type = request.args.get('type', 'all')
     notifications = []
     try:
         with support.db_connection() as conn:
             with conn.cursor() as cur:
-                cur.execute("""
-                    SELECT n.id, n.user_id, n.message, n.type, n.created_at, u.username, u.email
-                    FROM notifications n
-                    LEFT JOIN users u ON n.user_id = u.firebase_uid
-                    WHERE n.type = 'admin_notification'
-                    ORDER BY n.created_at DESC
-                    LIMIT 100
-                """)
+                if notif_type == 'all':
+                    cur.execute("""
+                        SELECT n.id, n.user_id, n.message, n.type, n.created_at, u.username, u.email, s.name as stokvel_name
+                        FROM notifications n
+                        LEFT JOIN users u ON n.user_id = u.firebase_uid
+                        LEFT JOIN stokvel_members sm ON sm.user_id = u.firebase_uid
+                        LEFT JOIN stokvels s ON sm.stokvel_id = s.id
+                        ORDER BY n.created_at DESC
+                        LIMIT 100
+                    """)
+                else:
+                    cur.execute("""
+                        SELECT n.id, n.user_id, n.message, n.type, n.created_at, u.username, u.email, s.name as stokvel_name
+                        FROM notifications n
+                        LEFT JOIN users u ON n.user_id = u.firebase_uid
+                        LEFT JOIN stokvel_members sm ON sm.user_id = u.firebase_uid
+                        LEFT JOIN stokvels s ON sm.stokvel_id = s.id
+                        WHERE n.type = %s
+                        ORDER BY n.created_at DESC
+                        LIMIT 100
+                    """, (notif_type,))
                 notifications = cur.fetchall()
     except Exception as e:
         print(f"Error fetching notifications: {e}")
@@ -571,6 +584,27 @@ def delete_notification(notification_id):
     
     return redirect(url_for('admin.notifications'))
 
+@admin_bp.route('/api/notifications/<int:notification_id>/delete', methods=['POST'])
+@login_required
+def api_delete_notification(notification_id):
+    user_id = session.get('user_id')
+    user_role = session.get('role')
+    try:
+        with support.db_connection() as conn:
+            with conn.cursor() as cur:
+                # Only allow delete if user owns the notification or is admin
+                if user_role == 'admin':
+                    cur.execute("DELETE FROM notifications WHERE id = %s", (notification_id,))
+                else:
+                    cur.execute("DELETE FROM notifications WHERE id = %s AND user_id = %s", (notification_id, user_id))
+                if cur.rowcount == 0:
+                    return jsonify({'success': False, 'message': 'Notification not found or not authorized.'}), 404
+                conn.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        print(f"Error deleting notification via API: {e}")
+        return jsonify({'success': False, 'message': 'Could not delete notification.'}), 500
+
 @admin_bp.route('/kyc-approvals')
 @login_required
 def kyc_approvals():
@@ -617,7 +651,7 @@ def approve_kyc(user_id):
         return redirect(url_for('admin.kyc_approvals'))
     try:
         with support.db_connection() as conn:
-            with conn.cursor() as cur:
+            with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
                 # Get email from the provided user_id to ensure we update the correct, active user
                 cur.execute("SELECT email, firebase_uid FROM users WHERE id = %s", (user_id,))
                 user_data = cur.fetchone()
@@ -657,7 +691,7 @@ def reject_kyc(user_id):
     rejection_reason = request.form.get('reason', 'Your documents could not be verified. Please re-upload clear and valid documents.')
     try:
         with support.db_connection() as conn:
-            with conn.cursor() as cur:
+            with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
                 # Get email from the provided user_id to ensure we update the correct, active user
                 cur.execute("SELECT email, firebase_uid FROM users WHERE id = %s", (user_id,))
                 user_data = cur.fetchone()
@@ -807,10 +841,15 @@ def settings():
                         ))
                 conn.commit()
             session['language_preference'] = language  # Ensure session is updated for immediate effect
-            flash('Settings updated successfully!', 'success')
+            if '_settings_updated' not in session:
+                flash('Settings updated successfully!', 'success')
+                session['_settings_updated'] = True
         except Exception as e:
             flash(f'Error saving settings: {e}', 'danger')
         return redirect(url_for('admin.settings'))
+
+    # Remove the flag after redirect
+    session.pop('_settings_updated', None)
 
     # Load settings for display
     default_settings = {
@@ -1460,5 +1499,48 @@ def reward_analytics():
     if session.get('role') != 'admin':
         flash('Permission denied.', 'danger')
         return redirect(url_for('admin.virtual_rewards'))
-    # TODO: Add analytics logic here if needed
-    return render_template('admin_reward_analytics.html')
+
+    monthly_data = []
+    top_earners = []
+    type_distribution = []
+
+    try:
+        with support.db_connection() as conn:
+            with conn.cursor() as cur:
+                # Monthly reward distribution (last 6 months)
+                cur.execute("""
+                    SELECT DATE_TRUNC('month', created_at) AS month, SUM(amount)
+                    FROM reward_transactions
+                    GROUP BY month
+                    ORDER BY month DESC
+                    LIMIT 6
+                """)
+                monthly_data = cur.fetchall()
+
+                # Top reward earners
+                cur.execute("""
+                    SELECT u.username, u.email, SUM(rt.amount) as total_earned
+                    FROM reward_transactions rt
+                    JOIN users u ON rt.user_id = u.id
+                    GROUP BY u.username, u.email
+                    ORDER BY total_earned DESC
+                    LIMIT 10
+                """)
+                top_earners = cur.fetchall()
+
+                # Reward type distribution
+                cur.execute("""
+                    SELECT rt.transaction_type, COUNT(*), SUM(rt.amount)
+                    FROM reward_transactions rt
+                    GROUP BY rt.transaction_type
+                """)
+                type_distribution = cur.fetchall()
+    except Exception as e:
+        print(f"Error fetching analytics data: {e}")
+
+    return render_template(
+        'admin_reward_analytics.html',
+        monthly_data=monthly_data,
+        top_earners=top_earners,
+        type_distribution=type_distribution
+    )

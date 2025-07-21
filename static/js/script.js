@@ -9,10 +9,6 @@ function disableButton(optbtn,femail,otp,reset)
     }
 }
 
-
-// Removed demo Plotly bar chart and DOMContentLoaded event
-
-
 $(document).ready(function(){
     $(".multi_select").selectpicker();
 })
