@@ -95,20 +95,17 @@ function initUpload() {
           container.appendChild(div);
         });
       }
-      if (json.transactions) {
-        // Simple table of txns
-        const tbl = document.createElement('table');
-        tbl.className = 'min-w-full text-left mt-2';
-        tbl.innerHTML = '<thead><tr><th>Date</th><th>Description</th><th>Amount</th></tr></thead>';
-        const body = document.createElement('tbody');
-        json.transactions.forEach(function(t) {
-          const row = document.createElement('tr');
-          row.innerHTML = '<td>' + t.date + '</td><td>' + t.description + '</td><td>R' + Number(t.amount).toFixed(2) + '</td>';
-          body.appendChild(row);
-        });
-        tbl.appendChild(body);
-        container.appendChild(tbl);
+      if (json.pdf_url) {
+        // Display the PDF in an iframe
+        const pdfFrame = document.createElement('iframe');
+        pdfFrame.src = json.pdf_url;
+        pdfFrame.width = '100%';
+        pdfFrame.height = '600px';
+        pdfFrame.style.border = '1px solid #ccc';
+        pdfFrame.title = 'Uploaded Statement';
+        container.appendChild(pdfFrame);
       }
+      // Transaction table rendering removed as per user request
       if (json.analysis) {
         const analysisCard = document.createElement('div');
         analysisCard.className = 'mt-6 p-4 rounded-lg border border-cyan-400 bg-blue-900 text-cyan-100 shadow-lg';
