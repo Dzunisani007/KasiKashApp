@@ -52,7 +52,15 @@ advisor_bp = Blueprint('advisor', __name__, url_prefix='/financial_advisor')
 @login_required
 def dashboard():
     user_id = session.get('user_id')
-    return render_template('financial_advisor.html', user_id=user_id)
+    # Fetch latest analysis for this user
+    from support import db_connection, get_latest_analysis
+    advisor_analysis = None
+    with db_connection() as conn:
+        analysis = get_latest_analysis(conn, user_id, with_budget=True)
+        if analysis:
+            _, _, analysis_text, _, _ = analysis
+            advisor_analysis = analysis_text
+    return render_template('financial_advisor.html', user_id=user_id, advisor_analysis=advisor_analysis)
 
 @advisor_bp.route('/debug_session', methods=['GET'])
 def debug_session():
@@ -281,5 +289,26 @@ Give financial advice based on this bank statement:
             analysis_id = save_statement_analysis(
                 conn, user_id, text, ai_analysis, [], file.filename, None
             )
-        session['advisor_transactions'] = []
-        return jsonify(success=True, pdf_url=pdf_url, analysis=ai_analysis, statement_text=text) 
+        # --- Extract transactions from statement text ---
+        def parse_transactions(text):
+            import re
+            txs = []
+            # Example regex for lines like: 01/04/2025 Rent - Diepsloot Prop 6,500.00-2,000.00
+            pattern = re.compile(r'^(\d{2}/\d{2}/\d{4})\s+(.+?)\s+([\d,]+\.\d{2})-([\d,]+\.\d{2})$', re.MULTILINE)
+            for match in pattern.finditer(text):
+                date, desc, debit, credit = match.groups()
+                debit = float(debit.replace(",", "")) if debit else 0.0
+                credit = float(credit.replace(",", "")) if credit else 0.0
+                amount = credit - debit  # Net effect
+                txs.append({
+                    'date': date,
+                    'description': desc.strip(),
+                    'amount': amount,
+                    'debit': debit,
+                    'credit': credit,
+                    'category': None  # Could add simple rules later
+                    })
+            return txs
+        transactions = parse_transactions(text)
+        session['advisor_transactions'] = transactions
+        return jsonify(success=True, pdf_url=pdf_url, analysis=ai_analysis, statement_text=text, transactions=transactions) 
