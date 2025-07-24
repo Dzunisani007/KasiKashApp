@@ -474,3 +474,43 @@ input:focus, textarea:focus {
     border-color: #7B61FF;
     outline: none;
 } 
+
+/* Chatbot message enhancements */
+.bot-message h3, .bot-message h4 {
+    color: #7B61FF;
+    margin: 8px 0 4px 0;
+    font-weight: 600;
+}
+.bot-message ul {
+    margin: 6px 0 6px 18px;
+    padding-left: 18px;
+}
+.bot-message li {
+    margin-bottom: 3px;
+}
+.bot-message table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 8px 0;
+    background: #232347;
+    color: #e2e2f0;
+    font-size: 0.95em;
+}
+.bot-message th, .bot-message td {
+    border: 1px solid #44446a;
+    padding: 6px 10px;
+    text-align: left;
+}
+.bot-message th {
+    background: #2d2d44;
+    color: #7B61FF;
+}
+.bot-message .callout {
+    background: #2d2d44;
+    border-left: 4px solid #7B61FF;
+    padding: 8px 12px;
+    margin: 10px 0;
+    border-radius: 6px;
+    font-style: italic;
+    color: #b3b3e6;
+} 

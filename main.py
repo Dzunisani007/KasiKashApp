@@ -1226,8 +1226,8 @@ def create_stokvel():
     if stokvel_id:
         # Add the creator as the first member
         support.execute_query(
-            "insert",
-            "INSERT INTO stokvel_members (stokvel_id, user_id, role) VALUES (%s, %s, %s)",
+    "insert",
+    "INSERT INTO stokvel_members (stokvel_id, user_id, role) VALUES (%s, %s, %s)",
             (stokvel_id, user_id, 'admin'))
         # Add the creator as the first member or update their role to admin if already a member
         existing = support.execute_query("search", "SELECT id FROM stokvel_members WHERE stokvel_id = %s AND user_id = %s", (stokvel_id, user_id))
@@ -1245,10 +1245,10 @@ def create_stokvel():
         message = f"You successfully created the stokvel '{name}'!"
         link = url_for('view_stokvel_members', stokvel_id=stokvel_id)
         create_notification(
-            user_id,
-            message,
-            link_url=link,
-            notification_type='stokvel_created')
+    user_id,
+    message,
+    link_url=link,
+     notification_type='stokvel_created')
         flash('Stokvel created successfully!', 'success')
     else:
         flash('Failed to create stokvel.', 'danger')

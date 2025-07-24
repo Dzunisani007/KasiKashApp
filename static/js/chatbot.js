@@ -405,25 +405,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             } else {
                 // --- AI Mode: Send to backend as before ---
-                const response = await fetch('/chat', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': csrfToken
-                    },
+            const response = await fetch('/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
                     body: JSON.stringify({ message: message, mode: 'ai' })
-                });
-
-                loadingIndicator.remove();
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || 'Failed to get response from chatbot');
-                }
-
-                const data = await response.json();
-                let botResponse = data.response.replace(/\*+/g, '');
-                addMessage(botResponse, 'bot');
+            });
+            
+            loadingIndicator.remove();
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to get response from chatbot');
+            }
+            
+            const data = await response.json();
+            let botResponse = data.response.replace(/\*+/g, '');
+            addMessage(botResponse, 'bot');
             }
         } catch (error) {
             loadingIndicator.remove();
