@@ -49,14 +49,27 @@ from flask_wtf.csrf import generate_csrf
 import calendar
 from flask import g
 from flask_babel import _
+import base64
 
 # Load environment variables
 load_dotenv()
 
 # Initialize Flask app
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your-secret-key-here')
-app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
+
+# --- Production-ready SQLAlchemy Database Configuration ---
+database_uri = os.environ.get('DATABASE_URL', '')
+if database_uri and database_uri.startswith('postgres://'):
+    database_uri = database_uri.replace('postgres://', 'postgresql://', 1)
+app.config['SQLALCHEMY_DATABASE_URI'] = database_uri or (
+    f"postgresql://{os.environ.get('DB_USER')}:{os.environ.get('DB_PASSWORD')}@{os.environ.get('DB_HOST')}:{os.environ.get('DB_PORT')}/{os.environ.get('DB_NAME')}"
+)
+
+# --- Secret Key Configuration ---
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'your-secret-key-here')
+
+# --- Debug Mode Configuration ---
+app.config['DEBUG'] = os.environ.get('FLASK_DEBUG', '0') == '1'
 
 babel = Babel(app)
 
@@ -91,12 +104,21 @@ app.config['MAIL_DEFAULT_SENDER'] = ('KasiKash App', os.getenv('MAIL_USERNAME'))
 mail = Mail(app)
 
 # Initialize Firebase Admin SDK
+import base64
+import json
 if not firebase_admin._apps:
-    cred = credentials.Certificate(
-    os.getenv(
-        "FIREBASE_SERVICE_ACCOUNT_KEY_PATH",
-         "firebase-service-account.json"))
-    firebase_admin.initialize_app(cred)
+    if 'FIREBASE_CREDENTIALS_BASE64' in os.environ:
+        base64_credentials = os.environ['FIREBASE_CREDENTIALS_BASE64']
+        decoded_credentials = base64.b64decode(base64_credentials).decode('utf-8')
+        firebase_credentials = json.loads(decoded_credentials)
+        cred = credentials.Certificate(firebase_credentials)
+        firebase_admin.initialize_app(cred)
+    else:
+        cred = credentials.Certificate(
+            os.getenv(
+                "FIREBASE_SERVICE_ACCOUNT_KEY_PATH",
+                "firebase-service-account.json"))
+        firebase_admin.initialize_app(cred)
 
 # Database connection function
 
@@ -3520,8 +3542,9 @@ def request_loan():
     return render_template('referral.html', referral_link=referral_link, message=message, stokvels=stokvels, selected_stokvel_id=selected_stokvel_id)
 
 if __name__ == "__main__":
-    # Use 127.0.0.1 which is accessible in the browser
-    socketio.run(app, host="127.0.0.1", port=5001, debug=True)
+    # Only run the development server if executed directly
+    # In production, use gunicorn main:app
+    app.run(debug=app.config['DEBUG'])
 
 # Inject _ into Jinja2 context for translations
 try:
